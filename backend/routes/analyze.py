@@ -8,7 +8,7 @@ from io import BytesIO
 analyze_bp = Blueprint("analyze", __name__)
 
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 ANALYZE_PROMPT = """
 You are MedClear, a compassionate medical report interpreter. 
