@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedClear — AI Medical Report Explainer</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── ANIMATED BACKGROUND ── -->
+  <div class="bg-canvas">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+    <div class="grid-bg"></div>
+    <div class="dna-wrap">
+      <svg class="dna-strand" id="dnasvg"  viewBox="0 0 200 2000" xmlns="http://www.w3.org/2000/svg"></svg>
+      <svg class="dna-strand" id="dnasvg2" viewBox="0 0 200 2000" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <!-- ── APP SHELL ── -->
+  <div class="shell">
+
+    <!-- HEADER -->
+    <header>
+      <div class="logo-mark">⚕</div>
+      <div class="brand">
+        <h1>MedClear</h1>
+        <p>AI-powered medical report explainer — plain language, instant clarity</p>
+      </div>
+    </header>
+
+    <!-- INPUT SECTION -->
+    <div id="inputSection">
+      <div class="upload-zone" id="dropZone">
+        <span class="upload-icon">🧬</span>
+        <h2>Drop your medical report here</h2>
+        <p>Lab results, prescriptions, discharge summaries, blood work — anything medical</p>
+        <label class="btn-file" for="fileInput">📎 Choose file (PDF or TXT)</label>
+        <input type="file" id="fileInput" accept=".txt,.pdf,.csv" />
+        <div id="filePill" style="display:none">
+          <span class="file-pill">📄 <span id="fileName"></span></span>
+        </div>
+      </div>
+
+      <div class="or-divider">or paste your report text</div>
+
+      <textarea id="reportText" placeholder="Paste your lab report, prescription, blood work results, or discharge summary here...
+
+Example:
+CBC Results:
+Hemoglobin: 10.2 g/dL (Reference: 12.0–16.0)
+WBC: 11,500 /μL (Reference: 4,500–11,000)
+Platelets: 145,000 /μL (Reference: 150,000–400,000)
+..."></textarea>
+
+      <button class="btn-primary" id="analyzeBtn">
+        ✦ Analyze My Report
+      </button>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div class="loading-state" id="loadingState">
+      <div class="dna-loader">
+        <canvas id="loaderCanvas" width="60" height="120"></canvas>
+      </div>
+      <div class="loading-label">Analyzing your report…</div>
+      <div class="loading-sub" id="loadingStep">Reading values and references</div>
+      <div class="progress-bar"><div class="progress-fill"></div></div>
+    </div>
+
+    <!-- RESULTS SECTION -->
+    <div id="results">
+      <div class="section-label">Summary</div>
+      <div class="summary-card">
+        <h3 id="summaryTitle">Report Analysis</h3>
+        <p id="summaryText"></p>
+      </div>
+
+      <div class="section-label">Findings Breakdown</div>
+      <div class="findings-grid" id="findingsGrid"></div>
+
+      <div class="section-label">Questions to Ask Your Doctor</div>
+      <div class="questions-list">
+        <h3>💬 Suggested questions</h3>
+        <div id="questionsList"></div>
+      </div>
+
+      <div class="disclaimer">
+        ⚠️ <strong>This is not medical advice.</strong> MedClear is an AI tool for educational purposes only.
+        Always consult a qualified healthcare professional for diagnosis, treatment, or any medical decisions.
+      </div>
+
+      <button class="btn-reset" id="resetBtn">← Analyze another report</button>
+    </div>
+
+  </div><!-- /.shell -->
+
+  <script src="script.js"></script>
+</body>
+</html>
