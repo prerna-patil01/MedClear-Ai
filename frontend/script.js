@@ -6,7 +6,7 @@
      POST /api/doctors  →  { doctors: [...] }
    ══════════════════════════════════════════════════ */
 
-const API_BASE = "https://medclear-ai.onrender.com";
+const API_BASE = "https://medclear-ai-zcox.onrender.com";
 
 /* ──────────────────────────────────────────────────
    STATE
