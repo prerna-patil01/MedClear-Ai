@@ -1,159 +1,179 @@
-import os
-import json
 import requests
-import google.generativeai as genai
 from flask import Blueprint, request, jsonify
 
 doctors_bp = Blueprint("doctors", __name__)
 
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-2.5-flash")
-
-# Specialist type → OSM amenity tags mapping
+# Specialist type → OSM tags
 SPECIALIST_TAGS = {
     "cardiologist": ["cardiology", "heart", "cardiac"],
     "endocrinologist": ["endocrinology", "diabetes", "hormone"],
-    "gastroenterologist": ["gastroenterology", "gastro", "digestive"],
+    "gastroenterologist": ["gastroenterology", "digestive"],
     "nephrologist": ["nephrology", "kidney", "renal"],
-    "hematologist": ["hematology", "blood", "haematology"],
-    "neurologist": ["neurology", "neural", "neuro"],
-    "pulmonologist": ["pulmonology", "pulmonary", "respiratory", "lung"],
+    "hematologist": ["hematology", "blood"],
+    "neurologist": ["neurology", "neuro"],
+    "pulmonologist": ["pulmonology", "lung", "respiratory"],
     "hepatologist": ["hepatology", "liver"],
-    "general physician": ["general_practitioner", "gp", "family_medicine"],
-    "internist": ["internal_medicine", "internist"],
+    "general physician": ["doctor", "general_practitioner"],
+    "internist": ["internal_medicine"],
     "rheumatologist": ["rheumatology"],
-    "oncologist": ["oncology", "cancer"],
-    "urologist": ["urology", "urological"],
-    "dermatologist": ["dermatology", "skin"],
-    "ophthalmologist": ["ophthalmology", "eye"],
+    "oncologist": ["oncology"],
+    "urologist": ["urology"],
+    "dermatologist": ["dermatology"],
+    "ophthalmologist": ["ophthalmology"]
 }
 
-def query_overpass(lat, lon, radius_m, specialties):
-    """Query OpenStreetMap Overpass API for nearby medical facilities."""
-    # Build query for hospitals and clinics near the location
-    queries = []
-    for specialty in specialties:
-        tags = SPECIALIST_TAGS.get(specialty.lower(), ["hospital"])
-        for tag in tags[:2]:  # limit to first 2 tags per specialty
-            queries.append(f'node["healthcare"="{tag}"](around:{radius_m},{lat},{lon});')
-            queries.append(f'node["amenity"="hospital"]["name"~"{tag}",i](around:{radius_m},{lat},{lon});')
-    
-    # Also get general hospitals/clinics as fallback
-    queries.append(f'node["amenity"="hospital"](around:{radius_m},{lat},{lon});')
-    queries.append(f'node["amenity"="clinic"](around:{radius_m},{lat},{lon});')
-    queries.append(f'node["healthcare"="doctor"](around:{radius_m},{lat},{lon});')
-
-    overpass_query = f"""
-[out:json][timeout:10];
-(
-  {''.join(queries[:12])}
-);
-out body 20;
-"""
-    try:
-        resp = requests.post(
-            "https://overpass-api.de/api/interpreter",
-            data={"data": overpass_query},
-            timeout=12
-        )
-        if resp.status_code == 200:
-            return resp.json().get("elements", [])
-    except Exception:
-        pass
-    return []
 
 def haversine(lat1, lon1, lat2, lon2):
-    """Calculate distance in km between two coordinates."""
     from math import radians, cos, sin, asin, sqrt
+
     R = 6371
-    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+
+    lat1, lon1, lat2, lon2 = map(
+        radians,
+        [lat1, lon1, lat2, lon2]
+    )
+
     dlat = lat2 - lat1
     dlon = lon2 - lon1
-    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+
+    a = (
+        sin(dlat / 2) ** 2
+        + cos(lat1)
+        * cos(lat2)
+        * sin(dlon / 2) ** 2
+    )
+
     return R * 2 * asin(sqrt(a))
+
+
+def query_overpass(lat, lon, radius=5000):
+    query = f"""
+    [out:json][timeout:15];
+    (
+      node["amenity"="hospital"](around:{radius},{lat},{lon});
+      node["amenity"="clinic"](around:{radius},{lat},{lon});
+      node["healthcare"="doctor"](around:{radius},{lat},{lon});
+    );
+    out body;
+    """
+
+    try:
+        response = requests.post(
+            "https://overpass-api.de/api/interpreter",
+            data={"data": query},
+            timeout=20
+        )
+
+        if response.status_code == 200:
+            return response.json().get("elements", [])
+
+    except Exception as e:
+        print("OVERPASS ERROR:", e)
+
+    return []
+
 
 @doctors_bp.route("/api/doctors", methods=["POST"])
 def get_doctors():
-    data = request.get_json(silent=True)
-    if not data:
-        return jsonify({"error": "Invalid request."}), 400
-
-    lat = data.get("lat")
-    lon = data.get("lon")
-    specialists = data.get("specialists", ["general physician"])
-
-    if lat is None or lon is None:
-        return jsonify({"error": "Location not provided."}), 400
-
     try:
-        lat = float(lat)
-        lon = float(lon)
-    except (ValueError, TypeError):
-        return jsonify({"error": "Invalid coordinates."}), 400
+        data = request.get_json(silent=True)
 
-    # Query OSM for nearby facilities
-    elements = query_overpass(lat, lon, radius_m=5000, specialties=specialists)
+        if not data:
+            return jsonify({
+                "error": "Invalid request."
+            }), 400
 
-    doctors = []
-    seen_names = set()
+        location = data.get("location")
+        specialty = data.get(
+            "specialty",
+            "general physician"
+        )
 
-    for el in elements:
-        tags = el.get("tags", {})
-        name = tags.get("name", "").strip()
+        if not location:
+            return jsonify({
+                "error": "Location is required."
+            }), 400
 
-        if not name or name.lower() in seen_names:
-            continue
-        seen_names.add(name.lower())
+        # Convert city/location → coordinates
+        geo_response = requests.get(
+            "https://nominatim.openstreetmap.org/search",
+            params={
+                "q": location,
+                "format": "json",
+                "limit": 1
+            },
+            headers={
+                "User-Agent": "MedClear"
+            },
+            timeout=10
+        )
 
-        el_lat = el.get("lat", lat)
-        el_lon = el.get("lon", lon)
-        distance_km = haversine(lat, lon, el_lat, el_lon)
+        geo_data = geo_response.json()
 
-        # Determine specialty from tags
-        specialty = "General Practitioner"
-        healthcare = tags.get("healthcare", "")
-        amenity = tags.get("amenity", "")
-        speciality_tag = tags.get("healthcare:speciality", tags.get("speciality", ""))
+        if not geo_data:
+            return jsonify({
+                "error": "Location not found."
+            }), 404
 
-        if speciality_tag:
-            specialty = speciality_tag.replace("_", " ").title()
-        elif healthcare == "hospital":
-            specialty = "Hospital"
-        elif amenity == "clinic":
-            specialty = "Clinic"
-        elif healthcare == "doctor":
-            specialty = "General Practitioner"
+        lat = float(geo_data[0]["lat"])
+        lon = float(geo_data[0]["lon"])
 
-        # Build maps directions URL
-        maps_url = f"https://www.google.com/maps/dir/?api=1&destination={el_lat},{el_lon}"
+        elements = query_overpass(lat, lon)
 
-        doctors.append({
-            "name": name,
-            "specialty": specialty,
-            "distance_km": round(distance_km, 2),
-            "address": tags.get("addr:full") or tags.get("addr:street") or "See on map",
-            "phone": tags.get("phone") or tags.get("contact:phone") or None,
-            "maps_url": maps_url,
-            "lat": el_lat,
-            "lon": el_lon,
-            "opening_hours": tags.get("opening_hours") or None
-        })
+        doctors = []
+        seen = set()
 
-    # Sort by distance
-    doctors.sort(key=lambda d: d["distance_km"])
-    doctors = doctors[:8]  # Return top 8
+        for el in elements:
+            tags = el.get("tags", {})
 
-    # If no results from OSM, return helpful message
-    if not doctors:
+            name = tags.get("name")
+
+            if not name:
+                continue
+
+            if name.lower() in seen:
+                continue
+
+            seen.add(name.lower())
+
+            dlat = el.get("lat", lat)
+            dlon = el.get("lon", lon)
+
+            distance = haversine(
+                lat,
+                lon,
+                dlat,
+                dlon
+            )
+
+            doctors.append({
+                "name": name,
+                "specialty": specialty.title(),
+                "address":
+                    tags.get("addr:full")
+                    or tags.get("addr:street")
+                    or "Address unavailable",
+                "distance_km": round(distance, 2),
+                "phone":
+                    tags.get("phone")
+                    or tags.get("contact:phone"),
+                "maps_url":
+                    f"https://www.google.com/maps/search/?api=1&query={dlat},{dlon}"
+            })
+
+        doctors.sort(
+            key=lambda x: x["distance_km"]
+        )
+
+        doctors = doctors[:8]
+
         return jsonify({
-            "doctors": [],
-            "message": "No facilities found nearby. Try expanding your search or use Google Maps to search for specialists directly.",
-            "specialists": specialists,
-            "maps_search_url": f"https://www.google.com/maps/search/{'+'.join(specialists[0].split())}+near+me"
+            "doctors": doctors
         })
 
-    return jsonify({
-        "doctors": doctors,
-        "specialists": specialists,
-        "total": len(doctors)
-    })
+    except Exception as e:
+        print("DOCTORS ERROR:", str(e))
+
+        return jsonify({
+            "error": str(e)
+        }), 500
