@@ -52,11 +52,15 @@ def extract_pdf_text(file_bytes):
     try:
         with pdfplumber.open(BytesIO(file_bytes)) as pdf:
             text = ""
+
             for page in pdf.pages:
                 page_text = page.extract_text()
+
                 if page_text:
                     text += page_text + "\n"
+
         return text.strip()
+
     except Exception:
         return None
 
@@ -81,6 +85,7 @@ def analyze():
         else:
             try:
                 report_text = f.read().decode("utf-8", errors="replace")
+
             except Exception:
                 return jsonify({
                     "error": "Could not read the uploaded file."
@@ -113,11 +118,11 @@ def analyze():
         if key:
             print("KEY PREFIX:", key[:10])
 
-        print("MODEL:", "google/gemma-3-27b-it:free")
+        print("MODEL:", "meta-llama/llama-3.3-70b-instruct:free")
         print("============")
 
         response = client.chat.completions.create(
-            model="google/gemma-3-27b-it:free",
+            model="meta-llama/llama-3.3-70b-instruct:free",
             messages=[
                 {
                     "role": "user",
@@ -146,10 +151,12 @@ def analyze():
 
         try:
             result = json.loads(raw)
+
         except Exception:
             print("===== RAW AI RESPONSE =====")
             print(raw)
             print("===========================")
+
             return jsonify({
                 "error": "Model returned invalid JSON",
                 "raw_response": raw[:1000]
