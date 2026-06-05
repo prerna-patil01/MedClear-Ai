@@ -13,7 +13,7 @@ idna==3.18
 itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.3
-openai==1.51.0
+openai==1.58.1
 pdfminer.six==20251230
 pdfplumber==0.11.9
 pillow==12.2.0
