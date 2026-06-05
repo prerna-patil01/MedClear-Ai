@@ -1,103 +1,140 @@
 import os
 from openai import OpenAI
 from flask import Blueprint, request, jsonify
+from extensions import limiter
 
 chat_bp = Blueprint("chat", __name__)
 
-client = OpenAI(
-    api_key=os.environ.get("OPENROUTER_API_KEY"),
-    base_url="https://openrouter.ai/api/v1",
-)
+GROQ_KEY = os.environ.get("GROQ_API_KEY", "")
+groq = OpenAI(api_key=GROQ_KEY, base_url="https://api.groq.com/openai/v1")
 
-# Same cascade as analyze — try in order
-CHAT_MODEL_CASCADE = [
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "nvidia/nemotron-3-super-120b-a12b:free",
-    "google/gemma-4-31b-it:free",
-    "nousresearch/hermes-3-llama-3.1-405b:free",
-    "qwen/qwen3-coder:free",
+OR_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+openrouter = OpenAI(api_key=OR_KEY, base_url="https://openrouter.ai/api/v1")
+
+# Fast models for chat — speed matters more than raw capability here
+GROQ_CHAT_MODELS = [
+    "llama-3.1-8b-instant",
+    "llama-3.3-70b-versatile",
+    "gemma2-9b-it",
+    "mixtral-8x7b-32768",
 ]
 
 MEDDIE_SYSTEM = """You are Meddie, a warm and knowledgeable AI health companion for MedClear.
 
-You have been given the user's analyzed medical report as context.
-
-Your role is to help the user understand their report in plain, compassionate language.
+The user has received an AI-analyzed medical report. Your role is to help them understand it.
 
 Guidelines:
-- Always refer to the actual values from the provided report context when answering
-- Be warm, supportive, and clear
-- Never diagnose or prescribe medications
-- Encourage users to discuss findings with their doctor
-- Keep answers concise (3-5 sentences)
-- If asked something outside the report, answer briefly
-- If the user seems worried, be reassuring but honest
-- End serious answers with: "Your doctor can give you the most accurate guidance on this."
+- Always refer to the actual values from the report context provided.
+- Be warm, supportive, and speak in plain language.
+- Never diagnose or prescribe medications.
+- Encourage the user to discuss findings with their doctor.
+- Keep answers concise — 3 to 5 sentences.
+- If the user seems worried, be reassuring but honest.
+- End answers about serious findings with: "Your doctor can give you the most accurate guidance on this."
+- If asked something outside the report scope, answer briefly and redirect.
 """
 
 
-def build_context_string(report_context) -> str:
+def build_context(report_context) -> str:
+    if not report_context:
+        return ""
     if isinstance(report_context, str):
         return report_context
+    if not isinstance(report_context, dict):
+        return ""
 
-    if isinstance(report_context, dict):
-        parts = []
-        parts.append(f"REPORT TITLE: {report_context.get('title', 'Medical Report')}")
-        parts.append(f"SUMMARY: {report_context.get('summary', '')}")
+    parts = [f"REPORT: {report_context.get('title', 'Medical Report')}"]
 
-        findings = report_context.get("findings", [])
-        if findings:
-            parts.append("FINDINGS:")
-            for f in findings:
-                parts.append(
-                    f"- {f.get('name')}: {f.get('value')} "
-                    f"(ref: {f.get('reference')}) "
-                    f"Status: {f.get('status')}"
-                )
+    risk = report_context.get("risk", {})
+    if isinstance(risk, dict):
+        parts.append(
+            f"RISK: {risk.get('level', '').upper()} (score {risk.get('score', 0)}/10) — {risk.get('reason', '')}"
+        )
+    elif isinstance(risk, str):
+        parts.append(f"RISK: {risk}")
 
-        risk = report_context.get("risk", {})
-        if risk:
+    parts.append(f"SUMMARY: {report_context.get('summary', '')}")
+
+    findings = report_context.get("findings", [])
+    if findings:
+        parts.append("KEY FINDINGS:")
+        for f in findings:
             parts.append(
-                f"RISK LEVEL: {risk.get('level')} (score: {risk.get('score')})"
+                f"  • {f.get('name')}: {f.get('value')} "
+                f"(ref: {f.get('reference', 'N/A')}) — {f.get('status', '').upper()}"
             )
 
-        return "\n".join(parts)
+    specialists = report_context.get("specialists", [])
+    if specialists:
+        parts.append(f"RECOMMENDED SPECIALISTS: {', '.join(specialists)}")
 
-    return ""
+    return "\n".join(parts)
 
 
 def call_chat_model(messages: list) -> str:
-    last_error = None
+    last_err = None
 
-    for model_id in CHAT_MODEL_CASCADE:
-        print(f"[CHAT] Trying model: {model_id}")
+    # --- Groq ---
+    for model in GROQ_CHAT_MODELS:
+        print(f"[CHAT] Groq: {model}")
         try:
-            response = client.chat.completions.create(
-                model=model_id,
+            resp = groq.chat.completions.create(
+                model=model,
                 messages=messages,
                 temperature=0.4,
                 max_tokens=600,
             )
-
-            if not response.choices:
-                continue
-
-            reply = (response.choices[0].message.content or "").strip()
+            reply = (resp.choices[0].message.content or "").strip()
             if reply:
-                print(f"[CHAT] Success with {model_id}")
                 return reply
+        except Exception as e:
+            err = str(e)
+            print(f"[CHAT] Error {model}: {err}")
+            last_err = err
+            if "401" in err or "403" in err:
+                break
 
-        except Exception as exc:
-            err_str = str(exc)
-            print(f"[CHAT] Error with {model_id}: {err_str}")
-            last_error = err_str
-            if "401" in err_str or "403" in err_str:
-                raise
+    # --- OpenRouter fallback ---
+    if OR_KEY:
+        try:
+            import requests as http_requests
+            resp_list = http_requests.get(
+                "https://openrouter.ai/api/v1/models",
+                headers={"Authorization": f"Bearer {OR_KEY}"},
+                timeout=6,
+            ).json().get("data", [])
+            free_ids = [
+                m["id"] for m in resp_list
+                if str(m.get("pricing", {}).get("prompt", "1")).strip() in ("0", "0.0")
+            ][:3]
+        except Exception:
+            free_ids = []
 
-    raise RuntimeError(last_error or "All chat models failed.")
+        for model in free_ids:
+            print(f"[CHAT] OpenRouter fallback: {model}")
+            try:
+                resp = openrouter.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    temperature=0.4,
+                    max_tokens=600,
+                    extra_headers={
+                        "HTTP-Referer": "https://med-clear-ai.vercel.app",
+                        "X-Title": "MedClear AI",
+                    },
+                )
+                reply = (resp.choices[0].message.content or "").strip()
+                if reply:
+                    return reply
+            except Exception as e:
+                print(f"[CHAT] OpenRouter error {model}: {e}")
+                last_err = str(e)
+
+    raise RuntimeError(last_err or "All chat models failed.")
 
 
 @chat_bp.route("/api/chat", methods=["POST"])
+@limiter.limit("20 per minute")
 def chat():
     try:
         data = request.get_json(silent=True)
@@ -111,26 +148,29 @@ def chat():
         if not user_message:
             return jsonify({"error": "Message cannot be empty."}), 400
 
-        context_str = build_context_string(report_context)
+        context_str = build_context(report_context)
 
         messages = [{"role": "system", "content": MEDDIE_SYSTEM}]
 
-        for msg in history[-10:]:
+        if context_str:
             messages.append({
-                "role": msg.get("role", "user"),
-                "content": msg.get("content", ""),
+                "role": "system",
+                "content": f"PATIENT REPORT CONTEXT:\n\n{context_str}",
             })
 
-        messages.append({
-            "role": "user",
-            "content": f"PATIENT REPORT:\n\n{context_str}\n\nUSER QUESTION:\n\n{user_message}",
-        })
+        for msg in history[-10:]:
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
+            if role in ("user", "assistant") and content:
+                messages.append({"role": role, "content": content})
+
+        messages.append({"role": "user", "content": user_message})
 
         reply = call_chat_model(messages)
         return jsonify({"response": reply})
 
     except Exception as e:
-        print("CHAT ERROR:", str(e))
+        print(f"[CHAT] Fatal: {e}")
         if "429" in str(e):
             return jsonify({"error": "Rate limit reached. Please wait a moment."}), 429
         return jsonify({"error": str(e)}), 500
