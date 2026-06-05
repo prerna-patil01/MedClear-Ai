@@ -52,15 +52,11 @@ def extract_pdf_text(file_bytes):
     try:
         with pdfplumber.open(BytesIO(file_bytes)) as pdf:
             text = ""
-
             for page in pdf.pages:
                 page_text = page.extract_text()
-
                 if page_text:
                     text += page_text + "\n"
-
         return text.strip()
-
     except Exception:
         return None
 
@@ -85,7 +81,6 @@ def analyze():
         else:
             try:
                 report_text = f.read().decode("utf-8", errors="replace")
-
             except Exception:
                 return jsonify({
                     "error": "Could not read the uploaded file."
@@ -109,7 +104,7 @@ def analyze():
         }), 400
 
     try:
-        prompt = f"{ANALYZE_PROMPT}\n\nAnalyze this medical report:\n\n{report_text[:8000]}"
+        prompt = f"{ANALYZE_PROMPT}\n\nAnalyze this medical report:\n\n{report_text[:4000]}"
 
         print("=== DEBUG ===")
         print("API KEY EXISTS:", bool(os.environ.get("OPENROUTER_API_KEY")))
@@ -118,11 +113,11 @@ def analyze():
         if key:
             print("KEY PREFIX:", key[:10])
 
-        print("MODEL:", "meta-llama/llama-3.3-70b-instruct:free")
+        print("MODEL:", "mistralai/mistral-7b-instruct:free")
         print("============")
 
         response = client.chat.completions.create(
-            model="meta-llama/llama-3.3-70b-instruct:free",
+            model="mistralai/mistral-7b-instruct:free",
             messages=[
                 {
                     "role": "user",
@@ -151,7 +146,6 @@ def analyze():
 
         try:
             result = json.loads(raw)
-
         except Exception:
             print("===== RAW AI RESPONSE =====")
             print(raw)
