@@ -6,304 +6,420 @@
   <title>MedClear — AI Medical Report Analyzer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- ══════════════════════════════════════════
-       UPLOAD SCREEN
-  ══════════════════════════════════════════ -->
-  <div id="upload-screen" class="screen active">
-    <header class="site-header">
-      <div class="header-inner">
-        <div class="logo-mark">
-          <span class="logo-pulse"></span>
-          <span class="logo-text">MedClear</span>
+<!-- ═══════════════════════════════════════
+     UPLOAD SCREEN
+═══════════════════════════════════════ -->
+<div id="upload-screen" class="screen active">
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  <canvas id="dna-canvas" class="dna-bg-canvas"></canvas>
+
+  <div class="upload-shell">
+    <header class="upload-header">
+      <div class="logo-lockup">
+        <div class="logo-icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2C10 2 17 6.5 17 10C17 13.5 10 18 10 18C10 18 3 13.5 3 10C3 6.5 10 2 10 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M6 10h8M10 6v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </div>
-        <div class="header-actions">
-          <button class="btn-icon-only" id="history-btn-upload" title="View history" aria-label="Upload history">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <button class="btn-icon-only" id="dark-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
-            <svg class="icon-moon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.5 10A6 6 0 016 2.5 6 6 0 1013.5 10z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-            <svg class="icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none" hidden><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.22 3.22l1.41 1.41M11.37 11.37l1.41 1.41M3.22 12.78l1.41-1.41M11.37 4.63l1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-          </button>
-        </div>
+        <span class="logo-name">MedClear</span>
+        <span class="logo-ai-tag">AI</span>
       </div>
-      <p class="logo-sub">AI Medical Report Analyzer</p>
+      <div class="upload-header-right">
+        <button class="ghost-btn" id="history-btn-upload">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          History
+        </button>
+        <button class="ghost-btn icon-btn" id="dark-toggle" title="Toggle dark mode">
+          <svg class="icon-moon" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.5 10A6 6 0 016 2.5 6 6 0 1013.5 10z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <svg class="icon-sun" width="16" height="16" viewBox="0 0 16 16" fill="none" hidden><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.22 3.22l1.41 1.41M11.37 11.37l1.41 1.41M3.22 12.78l1.41-1.41M11.37 4.63l1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+      </div>
     </header>
 
     <main class="upload-main">
-      <div class="upload-hero">
+      <div class="hero-block">
+        <div class="hero-eyebrow">
+          <span class="hero-dot"></span>
+          AI-Powered · Instant · Private
+        </div>
         <h1 class="hero-heading">
-          Understand your<br />
-          <em>medical reports</em><br />
+          Understand your<br/>
+          <em>medical reports</em><br/>
           in plain language.
         </h1>
         <p class="hero-sub">Upload a PDF, photo, or paste text. MedClear's AI breaks down findings, flags risks, and connects you to the right specialists — instantly.</p>
-      </div>
-
-      <div class="upload-card" id="drop-zone">
-        <div class="upload-icon-wrap">
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-            <path d="M16 4L16 22M16 4L10 10M16 4L22 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M6 24H26" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
+        <div class="hero-pills">
+          <div class="hero-pill"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Plain English results</div>
+          <div class="hero-pill"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Risk analysis</div>
+          <div class="hero-pill"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Find specialists</div>
         </div>
-        <p class="upload-primary">Drop your medical report here</p>
-        <p class="upload-secondary">Lab results · Blood work · Discharge summaries · Report photos · Prescriptions</p>
-
-        <label class="btn-upload" for="file-input">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 10.5V13a.5.5 0 00.5.5h11a.5.5 0 00.5-.5v-2.5M8 2v8M5 5L8 2l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/
-></svg>
-          Choose PDF, Image, or TXT
-        </label>
-        <input type="file" id="file-input" accept=".pdf,.txt,.jpg,.jpeg,.png,.webp,.bmp" hidden />
-
-        <div class="or-divider"><span>or</span></div>
-
-        <textarea id="report-text" class="report-textarea" placeholder="Paste your report text here…" rows="5"></textarea>
       </div>
 
-      <button class="btn-analyze" id="analyze-btn">
-        <span class="btn-label">Analyze My Report</span>
-        <span class="btn-icon">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.4"/><path d="M6 9h6M11 7l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </span>
-      </button>
+      <div class="upload-card glass-card" id="upload-card">
+        <div class="upload-type-tabs">
+          <button class="utype-tab active" data-upanel="file">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Upload File
+          </button>
+          <button class="utype-tab" data-upanel="text">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 5.5h6M5 8.5h6M5 11.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Paste Text
+          </button>
+        </div>
 
-      <p class="disclaimer">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"/><path d="M6 5.5V8M6 4h.01" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        For educational purposes only. Always consult a qualified healthcare professional.
-      </p>
+        <div class="upanel active" id="upanel-file">
+          <div class="drop-zone" id="drop-zone">
+            <div class="drop-zone-icon">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="6" y="3" width="20" height="26" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M11 13h10M11 18h7M11 23h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M21 3v8h8" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </div>
+            <p class="drop-zone-title">Drop your file here</p>
+            <p class="drop-zone-sub">PDF · JPG · PNG · WEBP · TXT</p>
+            <label class="primary-btn" for="file-input">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 10.5V13a.5.5 0 00.5.5h11a.5.5 0 00.5-.5v-2.5M8 2v8M5 5L8 2l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Choose File
+            </label>
+            <input type="file" id="file-input" accept=".pdf,.txt,.jpg,.jpeg,.png,.webp,.bmp" hidden />
+          </div>
+        </div>
+
+        <div class="upanel" id="upanel-text">
+          <textarea id="report-text" class="text-area" placeholder="Paste your lab results, blood test report, discharge summary, or any medical text here…" rows="6"></textarea>
+        </div>
+
+        <button class="analyze-btn" id="analyze-btn">
+          <span class="analyze-btn-glow"></span>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1.5L9 4.5M9 13.5L9 16.5M1.5 9L4.5 9M13.5 9L16.5 9M3.69 3.69L5.81 5.81M12.19 12.19L14.31 14.31M3.69 14.31L5.81 12.19M12.19 5.81L14.31 3.69" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="9" cy="9" r="3.5" stroke="currentColor" stroke-width="1.3"/></svg>
+          Analyze My Report
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" class="btn-arrow"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+        <p class="upload-disclaimer">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.1"/><path d="M6 5.5V8M6 4h.01" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+          Educational purposes only · Not a medical diagnosis
+        </p>
+      </div>
     </main>
   </div>
+</div>
 
-  <!-- ══════════════════════════════════════════
-       LOADING SCREEN
-  ══════════════════════════════════════════ -->
-  <div id="loading-screen" class="screen">
-    <div class="loading-center">
-      <div class="loading-pulse">
-        <div class="pulse-ring pulse-ring--1"></div>
-        <div class="pulse-ring pulse-ring--2"></div>
-        <div class="pulse-ring pulse-ring--3"></div>
-        <div class="pulse-core">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M14 3C14 3 22 8 22 14C22 20 14 25 14 25C14 25 6 20 6 14C6 8 14 3 14 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 14h12M14 8v12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+<!-- ═══════════════════════════════════════
+     LOADING SCREEN
+═══════════════════════════════════════ -->
+<div id="loading-screen" class="screen">
+  <div class="loading-layout">
+    <canvas id="loading-dna" class="loading-dna-canvas"></canvas>
+    <div class="loading-info">
+      <div class="loading-rings">
+        <div class="loading-ring r1"></div>
+        <div class="loading-ring r2"></div>
+        <div class="loading-ring r3"></div>
+        <div class="loading-core">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 3C12 3 20 7.5 20 12C20 16.5 12 21 12 21C12 21 4 16.5 4 12C4 7.5 12 3 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 12h10M12 7v10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         </div>
       </div>
-      <p class="loading-title">Analyzing your report…</p>
-      <p class="loading-sub" id="loading-sub-text">Reading values and cross-referencing references</p>
+      <h2 class="loading-title">Analyzing your report…</h2>
+      <p class="loading-sub" id="loading-sub-text">Reading values and cross-referencing…</p>
+      <div class="loading-steps">
+        <div class="lstep active" id="lstep-1"><div class="lstep-dot"></div><span>Extracting data</span></div>
+        <div class="lstep" id="lstep-2"><div class="lstep-dot"></div><span>AI analysis</span></div>
+        <div class="lstep" id="lstep-3"><div class="lstep-dot"></div><span>Generating insights</span></div>
+      </div>
     </div>
   </div>
+</div>
 
-  <!-- ══════════════════════════════════════════
-       RESULTS SCREEN
-  ══════════════════════════════════════════ -->
-  <div id="results-screen" class="screen">
+<!-- ═══════════════════════════════════════
+     RESULTS SCREEN
+═══════════════════════════════════════ -->
+<div id="results-screen" class="screen">
 
-    <div class="results-topbar">
-      <div class="topbar-inner">
-        <button class="topbar-back" id="back-btn">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          New Report
+  <!-- Top Bar -->
+  <div class="results-topbar">
+    <div class="topbar-row">
+      <button class="topbar-back" id="back-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        New Report
+      </button>
+      <div class="topbar-logo">
+        <span class="topbar-pulse"></span>
+        MedClear
+      </div>
+      <div class="topbar-actions">
+        <button class="ghost-btn icon-btn" id="history-btn-results" title="History">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <div class="topbar-logo">
-          <span class="logo-pulse logo-pulse--sm"></span>
-          MedClear
-        </div>
-        <div class="topbar-right">
-          <button class="btn-icon-only" id="history-btn-results" title="History" aria-label="History">
-            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <button class="btn-icon-only" id="dark-toggle-results" title="Toggle dark mode" aria-label="Toggle dark mode">
-            <svg class="icon-moon" width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M13.5 10A6 6 0 016 2.5 6 6 0 1013.5 10z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-            <svg class="icon-sun" width="15" height="15" viewBox="0 0 16 16" fill="none" hidden><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.22 3.22l1.41 1.41M11.37 11.37l1.41 1.41M3.22 12.78l1.41-1.41M11.37 4.63l1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-          </button>
-          <button class="topbar-download" id="download-btn-top">
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 2v8M4.5 7l3 3 3-3M2.5 12.5h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Export PDF
-          </button>
-        </div>
+        <button class="ghost-btn icon-btn" id="dark-toggle-results" title="Dark mode">
+          <svg class="icon-moon" width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M13.5 10A6 6 0 016 2.5 6 6 0 1013.5 10z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <svg class="icon-sun" width="15" height="15" viewBox="0 0 16 16" fill="none" hidden><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.22 3.22l1.41 1.41M11.37 11.37l1.41 1.41M3.22 12.78l1.41-1.41M11.37 4.63l1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+        <button class="export-btn" id="download-btn-top">
+          <svg width="13" height="13" viewBox="0 0 15 15" fill="none"><path d="M7.5 2v8M4.5 7l3 3 3-3M2.5 12.5h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Export PDF
+        </button>
       </div>
     </div>
 
-    <div class="results-body">
-
-      <!-- 1. RISK BANNER -->
-      <section class="risk-banner risk--default" id="risk-banner" aria-live="polite">
-        <div class="risk-banner-inner">
-          <div class="risk-left">
-            <p class="risk-eyebrow">Risk Assessment</p>
-            <h2 class="risk-level" id="risk-level-text">—</h2>
-            <p class="risk-reason" id="risk-reason-text"></p>
-          </div>
-          <div class="risk-right">
-            <div class="risk-score-wrap">
-              <span class="risk-score-num" id="risk-score-num">—</span>
-              <span class="risk-score-denom">/10</span>
-            </div>
-            <span class="risk-badge" id="risk-badge">Analyzing…</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- 2. SUMMARY -->
-      <section class="results-section summary-section">
-        <div class="section-header">
-          <span class="section-icon">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-          </span>
-          <h3 class="section-title">Summary</h3>
-        </div>
-        <div class="summary-body" id="summary-content">
-          <p class="skeleton-line"></p>
-          <p class="skeleton-line skeleton-line--short"></p>
-        </div>
-      </section>
-
-      <!-- 3. QUICK ACTIONS -->
-      <section class="quick-actions-section">
-        <div class="quick-actions-grid">
-          <button class="qa-card qa-card--primary" id="qa-meddie-btn">
-            <div class="qa-card-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="1.4"/><path d="M7 11c0-2.2 1.8-4 4-4s4 1.8 4 4v1H7v-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="11" cy="9" r="1.5" fill="currentColor"/></svg></div>
-            <div class="qa-card-text"><span class="qa-card-label">Ask Meddie</span><span class="qa-card-sub">AI health companion</span></div>
-            <svg class="qa-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 8h6M9 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <button class="qa-card" id="qa-doctor-btn">
-            <div class="qa-card-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3L11 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M7 7l4-4 4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="16" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M14 16h2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-            <div class="qa-card-text"><span class="qa-card-label">Find Specialist</span><span class="qa-card-sub">Doctors near you</span></div>
-            <svg class="qa-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 8h6M9 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <button class="qa-card" id="qa-download-btn">
-            <div class="qa-card-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 4v10M7.5 11l3.5 3.5L14.5 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 18h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
-            <div class="qa-card-text"><span class="qa-card-label">Download PDF</span><span class="qa-card-sub">Full report summary</span></div>
-            <svg class="qa-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 8h6M9 6l2 2-2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-      </section>
-
-      <!-- 4. MEDDIE CHAT -->
-      <section class="results-section meddie-section" id="meddie-section">
-        <div class="meddie-header">
-          <div class="meddie-avatar"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.4"/><path d="M6.5 10c0-2 1.6-3.5 3.5-3.5s3.5 1.5 3.5 3.5v.5h-7V10z" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="8" r="1.3" fill="currentColor"/></svg></div>
-          <div>
-            <h3 class="meddie-title">Meddie <span class="meddie-badge">AI</span></h3>
-            <p class="meddie-tagline">Ask me anything about your report</p>
-          </div>
-          <div class="meddie-status"><span class="status-dot"></span> Ready</div>
-        </div>
-        <div class="chat-window" id="chat-messages" aria-live="polite"></div>
-        <div class="chat-starters" id="chat-starters">
-          <button class="starter-chip" data-msg="What are the most concerning findings in my report?">What should I be most concerned about?</button>
-          <button class="starter-chip" data-msg="Explain the abnormal values in plain language.">Explain the abnormal values</button>
-          <button class="starter-chip" data-msg="What lifestyle changes should I make based on this report?">What should I change in my lifestyle?</button>
-          <button class="starter-chip" data-msg="How urgent is this? Do I need to see a doctor right away?">How urgent is this?</button>
-        </div>
-        <div class="chat-input-bar">
-          <input type="text" id="chat-input" class="chat-input" placeholder="Ask Meddie about your report…" autocomplete="off" />
-          <button class="chat-send-btn" id="chat-send-btn" aria-label="Send">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-      </section>
-
-      <!-- 5. DOCTOR FINDER -->
-      <section class="results-section doctor-section" id="doctor-section">
-        <div class="section-header">
-          <span class="section-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 110 8A4 4 0 018 2z" stroke="currentColor" stroke-width="1.3"/><path d="M3 14c0-2 2-3.5 5-3.5s5 1.5 5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
-          <h3 class="section-title">Find Specialists Near You</h3>
-        </div>
-        <div class="doctor-search-bar">
-          <input type="text" id="doctor-location" class="doctor-location-input" placeholder="Enter your city or area…" />
-          <button class="btn-find-doctors" id="find-doctors-btn">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 9.5L13 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            Find Doctors
-          </button>
-        </div>
-        <div class="doctor-list" id="doctor-list">
-          <div class="doctor-placeholder">
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="18" r="8" stroke="currentColor" stroke-width="1.2" opacity=".3"/><path d="M8 34c0-5 5-9 12-9s12 4 12 9" stroke="currentColor" stroke-width="1.2" opacity=".3" stroke-linecap="round"/></svg>
-            <p>Enter your location to find specialists near you.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- 6. KEY FINDINGS -->
-      <section class="results-section findings-section">
-        <div class="section-header">
-          <span class="section-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v3M8 11v3M2 8h3M11 8h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/></svg></span>
-          <h3 class="section-title">Key Findings</h3>
-          <button class="section-toggle" id="findings-toggle" aria-expanded="true" aria-controls="findings-body">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-        <div class="findings-body" id="findings-body">
-          <div class="findings-list" id="findings-list"></div>
-          <button class="btn-show-more" id="findings-show-more" hidden>Show all findings <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        </div>
-      </section>
-
-      <!-- 7. SPECIALISTS -->
-      <section class="results-section specialists-section" id="specialists-section" style="display:none">
-        <div class="section-header">
-          <span class="section-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM3 13c0-2.2 2.2-4 5-4s5 1.8 5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M12 7h3M13.5 5.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
-          <h3 class="section-title">Recommended Specialists</h3>
-        </div>
-        <div class="specialists-list" id="specialists-list"></div>
-      </section>
-
-      <!-- 8. LIFESTYLE -->
-      <section class="results-section lifestyle-section">
-        <div class="section-header">
-          <span class="section-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2c-1.5 2-4 3-4 6a4 4 0 008 0c0-3-2.5-4-4-6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 11v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></span>
-          <h3 class="section-title">Lifestyle Recommendations</h3>
-          <button class="section-toggle" id="lifestyle-toggle" aria-expanded="false" aria-controls="lifestyle-body">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-        <div class="lifestyle-body collapsed" id="lifestyle-body">
-          <ul class="lifestyle-list" id="lifestyle-list"></ul>
-        </div>
-      </section>
-
-      <!-- 9. QUESTIONS FOR DOCTOR -->
-      <section class="results-section questions-section">
-        <div class="section-header">
-          <span class="section-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 110 12A6 6 0 018 2z" stroke="currentColor" stroke-width="1.3"/><path d="M6 6.5c0-1.1.9-2 2-2s2 .9 2 2c0 1-.7 1.5-1.5 1.8-.4.2-.5.5-.5.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="11" r=".7" fill="currentColor"/></svg></span>
-          <h3 class="section-title">Questions for Your Doctor</h3>
-          <button class="section-toggle" id="questions-toggle" aria-expanded="false" aria-controls="questions-body">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-        <div class="questions-body collapsed" id="questions-body">
-          <ol class="questions-list" id="questions-list"></ol>
-        </div>
-      </section>
-
-      <footer class="results-footer">
-        <p><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.1"/><path d="M6 5.5V8M6 4h.01" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg> MedClear is an AI tool for <strong>educational purposes only</strong>. It does not provide medical diagnosis or professional healthcare advice. Always consult a qualified healthcare professional.</p>
-      </footer>
-
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════
-       HISTORY PANEL
-  ══════════════════════════════════════════ -->
-  <div id="history-overlay" class="history-overlay" hidden></div>
-  <aside id="history-panel" class="history-panel" hidden aria-label="Past analyses">
-    <div class="history-panel-header">
-      <h3>Past Analyses</h3>
-      <button id="history-close" class="btn-icon-only" aria-label="Close history">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <!-- Results Tab Nav -->
+    <div class="rtabs-nav">
+      <button class="rtab-btn active" data-rtab="overview">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+        Overview
+      </button>
+      <button class="rtab-btn" data-rtab="findings">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Findings
+        <span class="tab-badge" id="findings-badge"></span>
+      </button>
+      <button class="rtab-btn" data-rtab="doctors">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM3 14c0-2.2 2.2-4 5-4s5 1.8 5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Doctors
+      </button>
+      <button class="rtab-btn" data-rtab="actions">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M13 4L6 11l-3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Actions
       </button>
     </div>
-    <div id="history-list" class="history-list"></div>
-  </aside>
+  </div>
 
-  <script src="script.js"></script>
+  <div class="results-body">
+
+    <!-- ── OVERVIEW TAB ── -->
+    <div class="rtab-panel active" id="rtab-overview">
+      <div class="overview-grid">
+
+        <!-- Risk Gauge -->
+        <div class="gauge-card glass-card card-3d" id="risk-banner">
+          <div class="gauge-card-inner">
+            <div class="gauge-wrap">
+              <svg viewBox="0 0 200 130" class="gauge-svg">
+                <defs>
+                  <linearGradient id="ggrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#1e8c5a"/>
+                    <stop offset="50%" stop-color="#d4830a"/>
+                    <stop offset="100%" stop-color="#c93636"/>
+                  </linearGradient>
+                </defs>
+                <path d="M20 108 A82 82 0 0 1 180 108" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="14" stroke-linecap="round"/>
+                <path d="M20 108 A82 82 0 0 1 180 108" fill="none" stroke="url(#ggrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="257" stroke-dashoffset="257" id="gauge-arc" class="gauge-arc-path"/>
+                <text x="100" y="92" text-anchor="middle" class="gauge-num" id="gauge-num">—</text>
+                <text x="100" y="112" text-anchor="middle" class="gauge-denom">/10</text>
+              </svg>
+            </div>
+            <div class="gauge-info">
+              <p class="gauge-eyebrow">Risk Assessment</p>
+              <h2 class="gauge-level" id="risk-level-text">—</h2>
+              <span class="risk-pill" id="risk-badge">Analyzing…</span>
+              <p class="gauge-reason" id="risk-reason-text"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Human Body -->
+        <div class="body-card glass-card card-3d">
+          <div class="body-card-head">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1C4 1 2 3 2 5.5c0 3.5 5 7.5 5 7.5s5-4 5-7.5C12 3 10 1 7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+            Affected Areas
+          </div>
+          <div class="body-svg-wrap">
+            <svg viewBox="0 0 160 380" class="body-svg">
+              <defs>
+                <filter id="oglow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="4" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <!-- Body outline -->
+              <ellipse cx="80" cy="36" rx="26" ry="30" fill="none" stroke="var(--body-line)" stroke-width="1.5"/>
+              <ellipse cx="72" cy="33" rx="3" ry="2" fill="var(--body-line)" opacity=".25"/>
+              <ellipse cx="88" cy="33" rx="3" ry="2" fill="var(--body-line)" opacity=".25"/>
+              <path d="M73 42 Q80 46 87 42" fill="none" stroke="var(--body-line)" stroke-width="1" opacity=".25" stroke-linecap="round"/>
+              <rect x="71" y="64" width="18" height="15" rx="4" fill="none" stroke="var(--body-line)" stroke-width="1.5"/>
+              <path d="M28 86C35 78 55 76 80 76C105 76 125 78 132 86L136 196Q116 204 80 204Q44 204 24 196Z" fill="none" stroke="var(--body-line)" stroke-width="1.5"/>
+              <path d="M28 86C15 100 10 140 12 168C14 182 22 186 28 178L36 120Z" fill="none" stroke="var(--body-line)" stroke-width="1.5"/>
+              <path d="M132 86C145 100 150 140 148 168C146 182 138 186 132 178L124 120Z" fill="none" stroke="var(--body-line)" stroke-width="1.5"/>
+              <path d="M24 196C40 215 60 220 80 220C100 220 120 215 136 196" fill="none" stroke="var(--body-line)" stroke-width="1.5"/>
+              <path d="M44 206C40 250 42 300 44 340C46 356 56 360 64 356C72 352 74 338 72 320L70 206Z" fill="none" stroke="var(--body-line)" stroke-width="1.5"/>
+              <path d="M116 206C120 250 118 300 116 340C114 356 104 360 96 356C88 352 86 338 88 320L90 206Z
+                " fill="none" stroke="var(--body-line)" stroke-width="1.5"/>
+              <!-- Organs -->
+              <ellipse cx="80" cy="28" rx="18" ry="20" class="organ" id="org-brain" fill="rgba(139,92,246,.2)" stroke="rgba(139,92,246,.8)" stroke-width="1.5" filter="url(#oglow)" style="opacity:0;transition:opacity .6s"/>
+              <ellipse cx="80" cy="72" rx="9" ry="6" class="organ" id="org-thyroid" fill="rgba(245,158,11,.25)" stroke="rgba(245,158,11,.8)" stroke-width="1.5" filter="url(#oglow)" style="opacity:0;transition:opacity .6s"/>
+              <path d="M68 106Q72 98 80 107Q88 98 92 106Q96 120 80 134Q64 120 68 106Z" class="organ" id="org-heart" fill="rgba(239,68,68,.25)" stroke="rgba(239,68,68,.8)" stroke-width="1.5" filter="url(#oglow)" style="opacity:0;transition:opacity .6s"/>
+              <ellipse cx="60" cy="126" rx="16" ry="24" class="organ" id="org-lung-l" fill="rgba(59,130,246,.2)" stroke="rgba(59,130,246,.7)" stroke-width="1.5" filter="url(#oglow)" style="opacity:0;transition:opacity .6s"/>
+              <ellipse cx="100" cy="126" rx="16" ry="24" class="organ" id="org-lung-r" fill="rgba(59,130,246,.2)" stroke="rgba(59,130,246,.7)" stroke-width="1.5" filter="url(#oglow)" style="opacity:0;transition:opacity .6s"/>
+              <path d="M52 154Q80 146 112 158Q108 178 84 182Q58 178 52 154Z" class="organ" id="org-liver" fill="rgba(234,88,12,.2)" stroke="rgba(234,88,12,.7)" stroke-width="1.5" filter="url(#oglow)" style="opacity:0;transition:opacity .6s"/>
+              <ellipse cx="90" cy="168" rx="16" ry="11" class="organ" id="org-stomach" fill="rgba(16,185,129,.2)" stroke="rgba(16,185,129,.7)" stroke-width="1.5" filter="url(#oglow)" style="opacity:0;transition:opacity .6s"/>
+              <ellipse cx="60" cy="178" rx="9" ry="13" class="organ" id="org-kidney-l" fill="rgba(99,102,241,.2)" stroke="rgba(99,102,241,.7)" stroke-width="1.5" filter="url(#oglow)" style="opacity:0;transition:opacity .6s"/>
+              <ellipse cx="100" cy="178" rx="9" ry="13" class="organ" id="org-kidney-r" fill="rgba(99,102,241,.2)" stroke="rgba(99,102,241,.7)" stroke-width="1.5" filter="url(#oglow)" style="opacity:0;transition:opacity .6s"/>
+              <!-- Organ labels -->
+              <text x="80" y="10" text-anchor="middle" font-size="7.5" fill="rgba(139,92,246,.9)" class="organ-lbl" id="lbl-brain" style="opacity:0;transition:opacity .6s">Brain</text>
+              <text x="80" y="84" text-anchor="middle" font-size="7.5" fill="rgba(245,158,11,.9)" class="organ-lbl" id="lbl-thyroid" style="opacity:0;transition:opacity .6s">Thyroid</text>
+              <text x="80" y="140" text-anchor="middle" font-size="7.5" fill="rgba(239,68,68,.9)" class="organ-lbl" id="lbl-heart" style="opacity:0;transition:opacity .6s">Heart</text>
+              <text x="80" y="100" text-anchor="middle" font-size="7.5" fill="rgba(59,130,246,.9)" class="organ-lbl" id="lbl-lungs" style="opacity:0;transition:opacity .6s">Lungs</text>
+              <text x="80" y="188" text-anchor="middle" font-size="7.5" fill="rgba(234,88,12,.9)" class="organ-lbl" id="lbl-liver" style="opacity:0;transition:opacity .6s">Liver</text>
+              <text x="80" y="160" text-anchor="middle" font-size="7.5" fill="rgba(16,185,129,.9)" class="organ-lbl" id="lbl-stomach" style="opacity:0;transition:opacity .6s">Pancreas</text>
+              <text x="80" y="196" text-anchor="middle" font-size="7.5" fill="rgba(99,102,241,.9)" class="organ-lbl" id="lbl-kidneys" style="opacity:0;transition:opacity .6s">Kidneys</text>
+            </svg>
+            <p class="body-hint" id="body-hint">Analyze a report to see affected areas</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="rcard glass-card card-3d">
+        <div class="rcard-header">
+          <div class="rcard-icon" style="--ic:#0d9e80;--ibg:rgba(13,158,128,.12)">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Summary</h3>
+        </div>
+        <p class="summary-body" id="summary-content">Your report is being analyzed…</p>
+      </div>
+
+      <!-- Specialists -->
+      <div class="rcard glass-card" id="specialists-section" style="display:none">
+        <div class="rcard-header">
+          <div class="rcard-icon" style="--ic:#6366f1;--ibg:rgba(99,102,241,.12)">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM3 14c0-2.2 2.2-4 5-4s5 1.8 5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M12 7h3M13.5 5.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Recommended Specialists</h3>
+        </div>
+        <div class="specialists-row" id="specialists-list"></div>
+      </div>
+    </div>
+
+    <!-- ── FINDINGS TAB ── -->
+    <div class="rtab-panel" id="rtab-findings">
+      <div class="tab-page-header">
+        <h2><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Key Findings</h2>
+        <span id="findings-count-label" class="tab-count-chip"></span>
+      </div>
+      <div class="findings-list" id="findings-list"></div>
+    </div>
+
+    <!-- ── DOCTORS TAB ── -->
+    <div class="rtab-panel" id="rtab-doctors">
+      <div class="tab-page-header">
+        <h2><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM3 14c0-2.2 2.2-4 5-4s5 1.8 5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> Find Specialists Near You</h2>
+      </div>
+      <div class="rcard glass-card doctor-search-card">
+        <div class="doctor-search-row">
+          <div class="doctor-input-wrap">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1C4 1 2 3 2 5.5c0 3.5 5 7.5 5 7.5s5-4 5-7.5C12 3 10 1 7 1z" stroke="currentColor" stroke-width="1.2"/></svg>
+            <input type="text" id="doctor-location" class="doctor-input" placeholder="Enter your city — Hyderabad, London, New York…"/>
+          </div>
+          <button class="primary-btn" id="find-doctors-btn">
+            <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 9.5L13 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Search
+          </button>
+        </div>
+      </div>
+      <div id="doctor-list" class="doctor-grid">
+        <div class="empty-state">
+          <div class="empty-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="18" r="8" stroke="currentColor" stroke-width="1.2" opacity=".3"/><path d="M8 34c0-5 5-9 12-9s12 4 12 9" stroke="currentColor" stroke-width="1.2" opacity=".3" stroke-linecap="round"/></svg></div>
+          <p>Enter your city above to find nearby specialists</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ACTIONS TAB ── -->
+    <div class="rtab-panel" id="rtab-actions">
+      <div class="rcard glass-card">
+        <div class="rcard-header">
+          <div class="rcard-icon" style="--ic:#10b981;--ibg:rgba(16,185,129,.12)">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2c-1.5 2-4 3-4 6a4 4 0 008 0c0-3-2.5-4-4-6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 11v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Lifestyle Recommendations</h3>
+        </div>
+        <div class="lifestyle-grid" id="lifestyle-list"></div>
+      </div>
+      <div class="rcard glass-card">
+        <div class="rcard-header">
+          <div class="rcard-icon" style="--ic:#6366f1;--ibg:rgba(99,102,241,.12)">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 110 12A6 6 0 018 2z" stroke="currentColor" stroke-width="1.3"/><path d="M6 6.5c0-1.1.9-2 2-2s2 .9 2 2c0 1-.7 1.5-1.5 1.8-.4.2-.5.5-.5.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="11" r=".7" fill="currentColor"/></svg>
+          </div>
+          <h3>Questions for Your Doctor</h3>
+        </div>
+        <ol class="questions-list" id="questions-list"></ol>
+      </div>
+      <div class="download-banner glass-card">
+        <div class="download-icon-wrap">
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><path d="M14 4v14M8 13l6 5 6-5M5 22h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="download-text">
+          <h3>Download Full Report</h3>
+          <p>Printable PDF with all findings, recommendations and questions.</p>
+        </div>
+        <button class="primary-btn" id="download-btn-actions">Export PDF</button>
+      </div>
+    </div>
+
+    <div class="results-footer">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.1"/><path d="M6 5.5V8M6 4h.01" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+      MedClear is for <strong>educational purposes only</strong>. Not a medical diagnosis. Always consult a qualified healthcare professional.
+    </div>
+  </div>
+
+  <!-- Floating Meddie -->
+  <div class="meddie-fab-wrap">
+    <button class="meddie-fab" id="meddie-fab">
+      <div class="meddie-fab-av">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="1.4"/><path d="M7 11c0-2.2 1.8-4 4-4s4 1.8 4 4v1H7v-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="11" cy="9" r="1.5" fill="currentColor"/></svg>
+      </div>
+      <span>Ask Meddie</span>
+      <div class="fab-pulse"></div>
+    </button>
+  </div>
+
+  <!-- Meddie Modal -->
+  <div class="meddie-modal-backdrop" id="meddie-backdrop" hidden></div>
+  <div class="meddie-modal" id="meddie-modal" hidden>
+    <div class="meddie-modal-header">
+      <div class="mm-avatar">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.4"/><path d="M6.5 10c0-2 1.6-3.5 3.5-3.5s3.5 1.5 3.5 3.5v.5h-7V10z" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="8" r="1.3" fill="currentColor"/></svg>
+      </div>
+      <div>
+        <div class="mm-title">Meddie <span class="ai-tag">AI</span></div>
+        <div class="mm-sub">Your AI health companion</div>
+      </div>
+      <div class="mm-online"><span class="online-dot"></span>Online</div>
+      <button class="ghost-btn icon-btn mm-close" id="meddie-modal-close">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="chat-messages" id="chat-messages" aria-live="polite"></div>
+    <div class="chat-starters" id="chat-starters">
+      <button class="starter-chip" data-msg="What are the most concerning findings in my report?">What should I worry about?</button>
+      <button class="starter-chip" data-msg="Explain the abnormal values in plain language.">Explain abnormal values</button>
+      <button class="starter-chip" data-msg="How urgent is this? Do I need to see a doctor right away?">How urgent is this?</button>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" class="chat-input" id="chat-input" placeholder="Ask Meddie about your report…" autocomplete="off"/>
+      <button class="chat-send" id="chat-send-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- History Panel -->
+<div id="history-overlay" class="history-overlay" hidden></div>
+<aside id="history-panel" class="history-panel" hidden>
+  <div class="history-header">
+    <h3>Past Analyses</h3>
+    <button class="ghost-btn icon-btn" id="history-close">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div id="history-list" class="history-list"></div>
+</aside>
+
+<script src="script.js"></script>
 </body>
 </html>
