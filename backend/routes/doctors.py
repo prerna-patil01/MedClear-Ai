@@ -7,7 +7,7 @@ from flask import Blueprint, request, jsonify
 doctors_bp = Blueprint("doctors", __name__)
 
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 # Specialist type → OSM amenity tags mapping
 SPECIALIST_TAGS = {
