@@ -122,9 +122,12 @@ def analyze():
     except json.JSONDecodeError:
         return jsonify({"error": "AI returned an unexpected format. Please try again."}), 500
     except Exception as e:
-        error_msg = str(e)
-        if "quota" in error_msg.lower() or "429" in error_msg:
-            return jsonify({"error": "API rate limit reached. Please wait a moment and try again."}), 429
-        if "api_key" in error_msg.lower() or "401" in error_msg:
-            return jsonify({"error": "API configuration error. Please contact support."}), 500
-        return jsonify({"error": "Analysis failed. Please try again."}), 500
+        import traceback
+    
+        print("===== ANALYZE ERROR =====")
+        traceback.print_exc()
+        print("=========================")
+    
+        return jsonify({
+            "error": str(e)
+        }), 500
