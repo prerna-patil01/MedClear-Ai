@@ -9,6 +9,7 @@ Instead of struggling with medical jargon, users can upload a PDF report or past
 - Easy-to-understand summaries
 - Suggested questions to discuss with healthcare professionals
 
+---
 
 ## Features
 
@@ -43,7 +44,7 @@ Instead of struggling with medical jargon, users can upload a PDF report or past
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 ### Frontend
 - HTML5
@@ -65,33 +66,11 @@ Instead of struggling with medical jargon, users can upload a PDF report or past
 
 ##  Project Structure
 
-MedClear-AI/
-
-├── frontend/
-
-│ ├── index.html
-
-│ ├── style.css
-
-│ └── script.js
-
-│
-
-├── backend/
-
-│ ├── app.py
-
-│ ├── requirements.txt
-
-│ └── routes/
-
-│
-
-└── README.md
+text MedClear-AI/ │ ├── frontend/ │   ├── index.html │   ├── style.css │   └── script.js │ ├── backend/ │   ├── app.py │   ├── requirements.txt │   └── routes/ │ └── README.md 
 
 ---
 
-##  Installation
+## Installation
 
 ### Clone Repository
 
@@ -101,19 +80,21 @@ bash git clone https://github.com/prerna-patil01/MedClear-Ai.git cd MedClear-Ai
 
 bash cd backend  python -m venv venv  source venv/bin/activate 
 
-Install dependencies:
+### Install Dependencies
 
 bash pip install -r requirements.txt 
 
-Create a .env file:
+### Create Environment File
+
+Create a .env file inside the backend folder:
 
 env GEMINI_API_KEY=your_api_key_here 
 
-Run backend:
+### Run Backend
 
 bash python app.py 
 
-Backend runs on:
+Backend runs at:
 
 text http://localhost:5000 
 
@@ -124,7 +105,7 @@ text http://localhost:5000
 1. Start the Flask backend
 2. Open frontend/index.html
 3. Upload a PDF report or paste report text
-4. Click "Analyze My Report"
+4. Click Analyze My Report
 5. View AI-generated insights
 
 ---
@@ -143,4 +124,4 @@ Prerna Patil
 
 Computer Science Undergraduate | AI & Software Development Enthusiast
 
-Built with curiosity, caffeine, and Gemini.
+Built with curiosity, caffeine, and Gemini
