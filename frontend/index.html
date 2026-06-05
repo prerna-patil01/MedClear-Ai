@@ -1,308 +1,1010 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MedClear — AI Medical Intelligence</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-  <link rel="stylesheet" href="style.css"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MedClear — AI Medical Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════
+   TOKENS
+═══════════════════════════════ */
+:root{
+  --bg:#060816;
+  --bg-2:#0a0d1f;
+  --bg-3:#0f1326;
+  --glass:rgba(255,255,255,0.04);
+  --glass-hover:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);
+  --border-hi:rgba(255,255,255,0.16);
+  --ink:#f0eeff;
+  --ink-60:rgba(240,238,255,0.6);
+  --ink-30:rgba(240,238,255,0.3);
+  --ink-12:rgba(240,238,255,0.12);
+  --ink-06:rgba(240,238,255,0.06);
+  --accent:#00D4AA;
+  --accent-dim:rgba(0,212,170,0.15);
+  --accent-glow:rgba(0,212,170,0.35);
+  --purple:#7C5CFF;
+  --purple-dim:rgba(124,92,255,0.15);
+  --warn:#FFB547;
+  --warn-dim:rgba(255,181,71,0.15);
+  --red:#FF5C7A;
+  --red-dim:rgba(255,92,122,0.15);
+  --green:#00D4AA;
+  --ff-head:'Syne',sans-serif;
+  --ff-mono:'Geist Mono',monospace;
+  --r:8px;--r-lg:14px;--r-xl:20px;--r-2xl:28px;
+  --t:220ms cubic-bezier(.2,0,.4,1);
+}
+
+/* ═══════════════════════════════
+   RESET
+═══════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{font-family:var(--ff-head);background:var(--bg);color:var(--ink);min-height:100dvh;overflow-x:hidden;cursor:none}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--ff-head);cursor:none}
+input,textarea{font-family:var(--ff-head)}
+svg{display:block}
+
+/* ═══════════════════════════════
+   CUSTOM CURSOR
+═══════════════════════════════ */
+#cursor{position:fixed;width:12px;height:12px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .1s,background .2s,width .25s,height .25s;mix-blend-mode:screen}
+#cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(0,212,170,0.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:transform .25s cubic-bezier(.2,0,.4,1),width .3s,height .3s,opacity .3s,border-color .3s}
+body:has(button:hover) #cursor,
+body:has(a:hover) #cursor{width:20px;height:20px;background:rgba(0,212,170,0.4)}
+body:has(button:hover) #cursor-ring,
+body:has(a:hover) #cursor-ring{width:56px;height:56px;border-color:var(--accent)}
+
+/* ═══════════════════════════════
+   SCREENS
+═══════════════════════════════ */
+.screen{display:none;position:fixed;inset:0;overflow:hidden}
+.screen.active{display:flex}
+
+/* ═══════════════════════════════
+   PARTICLE CANVAS BG
+═══════════════════════════════ */
+#bg-canvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.6}
+
+/* ═══════════════════════════════
+   UPLOAD SCREEN
+═══════════════════════════════ */
+#upload-screen{
+  align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(124,92,255,0.12) 0%,transparent 60%),
+             radial-gradient(ellipse 60% 40% at 80% 80%,rgba(0,212,170,0.08) 0%,transparent 50%),
+             var(--bg)
+}
+
+.up-shell{
+  position:relative;z-index:2;
+  width:100%;max-width:520px;
+  padding:0 24px;
+  display:flex;flex-direction:column;align-items:center;gap:40px;
+}
+
+/* Logo */
+.up-logo{display:flex;align-items:center;gap:12px}
+.up-logo-mark{
+  width:40px;height:40px;border-radius:12px;
+  background:linear-gradient(135deg,var(--purple),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 30px rgba(124,92,255,0.4)
+}
+.up-logo-name{font-size:20px;font-weight:700;letter-spacing:-.5px}
+.up-logo-tag{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--accent);border:1px solid var(--accent-dim);padding:2px 7px;border-radius:5px}
+
+/* Hero */
+.up-hero{text-align:center}
+.up-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--ink-30);margin-bottom:20px
+}
+.up-pulse{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--accent-glow)}50%{box-shadow:0 0 0 8px rgba(0,212,170,0)}}
+.up-h1{
+  font-size:clamp(36px,6vw,56px);
+  font-weight:800;
+  line-height:1.1;
+  letter-spacing:-1.5px;
+  color:var(--ink)
+}
+.up-h1 em{
+  font-style:normal;
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text
+}
+.up-sub{margin-top:14px;font-size:15px;color:var(--ink-60);line-height:1.7;font-weight:400}
+
+/* Upload card */
+.up-card{
+  width:100%;
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:var(--r-2xl);
+  overflow:hidden;
+  backdrop-filter:blur(20px);
+  box-shadow:0 0 0 1px rgba(0,0,0,.3),0 40px 80px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+/* Tab row */
+.up-tabs{display:flex;border-bottom:1px solid var(--border)}
+.utab{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:14px 16px;background:transparent;border:none;
+  font-family:var(--ff-head);font-size:13px;font-weight:500;
+  color:var(--ink-30);transition:all var(--t);border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.utab:hover{color:var(--ink-60);background:var(--ink-06)}
+.utab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--accent-dim)}
+
+/* Panels */
+.upanel{display:none;padding:24px}
+.upanel.active{display:block}
+
+/* Drop zone */
+.drop-zone{
+  border:1.5px dashed var(--border-hi);
+  border-radius:var(--r-xl);
+  padding:40px 24px;
+  text-align:center;
+  transition:all var(--t)
+}
+.drop-zone.drag-over{border-color:var(--accent);background:var(--accent-dim)}
+.dz-icon{
+  width:56px;height:56px;margin:0 auto 16px;
+  border-radius:50%;background:var(--ink-06);
+  display:flex;align-items:center;justify-content:center;color:var(--ink-30)
+}
+.dz-title{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.dz-sub{font-size:12px;color:var(--ink-30);margin-bottom:20px}
+.dz-btn{
+  display:inline-block;padding:9px 22px;
+  background:var(--glass);border:1px solid var(--border-hi);
+  border-radius:100px;font-size:13px;font-weight:600;color:var(--ink);
+  transition:all var(--t);
+}
+.dz-btn:hover{background:var(--glass-hover);border-color:var(--accent);color:var(--accent)}
+
+.up-textarea{
+  width:100%;background:var(--ink-06);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:14px 16px;
+  font-family:var(--ff-head);font-size:13.5px;color:var(--ink);
+  resize:vertical;line-height:1.6;transition:border-color var(--t)
+}
+.up-textarea::placeholder{color:var(--ink-30)}
+.up-textarea:focus{outline:none;border-color:var(--accent)}
+
+/* Analyze button */
+.analyze-btn{
+  position:relative;width:calc(100% - 48px);margin:0 24px 24px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:15px;
+  background:linear-gradient(135deg,var(--accent) 0%,rgba(0,180,140,1) 100%);
+  border:none;border-radius:var(--r-xl);
+  font-family:var(--ff-head);font-size:15px;font-weight:700;color:#000;
+  overflow:hidden;transition:all var(--t);
+  box-shadow:0 0 30px var(--accent-glow),0 8px 20px rgba(0,0,0,.3)
+}
+.analyze-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.2) 50%,transparent 100%);
+  transform:translateX(-100%);transition:transform .6s ease
+}
+.analyze-btn:hover::before{transform:translateX(100%)}
+.analyze-btn:hover{transform:translateY(-2px);box-shadow:0 0 50px var(--accent-glow),0 12px 30px rgba(0,0,0,.4)}
+.analyze-btn:disabled{opacity:.5;pointer-events:none}
+
+.up-note{text-align:center;font-size:11.5px;color:var(--ink-30);padding-bottom:20px}
+
+/* File chip */
+.file-chip{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;background:var(--accent-dim);
+  border:1px solid rgba(0,212,170,.25);border-radius:var(--r-lg);
+  font-size:12.5px;color:var(--accent);font-weight:500;
+  max-width:100%;overflow:hidden;margin-top:12px
+}
+.file-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-chip-img{width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0}
+
+
+/* ═══════════════════════════════
+   LOADING SCREEN
+═══════════════════════════════ */
+#loading-screen{
+  align-items:center;justify-content:center;flex-direction:column;
+  background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(0,212,170,0.06) 0%,transparent 60%),var(--bg)
+}
+.load-orb-wrap{position:relative;width:120px;height:120px;margin-bottom:32px}
+.load-ring{
+  position:absolute;border-radius:50%;border:1px solid var(--accent);
+  animation:lring 2.5s ease-in-out infinite
+}
+.r1{inset:0;opacity:.3}
+.r2{inset:14px;opacity:.5;animation-delay:.5s}
+.r3{inset:28px;opacity:.7;animation-delay:1s}
+@keyframes lring{0%,100%{transform:scale(.95);opacity:.2}50%{transform:scale(1.05);opacity:.7}}
+.load-core{
+  position:absolute;inset:42px;
+  background:radial-gradient(circle,rgba(0,212,170,0.3),rgba(0,212,170,0.05));
+  border-radius:50%;border:1px solid var(--accent);
+  display:flex;align-items:center;justify-content:center;color:var(--accent);z-index:1
+}
+.load-title{font-size:22px;font-weight:700;letter-spacing:-.5px;color:var(--ink);margin-bottom:8px;text-align:center}
+.load-sub{font-size:13px;color:var(--ink-60);text-align:center;max-width:240px;animation:text-cycle 2.5s ease-in-out infinite}
+@keyframes text-cycle{0%,100%{opacity:.5}50%{opacity:1}}
+.load-bar-wrap{width:240px;height:2px;background:var(--border);border-radius:1px;margin:20px auto 0;overflow:hidden}
+.load-bar{height:100%;background:var(--accent);border-radius:1px;width:0%;transition:width 2.5s ease}
+.load-steps{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+.lstep{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-30)}
+.lstep.active{color:var(--accent)}
+.lstep.done .ls-dot{background:var(--accent)}
+.ls-dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background var(--t)}
+.lstep.active .ls-dot{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+
+
+/* ═══════════════════════════════
+   DASHBOARD SCREEN
+═══════════════════════════════ */
+#results-screen{flex-direction:column}
+
+/* ── Header ── */
+.dash-hdr{
+  position:relative;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;height:52px;
+  background:rgba(6,8,22,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0
+}
+.dash-hdr-l{display:flex;align-items:center;gap:12px}
+.dash-back{
+  width:30px;height:30px;border-radius:var(--r);
+  background:transparent;border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink-60);transition:all var(--t);
+}
+.dash-back:hover{background:var(--glass-hover);color:var(--ink);border-color:var(--border-hi)}
+.dash-logo{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700}
+.dash-logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+.dash-logo-tag{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--accent);border:1px solid var(--accent-dim);padding:2px 5px;border-radius:4px}
+.dash-sep{width:1px;height:20px;background:var(--border)}
+.dash-title{font-size:13px;color:var(--ink-60);font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-hdr-r{display:flex;align-items:center;gap:8px}
+.hdr-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 12px;background:transparent;border:1px solid var(--border);
+  border-radius:var(--r);font-size:12px;font-weight:500;color:var(--ink-60);
+  transition:all var(--t)
+}
+.hdr-btn:hover{background:var(--glass-hover);color:var(--ink);border-color:var(--border-hi)}
+.hdr-btn.accent{background:var(--accent-dim);border-color:rgba(0,212,170,.3);color:var(--accent)}
+.hdr-btn.accent:hover{background:rgba(0,212,170,.25)}
+
+/* ── Body ── */
+.dash-body{
+  flex:1;
+  display:grid;
+  grid-template-columns:280px 1fr 320px;
+  gap:0;
+  min-height:0;
+  overflow:hidden
+}
+
+/* ═══════════════════════════════
+   LEFT PANEL
+═══════════════════════════════ */
+.left-panel{
+  display:flex;flex-direction:column;gap:10px;
+  padding:16px;overflow-y:auto;
+  border-right:1px solid var(--border);
+  scrollbar-width:none
+}
+.left-panel::-webkit-scrollbar{display:none}
+
+/* Panel cards */
+.pc{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:16px;
+  transition:border-color var(--t),background var(--t)
+}
+.pc:hover{border-color:var(--border-hi);background:var(--glass-hover)}
+.pc-label{
+  font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--ink-30);margin-bottom:12px;display:flex;align-items:center;gap:6px
+}
+
+/* Risk gauge */
+.risk-card{position:relative;overflow:hidden}
+.risk-card::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,212,170,0.06),transparent);
+  pointer-events:none
+}
+.gauge-wrap{margin:-8px -8px 8px}
+.gauge-svg{width:100%}
+.gauge-num-text{
+  font-family:var(--ff-head);font-size:32px;font-weight:800;
+  fill:var(--ink);dominant-baseline:middle;text-anchor:middle
+}
+.gauge-den-text{font-family:var(--ff-head);font-size:11px;fill:var(--ink-30);text-anchor:middle}
+#gauge-arc{transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)}
+.risk-eyebrow{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink-30)}
+.risk-level-text{font-size:18px;font-weight:700;color:var(--ink);margin:4px 0 8px;letter-spacing:-.3px}
+.risk-badge{
+  display:inline-block;padding:4px 12px;border-radius:100px;
+  font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  background:var(--glass);color:var(--ink-60)
+}
+.risk-badge.low{background:rgba(0,212,170,.2);color:var(--accent)}
+.risk-badge.moderate{background:var(--warn-dim);color:var(--warn)}
+.risk-badge.high{background:var(--red-dim);color:var(--red)}
+.risk-reason{font-size:12px;color:var(--ink-60);line-height:1.6;margin-top:10px}
+
+/* Summary */
+.summary-text{font-size:13px;color:var(--ink-60);line-height:1.7}
+
+/* Stat rows */
+.stat-rows{display:flex;flex-direction:column;gap:8px}
+.stat-row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:var(--r);
+  background:var(--ink-06);transition:background var(--t)
+}
+.stat-row:hover{background:var(--glass-hover)}
+.stat-ic{width:28px;height:28px;border-radius:var(--r);display:flex;align-items:center;justify-content:center}
+.stat-lbl{flex:1;font-size:12.5px;color:var(--ink-60);font-weight:500}
+.stat-val{font-size:13px;font-weight:700;color:var(--ink);font-family:var(--ff-mono)}
+
+/* Action buttons */
+.action-btns{display:flex;flex-direction:column;gap:8px}
+.act-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);
+  background:transparent;font-size:13px;font-weight:500;color:var(--ink-60);
+  transition:all var(--t)
+}
+.act-btn:hover{background:var(--glass-hover);color:var(--ink);border-color:var(--border-hi)}
+.act-btn.primary{
+  background:var(--accent-dim);border-color:rgba(0,212,170,.3);color:var(--accent)
+}
+.act-btn.primary:hover{background:rgba(0,212,170,.25)}
+
+/* Specialists chips */
+.spec-chips{display:flex;flex-wrap:wrap;gap:6px}
+.spec-chip{
+  padding:5px 12px;border-radius:100px;
+  border:1px solid var(--border);background:var(--glass);
+  font-size:12px;font-weight:500;color:var(--ink-60);
+  transition:all var(--t)
+}
+.spec-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+
+
+/* ═══════════════════════════════
+   CENTER PANEL
+═══════════════════════════════ */
+.center-panel{
+  display:flex;flex-direction:column;
+  overflow:hidden;position:relative
+}
+
+/* Body viz */
+.body-viz{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;position:relative;min-height:0;
+  background:radial-gradient(ellipse 60% 70% at 50% 50%,rgba(124,92,255,0.04),transparent)
+}
+.body-viz-label{
+  position:absolute;top:16px;left:16px;
+  display:flex;align-items:center;gap:6px;
+  font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--ink-30)
+}
+.anatomy-svg{width:auto;height:min(380px,calc(100% - 40px));max-width:180px}
+.body-hint{
+  position:absolute;bottom:16px;left:0;right:0;text-align:center;
+  font-size:12px;color:var(--ink-30)
+}
+
+/* Organ styles */
+.organ{cursor:none;transition:all .3s ease}
+.organ.active{animation:organ-pulse 2s ease-in-out infinite}
+@keyframes organ-pulse{0%,100%{opacity:.6}50%{opacity:1}}
+
+/* Body shape */
+.body-shape path,.body-shape ellipse{
+  fill:rgba(255,255,255,0.02);
+  stroke:rgba(255,255,255,0.12);
+  stroke-width:1
+}
+
+/* Organ tooltip */
+.organ-tt{
+  position:fixed;pointer-events:none;z-index:200;
+  background:var(--bg-3);border:1px solid var(--border-hi);
+  border-radius:var(--r);padding:6px 12px;
+  font-size:12px;font-weight:600;color:var(--ink);
+  box-shadow:0 8px 30px rgba(0,0,0,.5);
+  opacity:0;transform:translateY(4px);transition:all .15s ease
+}
+.organ-tt.show{opacity:1;transform:translateY(0)}
+
+/* Findings section */
+.findings-section{
+  border-top:1px solid var(--border);
+  padding:12px 16px;
+  flex-shrink:0
+}
+.findings-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.findings-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink-30);display:flex;align-items:center;gap:6px}
+.findings-count{
+  font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;
+  background:var(--red-dim);color:var(--red)
+}
+.findings-grid{
+  display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;
+  scrollbar-width:none
+}
+.findings-grid::-webkit-scrollbar{display:none}
+
+/* Finding chips */
+.f-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:var(--r-lg);border:1px solid var(--border);
+  background:var(--glass);flex-shrink:0;
+  transition:all var(--t);cursor:none;
+}
+.f-chip:hover{transform:translateY(-2px);border-color:var(--border-hi);background:var(--glass-hover)}
+.f-chip-name{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap}
+.f-chip-val{font-size:11px;color:var(--ink-60);font-family:var(--ff-mono);white-space:nowrap}
+.f-chip-status{
+  font-size:10px;font-weight:700;letter-spacing:.5px;
+  padding:2px 7px;border-radius:100px
+}
+.st-high .f-chip-status,.st-abnormal .f-chip-status{background:var(--red-dim);color:var(--red)}
+.st-high{border-color:rgba(255,92,122,.25);background:rgba(255,92,122,.04)}
+.st-moderate .f-chip-status,.st-borderline .f-chip-status{background:var(--warn-dim);color:var(--warn)}
+.st-moderate{border-color:rgba(255,181,71,.25);background:rgba(255,181,71,.04)}
+.st-normal .f-chip-status{background:rgba(0,212,170,.15);color:var(--accent)}
+.st-normal{border-color:rgba(0,212,170,.2)}
+.st-low .f-chip-status{background:var(--purple-dim);color:var(--purple)}
+
+
+/* ═══════════════════════════════
+   RIGHT PANEL — MEDDIE
+═══════════════════════════════ */
+.right-panel{
+  display:flex;flex-direction:column;
+  border-left:1px solid var(--border);
+  overflow:hidden
+}
+.meddie-hdr{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;border-bottom:1px solid var(--border);
+  flex-shrink:0
+}
+.meddie-av{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--purple),var(--accent));
+  display:flex;align-items:center;justify-content:center;color:#000;
+  box-shadow:0 0 20px rgba(124,92,255,0.3)
+}
+.meddie-name{font-size:14px;font-weight:700}
+.meddie-ai-tag{font-size:9px;font-weight:700;letter-spacing:.8px;color:var(--purple);border:1px solid var(--purple-dim);padding:1px 5px;border-radius:4px}
+.meddie-status{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-30)}
+.online-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2.5s infinite}
+
+.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.chat-msgs::-webkit-scrollbar{width:4px}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+.chat-msg{display:flex;gap:8px;animation:msg-in .25s ease}
+.chat-msg--user{flex-direction:row-reverse}
+@keyframes msg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg-av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:8px;font-weight:700}
+.chat-msg--ai .msg-av{background:linear-gradient(135deg,var(--purple),var(--accent));color:#000}
+.chat-msg--user .msg-av{background:var(--ink-12);color:var(--ink-60)}
+.msg-bubble{
+  max-width:82%;padding:10px 14px;border-radius:14px;
+  font-size:13px;line-height:1.65
+}
+.chat-msg--ai .msg-bubble{
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:4px 14px 14px 14px;color:var(--ink-60)
+}
+.chat-msg--user .msg-bubble{
+  background:var(--ink-12);border:1px solid var(--border-hi);
+  border-radius:14px 4px 14px 14px;color:var(--ink)
+}
+.typing-bubble{
+  display:flex;align-items:center;gap:4px;
+  padding:12px 14px;background:var(--glass);border:1px solid var(--border);
+  border-radius:4px 14px 14px 14px;width:fit-content
+}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--ink-30);animation:tdot 1.2s infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}
+.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+
+.chat-starters{padding:0 12px 10px;display:flex;gap:6px;flex-wrap:wrap}
+.starter{
+  background:var(--glass);border:1px solid var(--border);border-radius:100px;
+  padding:6px 12px;font-size:11.5px;color:var(--ink-60);
+  font-family:var(--ff-head);transition:all var(--t)
+}
+.starter:hover{background:var(--glass-hover);border-color:var(--accent);color:var(--accent)}
+
+.chat-input-wrap{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0
+}
+.chat-input{
+  flex:1;background:var(--glass);border:1px solid var(--border);
+  border-radius:100px;padding:9px 16px;
+  font-family:var(--ff-head);font-size:13px;color:var(--ink);outline:none;
+  transition:all var(--t)
+}
+.chat-input::placeholder{color:var(--ink-30)}
+.chat-input:focus{border-color:var(--accent)}
+.chat-send{
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),rgba(0,180,140,1));
+  border:none;color:#000;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all var(--t);box-shadow:0 0 15px var(--accent-glow)
+}
+.chat-send:hover{transform:scale(1.1)}
+.chat-send:disabled{opacity:.4}
+
+
+/* ═══════════════════════════════
+   MODALS
+═══════════════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:fade-in .2s ease
+}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+.modal-box{
+  width:100%;max-width:520px;max-height:80vh;
+  background:var(--bg-3);border:1px solid var(--border-hi);
+  border-radius:var(--r-2xl);overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 40px 80px rgba(0,0,0,.6);
+  animation:modal-in .3s cubic-bezier(.2,0,.4,1)
+}
+@keyframes modal-in{from{opacity:0;transform:scale(.97) translateY(10px)}to{opacity:1;transform:none}}
+.modal-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px;border-bottom:1px solid var(--border)
+}
+.modal-hdr h3{font-size:16px;font-weight:700}
+.modal-close{
+  width:30px;height:30px;border-radius:var(--r);background:var(--glass);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;color:var(--ink-60);
+  transition:all var(--t)
+}
+.modal-close:hover{background:var(--glass-hover);color:var(--ink)}
+.modal-body{flex:1;overflow-y:auto;padding:16px 20px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+
+/* Doctor modal */
+.doc-search-row{display:flex;gap:10px;margin-bottom:16px}
+.doc-input-wrap{
+  flex:1;display:flex;align-items:center;gap:8px;
+  background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);padding:0 14px
+}
+.doc-input-wrap:focus-within{border-color:var(--accent)}
+.doc-input{flex:1;background:transparent;border:none;padding:11px 0;font-size:13.5px;color:var(--ink);outline:none;font-family:var(--ff-head)}
+.doc-input::placeholder{color:var(--ink-30)}
+.doctor-card{
+  display:flex;gap:14px;padding:16px;border-radius:var(--r-xl);
+  background:var(--glass);border:1px solid var(--border);
+  margin-bottom:10px;transition:all var(--t)
+}
+.doctor-card:hover{border-color:var(--border-hi);background:var(--glass-hover);transform:translateX(3px)}
+.doc-av{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--purple),var(--accent));
+  color:#000;font-size:14px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0
+}
+.doc-name{font-size:13.5px;font-weight:600;margin-bottom:2px}
+.doc-spec{font-size:12px;color:var(--accent);margin-bottom:4px}
+.doc-addr{font-size:12px;color:var(--ink-30)}
+.doc-links{display:flex;gap:6px;margin-top:8px}
+.doc-link{
+  font-size:11.5px;color:var(--accent);padding:3px 10px;
+  border:1px solid rgba(0,212,170,.25);border-radius:100px;transition:background var(--t)
+}
+.doc-link:hover{background:var(--accent-dim)}
+.modal-empty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px;color:var(--ink-30);text-align:center;font-size:13px}
+
+/* Lifestyle items */
+.lifestyle-item{
+  display:flex;gap:12px;padding:14px 16px;
+  border-radius:var(--r-lg);border:1px solid var(--border);background:var(--glass);
+  margin-bottom:10px;transition:all var(--t)
+}
+.lifestyle-item:hover{border-color:var(--border-hi);background:var(--glass-hover)}
+.ls-icon{font-size:22px;flex-shrink:0}
+.ls-cat{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-30);margin-bottom:2px}
+.ls-text{font-size:13px;color:var(--ink-60);line-height:1.5}
+
+/* Questions */
+.questions-list{list-style:none;counter-reset:qc;display:flex;flex-direction:column;gap:10px}
+.question-item{
+  display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
+  background:var(--glass);border:1px solid var(--border);border-radius:var(--r-lg);
+  font-size:13.5px;color:var(--ink-60);line-height:1.6;counter-increment:qc;
+  transition:all var(--t)
+}
+.question-item::before{
+  content:counter(qc);min-width:22px;height:22px;border-radius:50%;
+  background:var(--ink-06);color:var(--ink);font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+  border:1px solid var(--border)
+}
+.question-item:hover{border-color:var(--border-hi);background:var(--glass-hover)}
+
+/* History */
+.hist-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;backdrop-filter:blur(4px)}
+.hist-panel{
+  position:fixed;top:0;right:0;bottom:0;width:340px;
+  background:var(--bg-3);border-left:1px solid var(--border-hi);
+  z-index:301;display:flex;flex-direction:column;
+  box-shadow:-20px 0 60px rgba(0,0,0,.4);
+  animation:slide-left .25s ease
+}
+@keyframes slide-left{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.hist-hdr{display:flex;align-items:center;justify-content:space-between;padding:20px;border-bottom:1px solid var(--border)}
+.hist-hdr h3{font-size:15px;font-weight:700}
+.hist-body{flex:1;overflow-y:auto;padding:12px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.hist-item{
+  padding:14px 16px;border-radius:var(--r-lg);border:1px solid var(--border);
+  background:var(--glass);cursor:none;margin-bottom:10px;transition:all var(--t)
+}
+.hist-item:hover{border-color:var(--accent);background:var(--accent-dim)}
+.hist-item-title{font-size:13.5px;font-weight:600;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-item-meta{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.hist-item-sum{font-size:12px;color:var(--ink-30);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rc{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;text-transform:uppercase}
+.rc-low{background:var(--accent-dim);color:var(--accent)}
+.rc-moderate{background:var(--warn-dim);color:var(--warn)}
+.rc-high{background:var(--red-dim);color:var(--red)}
+.rc-unknown{background:var(--glass);color:var(--ink-30)}
+
+/* Pill button */
+.pill-btn{
+  padding:9px 20px;border-radius:100px;
+  background:var(--accent-dim);border:1px solid rgba(0,212,170,.3);
+  color:var(--accent);font-size:13px;font-weight:600;
+  transition:all var(--t)
+}
+.pill-btn:hover{background:rgba(0,212,170,.25)}
+
+/* Spinner */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin .8s linear infinite}
+
+/* Empty */
+.empty-state{display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px 20px;color:var(--ink-30);text-align:center;font-size:13px}
+
+/* Error toast */
+.err-toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--red);color:#fff;padding:12px 20px;
+  border-radius:var(--r-lg);font-size:13.5px;font-weight:600;
+  box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:9999;max-width:90vw;text-align:center;
+  animation:toast-in .3s ease
+}
+@keyframes toast-in{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+
+/* ═══════════════════════════════
+   RESPONSIVE
+═══════════════════════════════ */
+@media(max-width:1100px){
+  .dash-body{grid-template-columns:260px 1fr 300px}
+}
+@media(max-width:900px){
+  .dash-body{grid-template-columns:240px 1fr}
+  .right-panel{display:none}
+}
+@media(max-width:640px){
+  .dash-body{grid-template-columns:1fr}
+  .left-panel{display:none}
+  #cursor,#cursor-ring{display:none}
+  body{cursor:auto}button{cursor:pointer}
+}
+@media print{
+  #cursor,#cursor-ring,#bg-canvas{display:none!important}
+  .dash-hdr .dash-hdr-r{display:none}
+}
+</style>
 </head>
 <body>
 
-<!-- Cursor glow -->
-<div id="cursor-glow"></div>
-
-<!-- Particle background -->
+<!-- Cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
 <canvas id="bg-canvas"></canvas>
+<div id="organ-tt" class="organ-tt"></div>
 
-<!-- Organ tooltip -->
-<div id="organ-tooltip" class="organ-tooltip">
-  <span id="organ-tooltip-name"></span>
-</div>
-
-<!-- ═══════════════════════════════════════
+<!-- ═══════════════════════════════
      UPLOAD SCREEN
-═══════════════════════════════════════ -->
+═══════════════════════════════ -->
 <div id="upload-screen" class="screen active">
-  <canvas id="dna-canvas" class="dna-canvas"></canvas>
-
-  <div class="upload-container">
-    <div class="upload-logo">
-      <div class="upload-logo-icon">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10 2C10 2 17 6.5 17 10C17 13.5 10 18 10 18C10 18 3 13.5 3 10C3 6.5 10 2 10 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-          <path d="M6 10h8M10 6v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <div class="up-shell">
+    <div class="up-logo">
+      <div class="up-logo-mark">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+          <path d="M11 2C11 2 19 6.5 19 11C19 15.5 11 20 11 20C11 20 3 15.5 3 11C3 6.5 11 2Z" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M7 11h8M11 7v8" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
       </div>
-      <span class="upload-logo-name">MedClear</span>
-      <span class="upload-logo-tag">AI</span>
+      <span class="up-logo-name">MedClear</span>
+      <span class="up-logo-tag">AI</span>
     </div>
 
-    <div class="upload-card">
-      <div class="upload-card-glow"></div>
-      <div class="upload-card-inner">
-        <div class="upload-headline">
-          <h1>Understand your<br/><em>medical reports</em><br/>in seconds.</h1>
-          <p>AI-powered analysis. Plain language. Instant insights.</p>
-        </div>
+    <div class="up-hero">
+      <div class="up-eyebrow"><span class="up-pulse"></span>AI-Powered Medical Analysis</div>
+      <h1 class="up-h1">Understand your<br/><em>medical reports</em><br/>in seconds.</h1>
+      <p class="up-sub">Upload any lab report or paste text. Get instant AI analysis, risk assessment, and plain-language explanations.</p>
+    </div>
 
-        <div class="upload-tabs">
-          <button class="utab active" data-panel="file">
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            Upload File
-          </button>
-          <button class="utab" data-panel="text">
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 5.5h6M5 8.5h6M5 11.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            Paste Text
-          </button>
-        </div>
-
-        <div class="upanel active" id="upanel-file">
-          <div class="drop-zone" id="drop-zone">
-            <div class="drop-zone-ring"></div>
-            <div class="drop-zone-content">
-              <div class="drop-icon">
-                <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect x="6" y="3" width="20" height="26" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M11 13h10M11 18h7M11 23h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M21 3v8h8" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-              </div>
-              <p class="drop-title">Drop your report here</p>
-              <p class="drop-sub">PDF · JPG · PNG · WEBP · TXT</p>
-              <label class="upload-file-btn" for="file-input">Choose File</label>
-              <input type="file" id="file-input" accept=".pdf,.txt,.jpg,.jpeg,.png,.webp,.bmp" hidden/>
-            </div>
-          </div>
-        </div>
-
-        <div class="upanel" id="upanel-text">
-          <textarea id="report-text" class="upload-textarea" placeholder="Paste your lab results, discharge summary, blood test report, or any medical text…" rows="5"></textarea>
-        </div>
-
-        <button class="analyze-btn" id="analyze-btn">
-          <div class="analyze-btn-bg"></div>
-          <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.3"/><path d="M9 5v4l3 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span>Analyze Report</span>
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" class="btn-arr"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div class="up-card">
+      <div class="up-tabs">
+        <button class="utab active" data-panel="file">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Upload File
         </button>
-
-        <p class="upload-note">Educational purposes only · Not a medical diagnosis</p>
+        <button class="utab" data-panel="text">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 5.5h6M5 8.5h6M5 11.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Paste Text
+        </button>
       </div>
-    </div>
 
-    <div class="upload-features">
-      <div class="uf-item"><span class="uf-dot"></span>AI Analysis in seconds</div>
-      <div class="uf-item"><span class="uf-dot" style="background:var(--purple)"></span>Organ body map</div>
-      <div class="uf-item"><span class="uf-dot" style="background:var(--warn)"></span>Find specialists nearby</div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════
-     LOADING SCREEN
-═══════════════════════════════════════ -->
-<div id="loading-screen" class="screen">
-  <div class="loading-wrap">
-    <canvas id="loading-dna" class="loading-dna"></canvas>
-    <div class="loading-info">
-      <div class="loading-orb">
-        <div class="lorb-ring r1"></div>
-        <div class="lorb-ring r2"></div>
-        <div class="lorb-ring r3"></div>
-        <div class="lorb-core">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3C12 3 20 7.5 20 12C20 16.5 12 21 12 21C12 21 4 16.5 4 12C4 7.5 12 3 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      <div class="upanel active" id="upanel-file">
+        <div class="drop-zone" id="drop-zone">
+          <div class="dz-icon">
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect x="6" y="3" width="20" height="26" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M11 13h10M11 18h7M11 23h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M21 3v8h8" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          </div>
+          <p class="dz-title">Drop your report here</p>
+          <p class="dz-sub">PDF · JPG · PNG · WEBP · TXT</p>
+          <label class="dz-btn" for="file-input">Choose File</label>
+          <input type="file" id="file-input" accept=".pdf,.txt,.jpg,.jpeg,.png,.webp,.bmp" hidden/>
         </div>
       </div>
-      <h2 class="loading-title">Analyzing your report</h2>
-      <p class="loading-sub" id="loading-sub-text">Reading values and cross-referencing…</p>
-      <div class="loading-progress">
-        <div class="lp-bar" id="lp-bar"></div>
+
+      <div class="upanel" id="upanel-text">
+        <textarea id="report-text" class="up-textarea" rows="5" placeholder="Paste your lab results, discharge summary, blood test report…"></textarea>
       </div>
-      <div class="loading-steps">
-        <div class="lstep active" id="lstep-0"><div class="ls-dot"></div><span>Extract data</span></div>
-        <div class="lstep" id="lstep-1"><div class="ls-dot"></div><span>AI analysis</span></div>
-        <div class="lstep" id="lstep-2"><div class="ls-dot"></div><span>Generate insights</span></div>
-      </div>
+
+      <button class="analyze-btn" id="analyze-btn">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.3"/><path d="M9 5.5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <span>Analyze Report</span>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <p class="up-note">Educational purposes only · Not a medical diagnosis</p>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
+<!-- ═══════════════════════════════
+     LOADING SCREEN
+═══════════════════════════════ -->
+<div id="loading-screen" class="screen">
+  <div class="load-orb-wrap">
+    <div class="load-ring r1"></div>
+    <div class="load-ring r2"></div>
+    <div class="load-ring r3"></div>
+    <div class="load-core">
+      <svg width="18" height="18" viewBox="0 0 22 22" fill="none">
+        <path d="M11 2C11 2 19 6.5 19 11C19 15.5 11 20 11 20C11 20 3 15.5 3 11C3 6.5 11 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+  <h2 class="load-title">Analyzing your report</h2>
+  <p class="load-sub" id="load-sub">Reading values and cross-referencing…</p>
+  <div class="load-bar-wrap"><div class="load-bar" id="load-bar"></div></div>
+  <div class="load-steps">
+    <div class="lstep active" id="lstep-0"><div class="ls-dot"></div><span>Extract data</span></div>
+    <div class="lstep" id="lstep-1"><div class="ls-dot"></div><span>AI analysis</span></div>
+    <div class="lstep" id="lstep-2"><div class="ls-dot"></div><span>Generate insights</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
      DASHBOARD SCREEN
-═══════════════════════════════════════ -->
+═══════════════════════════════ -->
 <div id="results-screen" class="screen">
 
-  <!-- Dashboard Header -->
-  <header class="dash-header">
-    <div class="dash-header-left">
+  <!-- Header -->
+  <header class="dash-hdr">
+    <div class="dash-hdr-l">
       <button class="dash-back" id="back-btn">
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="dash-logo">
         <span class="dash-logo-dot"></span>
         MedClear
         <span class="dash-logo-tag">AI</span>
       </div>
-      <div class="dash-divider"></div>
-      <span class="dash-report-title" id="dash-report-title">Medical Report</span>
+      <div class="dash-sep"></div>
+      <span class="dash-title" id="dash-title">Medical Report</span>
     </div>
-    <div class="dash-header-right">
+    <div class="dash-hdr-r">
       <button class="hdr-btn" id="history-btn">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         History
       </button>
+      <button class="hdr-btn" id="lifestyle-btn">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2c-1.5 2-4 3-4 6a4 4 0 008 0c0-3-2.5-4-4-6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        Lifestyle
+      </button>
+      <button class="hdr-btn" id="questions-btn">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 110 12A6 6 0 018 2z" stroke="currentColor" stroke-width="1.3"/><path d="M6 6.5c0-1.1.9-2 2-2s2 .9 2 2c0 1-.7 1.5-1.5 1.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Questions
+      </button>
+      <button class="hdr-btn accent" id="doctors-btn">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM3 14c0-2.2 2.2-4 5-4s5 1.8 5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Find Doctors
+      </button>
       <button class="hdr-btn" id="download-btn">
-        <svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M7.5 2v8M4.5 7l3 3 3-3M2.5 12.5h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="13" height="13" viewBox="0 0 15 15" fill="none"><path d="M7.5 2v8M4.5 7l3 3 3-3M2.5 12.5h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Export PDF
       </button>
     </div>
   </header>
 
-  <!-- 3-Panel Dashboard -->
+  <!-- 3-panel body -->
   <div class="dash-body">
 
-    <!-- LEFT PANEL -->
+    <!-- LEFT -->
     <aside class="left-panel">
 
       <!-- Risk Score -->
-      <div class="panel-card risk-card" id="risk-card">
-        <div class="risk-gauge-wrap">
-          <svg viewBox="0 0 200 120" class="risk-gauge-svg">
+      <div class="pc risk-card">
+        <div class="gauge-wrap">
+          <svg viewBox="0 0 200 120" class="gauge-svg">
             <defs>
-              <linearGradient id="ggrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <linearGradient id="gg" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#00D4AA"/>
                 <stop offset="50%" stop-color="#FFB547"/>
                 <stop offset="100%" stop-color="#FF5C7A"/>
               </linearGradient>
             </defs>
-            <path d="M18 104 A82 82 0 0 1 182 104" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="12" stroke-linecap="round"/>
-            <path id="gauge-arc" d="M18 104 A82 82 0 0 1 182 104" fill="none" stroke="url(#ggrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="258" stroke-dashoffset="258"/>
-            <text id="gauge-num" x="100" y="88" text-anchor="middle" class="gauge-num-text">—</text>
-            <text x="100" y="108" text-anchor="middle" class="gauge-den-text">/10</text>
+            <path d="M18 104 A82 82 0 0 1 182 104" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10" stroke-linecap="round"/>
+            <path id="gauge-arc" d="M18 104 A82 82 0 0 1 182 104" fill="none" stroke="url(#gg)" stroke-width="10" stroke-linecap="round" stroke-dasharray="257" stroke-dashoffset="257"/>
+            <text id="gauge-num" x="100" y="86" class="gauge-num-text">—</text>
+            <text x="100" y="106" class="gauge-den-text">/10</text>
           </svg>
         </div>
-        <div class="risk-info">
-          <div class="risk-eyebrow">Risk Assessment</div>
-          <div class="risk-level" id="risk-level-text">—</div>
-          <div class="risk-badge" id="risk-badge">Analyzing…</div>
-        </div>
-        <p class="risk-reason" id="risk-reason-text"></p>
+        <div class="risk-eyebrow">Risk Assessment</div>
+        <div class="risk-level-text" id="risk-level-text">—</div>
+        <span class="risk-badge" id="risk-badge">Analyzing…</span>
+        <p class="risk-reason" id="risk-reason"></p>
       </div>
 
-      <!-- Summary -->
-      <div class="panel-card summary-card">
+      <!-- AI Summary -->
+      <div class="pc">
         <div class="pc-label">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4 5h6M4 8h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
           AI Summary
         </div>
-        <p class="summary-text" id="summary-content">Analyzing your report…</p>
+        <p class="summary-text" id="summary-text">Analyzing your report…</p>
       </div>
 
       <!-- Specialists -->
-      <div class="panel-card" id="specialists-card" style="display:none">
+      <div class="pc" id="specialists-card" style="display:none">
         <div class="pc-label">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM3 14c0-2.2 2.2-4 5-4s5 1.8 5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M12 7h3M13.5 5.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-          Recommended Specialists
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 1.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM2.5 12c0-2 2-3.5 4.5-3.5s4.5 1.5 4.5 3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M10 6h3M11.5 4.5v3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          Specialists
         </div>
-        <div class="specialist-chips" id="specialists-list"></div>
+        <div class="spec-chips" id="specialists-list"></div>
       </div>
 
-      <!-- Quick Stats -->
-      <div class="panel-card stats-card">
-        <div class="stat-row" id="stat-lifestyle">
-          <div class="stat-icon" style="color:var(--accent)">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2c-1.5 2-4 3-4 6a4 4 0 008 0c0-3-2.5-4-4-6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      <!-- Stats -->
+      <div class="pc">
+        <div class="pc-label">Metrics</div>
+        <div class="stat-rows">
+          <div class="stat-row">
+            <div class="stat-ic" style="background:var(--accent-dim);color:var(--accent)">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            </div>
+            <span class="stat-lbl">Findings</span>
+            <span class="stat-val" id="stat-findings">—</span>
           </div>
-          <span class="stat-label">Lifestyle Tips</span>
-          <span class="stat-val" id="lifestyle-count">—</span>
-        </div>
-        <div class="stat-row" id="stat-questions">
-          <div class="stat-icon" style="color:var(--purple)">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 110 12A6 6 0 018 2z" stroke="currentColor" stroke-width="1.3"/><path d="M6 6.5c0-1.1.9-2 2-2s2 .9 2 2c0 1-.7 1.5-1.5 1.8-.4.2-.5.5-.5.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="11" r=".7" fill="currentColor"/></svg>
+          <div class="stat-row">
+            <div class="stat-ic" style="background:var(--warn-dim);color:var(--warn)">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2c-1.5 2-4 3-4 6a4 4 0 008 0c0-3-2.5-4-4-6z" stroke="currentColor" stroke-width="1.3"/></svg>
+            </div>
+            <span class="stat-lbl">Lifestyle Tips</span>
+            <span class="stat-val" id="stat-lifestyle">—</span>
           </div>
-          <span class="stat-label">Doctor Questions</span>
-          <span class="stat-val" id="questions-count">—</span>
-        </div>
-        <div class="stat-row" id="stat-findings">
-          <div class="stat-icon" style="color:var(--warn)">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <div class="stat-row">
+            <div class="stat-ic" style="background:var(--purple-dim);color:var(--purple)">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 110 12A6 6 0 018 2z" stroke="currentColor" stroke-width="1.3"/><path d="M6 6.5c0-1.1.9-2 2-2s2 .9 2 2c0 1-.7 1.5-1.5 1.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            </div>
+            <span class="stat-lbl">Doctor Questions</span>
+            <span class="stat-val" id="stat-questions">—</span>
           </div>
-          <span class="stat-label">Findings</span>
-          <span class="stat-val" id="findings-count">—</span>
         </div>
       </div>
 
       <!-- Actions -->
-      <div class="panel-card actions-card">
-        <button class="action-btn" id="lifestyle-btn">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2c-1.5 2-4 3-4 6a4 4 0 008 0c0-3-2.5-4-4-6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-          View Lifestyle Tips
-        </button>
-        <button class="action-btn" id="questions-btn">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 110 12A6 6 0 018 2z" stroke="currentColor" stroke-width="1.3"/><path d="M6 6.5c0-1.1.9-2 2-2s2 .9 2 2c0 1-.7 1.5-1.5 1.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-          Doctor Questions
-        </button>
-        <button class="action-btn accent-action" id="doctors-btn">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM3 14c0-2.2 2.2-4 5-4s5 1.8 5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-          Find Doctors Nearby
-        </button>
+      <div class="pc">
+        <div class="action-btns">
+          <button class="act-btn" id="act-lifestyle">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2c-1.5 2-4 3-4 6a4 4 0 008 0c0-3-2.5-4-4-6z" stroke="currentColor" stroke-width="1.3"/></svg>
+            View Lifestyle Tips
+          </button>
+          <button class="act-btn" id="act-questions">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 110 12A6 6 0 018 2z" stroke="currentColor" stroke-width="1.3"/><path d="M6 6.5c0-1.1.9-2 2-2s2 .9 2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Doctor Questions
+          </button>
+          <button class="act-btn primary" id="act-doctors">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM3 14c0-2.2 2.2-4 5-4s5 1.8 5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Find Doctors Nearby
+          </button>
+        </div>
       </div>
 
     </aside>
 
-    <!-- CENTER PANEL -->
+    <!-- CENTER -->
     <main class="center-panel">
-
-      <!-- Body visualization -->
-      <div class="body-viz" id="body-viz">
+      <div class="body-viz">
         <div class="body-viz-label">
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1C4 1 2 3 2 5.5c0 3.5 5 7.5 5 7.5s5-4 5-7.5C12 3 10 1 7 1z" stroke="currentColor" stroke-width="1.2"/></svg>
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 1C4 1 2 3 2 5.5c0 3.5 5 7.5 5 7.5s5-4 5-7.5C12 3 10 1 7 1z" stroke="currentColor" stroke-width="1.2"/></svg>
           Affected Areas
         </div>
 
         <svg viewBox="0 0 200 440" class="anatomy-svg" id="body-svg">
           <defs>
             <filter id="oglow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="5" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-            <filter id="body-glow">
-              <feGaussianBlur stdDeviation="2" result="blur"/>
+              <feGaussianBlur stdDeviation="6" result="blur"/>
               <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
 
           <!-- Body silhouette -->
           <g class="body-shape">
-            <!-- Head -->
-            <ellipse cx="100" cy="42" rx="30" ry="34" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
-            <!-- Face details -->
-            <ellipse cx="91" cy="37" rx="3" ry="2" fill="rgba(255,255,255,0.08)"/>
-            <ellipse cx="109" cy="37" rx="3" ry="2" fill="rgba(255,255,255,0.08)"/>
-            <path d="M93 50 Q100 54 107 50" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width=".8" stroke-linecap="round"/>
-            <!-- Ears -->
-            <path d="M70 40 C64 40 62 46 64 52 C66 58 70 58 70 54" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
-            <path d="M130 40 C136 40 138 46 136 52 C134 58 130 58 130 54" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
-            <!-- Neck -->
-            <path d="M88 74 L88 92 Q100 96 112 92 L112 74" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-linejoin="round"/>
-            <!-- Torso + arms + legs -->
-            <path d="M38 94 C22 102 18 120 18 142 L18 216 C18 230 28 240 44 244 L46 258 L46 330 C46 346 50 360 56 370 C60 380 62 396 62 410 L62 440 M162 94 C178 102 182 120 182 142 L182 216 C182 230 172 240 156 244 L154 258 L154 330 C154 346 150 360 144 370 C140 380 138 396 138 410 L138 440 M88 92 Q100 96 112 92 M38 94 C52 86 72 84 100 84 C128 84 148 86 162 94 M44 244 Q72 252 100 252 Q128 252 156 244 M62 440 Q74 444 82 444 Q92 440 100 440 M138 440 Q126 444 118 444 Q108 440 100 440" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-            <!-- Arms -->
-            <path d="M38 94 L22 104 L16 196 L24 216 L36 206 L44 136" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M162 94 L178 104 L184 196 L176 216 L164 206 L156 136" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+            <ellipse cx="100" cy="42" rx="30" ry="34" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+            <ellipse cx="91" cy="37" rx="3" ry="2" fill="rgba(255,255,255,0.06)"/>
+            <ellipse cx="109" cy="37" rx="3" ry="2" fill="rgba(255,255,255,0.06)"/>
+            <path d="M93 50 Q100 54 107 50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width=".8" stroke-linecap="round"/>
+            <path d="M70 40 C64 40 62 46 64 52 C66 58 70 58 70 54" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <path d="M130 40 C136 40 138 46 136 52 C134 58 130 58 130 54" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <path d="M88 74 L88 92 Q100 96 112 92 L112 74" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+            <path d="M38 94 C22 102 18 120 18 142 L18 216 C18 230 28 240 44 244 L46 258 L46 330 C46 346 50 360 56 370 C60 380 62 396 62 410 L62 440 M162 94 C178 102 182 120 182 142 L182 216 C182 230 172 240 156 244 L154 258 L154 330 C154 346 150 360 144 370 C140 380 138 396 138 410 L138 440 M88 92 Q100 96 112 92 M38 94 C52 86 72 84 100 84 C128 84 148 86 162 94 M44 244 Q72 252 100 252 Q128 252 156 244 M62 440 Q74 444 82 444 Q92 440 100 440 M138 440 Q126 444 118 444 Q108 440 100 440" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M38 94 L22 104 L16 196 L24 216 L36 206 L44 136" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M162 94 L178 104 L184 196 L176 216 L164 206 L156 136" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
           </g>
-
-          <!-- Anatomy guide lines -->
-          <g fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.6">
+          <!-- guide lines -->
+          <g fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="0.5">
             <path d="M88 92 Q100 98 112 92"/>
             <path d="M76 114 Q100 120 124 114"/>
             <path d="M70 130 Q100 136 130 130"/>
-            <path d="M68 148 Q100 154 132 148"/>
-            <path d="M70 166 Q100 172 130 166"/>
-            <line x1="100" y1="98" x2="100" y2="250" stroke-dasharray="3,8"/>
+            <line x1="100" y1="98" x2="100" y2="250" stroke-dasharray="3,10"/>
           </g>
 
-          <!-- ORGANS -->
+          <!-- Organs -->
           <ellipse cx="100" cy="33" rx="22" ry="20" class="organ" id="org-brain" data-color="124,92,255" data-name="Brain" fill="transparent" stroke="transparent" stroke-width="1.5"/>
           <ellipse cx="100" cy="86" rx="11" ry="7" class="organ" id="org-thyroid" data-color="255,181,71" data-name="Thyroid" fill="transparent" stroke="transparent" stroke-width="1.5"/>
           <path d="M91 122 C88 115 82 113 80 120 C78 128 84 139 91 147 C98 139 104 128 102 120 C100 113 94 115 91 122Z" class="organ" id="org-heart" data-color="255,92,122" data-name="Heart" fill="transparent" stroke="transparent" stroke-width="1.5"/>
@@ -313,136 +1015,833 @@
           <ellipse cx="76" cy="206" rx="9" ry="13" class="organ" id="org-kidney-l" data-color="124,92,255" data-name="Kidneys" fill="transparent" stroke="transparent" stroke-width="1.5"/>
           <ellipse cx="124" cy="206" rx="9" ry="13" class="organ" id="org-kidney-r" data-color="124,92,255" data-name="Kidneys" fill="transparent" stroke="transparent" stroke-width="1.5"/>
 
-          <!-- Organ labels -->
-          <g class="organ-labels" font-size="7.5" text-anchor="middle" font-family="DM Sans" font-weight="500">
+          <!-- Labels -->
+          <g font-family="'Syne', sans-serif" font-size="7" text-anchor="middle" font-weight="600" fill="rgba(255,255,255,0.6)">
             <text id="lbl-brain"  x="100" y="11" opacity="0">Brain</text>
             <text id="lbl-thyroid" x="100" y="100" opacity="0">Thyroid</text>
-            <text id="lbl-heart"  x="78" y="153" opacity="0">Heart</text>
-            <text id="lbl-lungs"  x="100" y="106" opacity="0">Lungs</text>
-            <text id="lbl-liver"  x="117" y="208" opacity="0">Liver</text>
-            <text id="lbl-stomach" x="86" y="178" opacity="0">Pancreas</text>
-            <text id="lbl-kidneys" x="100" y="224" opacity="0">Kidneys</text>
+            <text id="lbl-heart"  x="76" y="155" opacity="0">Heart</text>
+            <text id="lbl-lungs"  x="100" y="104" opacity="0">Lungs</text>
+            <text id="lbl-liver"  x="118" y="208" opacity="0">Liver</text>
+            <text id="lbl-stomach" x="86" y="176" opacity="0">Pancreas</text>
+            <text id="lbl-kidneys" x="100" y="225" opacity="0">Kidneys</text>
           </g>
         </svg>
-
         <p class="body-hint" id="body-hint">Analyze a report to see affected areas</p>
       </div>
 
-      <!-- Findings chips -->
+      <!-- Findings chips bar -->
       <div class="findings-section">
-        <div class="findings-header">
-          <span class="findings-label">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <div class="findings-hdr">
+          <span class="findings-lbl">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.2"/><path d="M7 1.5v2M7 10.5v2M1.5 7h2M10.5 7h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
             Key Findings
           </span>
-          <span class="findings-count-chip" id="findings-count-chip"></span>
+          <span class="findings-count" id="findings-count"></span>
         </div>
-        <div class="findings-chips-grid" id="findings-chips"></div>
+        <div class="findings-grid" id="findings-grid"></div>
       </div>
-
     </main>
 
-    <!-- RIGHT PANEL — MEDDIE -->
+    <!-- RIGHT — Meddie -->
     <aside class="right-panel">
-      <div class="meddie-header">
+      <div class="meddie-hdr">
         <div class="meddie-av">
-          <svg width="17" height="17" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.4"/><path d="M6.5 10c0-2 1.6-3.5 3.5-3.5s3.5 1.5 3.5 3.5v.5h-7V10z" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="8" r="1.3" fill="currentColor"/></svg>
+          <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 9c0-1.9 1.6-3.5 3.5-3.5s3.5 1.6 3.5 3.5v.5h-7V9z" stroke="currentColor" stroke-width="1.2"/></svg>
         </div>
-        <div class="meddie-hinfo">
+        <div style="flex:1">
           <div class="meddie-name">Meddie <span class="meddie-ai-tag">AI</span></div>
           <div class="meddie-status"><span class="online-dot"></span>Online</div>
         </div>
-        <div class="meddie-actions">
-          <button class="hdr-btn" id="history-btn-r">
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
+        <button class="hdr-btn" id="history-btn-r">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
       </div>
-
-      <div class="chat-messages" id="chat-messages" aria-live="polite"></div>
-
+      <div class="chat-msgs" id="chat-messages"></div>
       <div class="chat-starters" id="chat-starters">
-        <button class="starter" data-msg="What are the most critical findings I should be concerned about?">Most critical findings?</button>
-        <button class="starter" data-msg="Explain my abnormal values in simple language.">Explain abnormal values</button>
+        <button class="starter" data-msg="What are the most critical findings?">Critical findings?</button>
+        <button class="starter" data-msg="Explain my abnormal values in plain language.">Explain abnormal values</button>
         <button class="starter" data-msg="How urgent is this? Do I need to see a doctor immediately?">How urgent is this?</button>
-        <button class="starter" data-msg="What lifestyle changes should I make based on this report?">Lifestyle changes?</button>
+        <button class="starter" data-msg="What lifestyle changes should I make?">Lifestyle changes?</button>
       </div>
-
       <div class="chat-input-wrap">
         <input type="text" class="chat-input" id="chat-input" placeholder="Ask Meddie about your report…" autocomplete="off"/>
         <button class="chat-send" id="chat-send-btn">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
     </aside>
-
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
+<!-- ═══════════════════════════════
      MODALS
-═══════════════════════════════════════ -->
+═══════════════════════════════ -->
 
-<!-- Doctor Search Modal -->
-<div id="doctors-modal" class="modal-overlay" hidden>
+<!-- Doctors -->
+<div id="doctors-modal" style="display:none" class="modal-overlay">
   <div class="modal-box">
-    <div class="modal-header">
+    <div class="modal-hdr">
       <h3>Find Specialists Near You</h3>
       <button class="modal-close" data-close="doctors-modal">
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
     </div>
-    <div class="modal-search-row">
-      <div class="modal-input-wrap">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1C4 1 2 3 2 5.5c0 3.5 5 7.5 5 7.5s5-4 5-7.5C12 3 10 1 7 1z" stroke="currentColor" stroke-width="1.2"/></svg>
-        <input type="text" id="doctor-location" class="modal-input" placeholder="Enter your city…"/>
+    <div class="modal-body">
+      <div class="doc-search-row">
+        <div class="doc-input-wrap">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" style="color:var(--ink-30)"><path d="M7 1C4 1 2 3 2 5.5c0 3.5 5 7.5 5 7.5s5-4 5-7.5C12 3 10 1 7 1z" stroke="currentColor" stroke-width="1.2"/></svg>
+          <input type="text" id="doctor-location" class="doc-input" placeholder="Enter your city…"/>
+        </div>
+        <button class="pill-btn" id="find-doctors-btn">Search</button>
       </div>
-      <button class="primary-pill-btn" id="find-doctors-btn">Search</button>
-    </div>
-    <div id="doctor-list" class="doctor-list">
-      <div class="modal-empty"><svg width="36" height="36" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="18" r="8" stroke="currentColor" stroke-width="1.2" opacity=".3"/><path d="M8 34c0-5 5-9 12-9s12 4 12 9" stroke="currentColor" stroke-width="1.2" opacity=".3" stroke-linecap="round"/></svg><p>Enter your city to search</p></div>
+      <div id="doctor-list">
+        <div class="modal-empty">
+          <svg width="36" height="36" viewBox="0 0 40 40" fill="none" style="opacity:.3"><circle cx="20" cy="18" r="8" stroke="currentColor" stroke-width="1.2"/><path d="M8 34c0-5 5-9 12-9s12 4 12 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <p>Enter your city to search</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Lifestyle Modal -->
-<div id="lifestyle-modal" class="modal-overlay" hidden>
+<!-- Lifestyle -->
+<div id="lifestyle-modal" style="display:none" class="modal-overlay">
   <div class="modal-box">
-    <div class="modal-header">
+    <div class="modal-hdr">
       <h3>Lifestyle Recommendations</h3>
       <button class="modal-close" data-close="lifestyle-modal">
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
     </div>
-    <div id="lifestyle-list" class="lifestyle-list"></div>
+    <div class="modal-body" id="lifestyle-list"></div>
   </div>
 </div>
 
-<!-- Questions Modal -->
-<div id="questions-modal" class="modal-overlay" hidden>
+<!-- Questions -->
+<div id="questions-modal" style="display:none" class="modal-overlay">
   <div class="modal-box">
-    <div class="modal-header">
+    <div class="modal-hdr">
       <h3>Questions for Your Doctor</h3>
       <button class="modal-close" data-close="questions-modal">
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </button>
     </div>
-    <ol id="questions-list" class="questions-list"></ol>
+    <div class="modal-body"><ol class="questions-list" id="questions-list"></ol></div>
   </div>
 </div>
 
-<!-- History Panel -->
-<div id="history-overlay" class="history-overlay" hidden></div>
-<aside id="history-panel" class="history-panel" hidden>
-  <div class="history-panel-header">
+<!-- History panel -->
+<div id="hist-overlay" class="hist-overlay" style="display:none"></div>
+<aside id="hist-panel" class="hist-panel" style="display:none">
+  <div class="hist-hdr">
     <h3>Past Analyses</h3>
-    <button class="modal-close" id="history-close">
-      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <button class="modal-close" id="hist-close">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
     </button>
   </div>
-  <div id="history-list" class="history-list"></div>
+  <div class="hist-body" id="hist-list"></div>
 </aside>
 
-<script src="script.js"></script>
+<script>
+/* ═════════════════════════════════
+   CONSTANTS
+═════════════════════════════════ */
+const API_BASE = "https://medclearai.onrender.com";
+
+/* ═════════════════════════════════
+   STATE
+═════════════════════════════════ */
+let currentAnalysis = null;
+let chatHistory = [];
+
+/* ═════════════════════════════════
+   CURSOR
+═════════════════════════════════ */
+const cursor = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top = my + 'px';
+});
+
+function animateCursorRing() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  cursorRing.style.left = rx + 'px';
+  cursorRing.style.top = ry + 'px';
+  requestAnimationFrame(animateCursorRing);
+}
+animateCursorRing();
+
+/* ═════════════════════════════════
+   PARTICLE BG
+═════════════════════════════════ */
+(function() {
+  const cv = document.getElementById('bg-canvas');
+  const ctx = cv.getContext('2d');
+  const W = () => cv.width = window.innerWidth;
+  const H = () => cv.height = window.innerHeight;
+  W(); H();
+  window.addEventListener('resize', () => { W(); H(); });
+
+  const pts = Array.from({length: 60}, () => ({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3,
+    r: Math.random() * 1.5 + 0.5,
+    a: Math.random()
+  }));
+
+  function drawPts() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    pts.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = cv.width;
+      if (p.x > cv.width) p.x = 0;
+      if (p.y < 0) p.y = cv.height;
+      if (p.y > cv.height) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0,212,170,${p.a * 0.3})`;
+      ctx.fill();
+    });
+    // Draw connections
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i+1; j < pts.length; j++) {
+        const dx = pts[i].x - pts[j].x;
+        const dy = pts[i].y - pts[j].y;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        if (d < 120) {
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x, pts[i].y);
+          ctx.lineTo(pts[j].x, pts[j].y);
+          ctx.strokeStyle = `rgba(124,92,255,${(1 - d/120) * 0.12})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(drawPts);
+  }
+  drawPts();
+})();
+
+/* ═════════════════════════════════
+   SCREEN TRANSITIONS
+═════════════════════════════════ */
+const screens = {
+  upload: document.getElementById('upload-screen'),
+  loading: document.getElementById('loading-screen'),
+  results: document.getElementById('results-screen'),
+};
+
+function showScreen(name) {
+  Object.values(screens).forEach(s => { s.classList.remove('active'); s.style.opacity = '0'; });
+  const el = screens[name];
+  el.classList.add('active');
+  requestAnimationFrame(() => {
+    el.style.transition = 'opacity .4s ease';
+    el.style.opacity = '1';
+  });
+  window.scrollTo(0, 0);
+}
+
+/* ═════════════════════════════════
+   UPLOAD TABS
+═════════════════════════════════ */
+document.querySelectorAll('.utab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.utab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.upanel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('upanel-' + btn.dataset.panel).classList.add('active');
+  });
+});
+
+/* ═════════════════════════════════
+   FILE UPLOAD
+═════════════════════════════════ */
+const fileInput = document.getElementById('file-input');
+const dropZone = document.getElementById('drop-zone');
+
+fileInput.addEventListener('change', () => {
+  const f = fileInput.files[0];
+  if (f) showFileChip(f);
+});
+
+function showFileChip(file) {
+  let chip = dropZone.querySelector('.file-chip');
+  if (!chip) { chip = document.createElement('div'); chip.className = 'file-chip'; dropZone.appendChild(chip); }
+  if (file.type.startsWith('image/')) {
+    const r = new FileReader();
+    r.onload = e => { chip.innerHTML = `<img src="${e.target.result}" class="file-chip-img"/><span>${esc(file.name)}</span>`; };
+    r.readAsDataURL(file);
+  } else {
+    chip.innerHTML = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg><span>${esc(file.name)}</span>`;
+  }
+}
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (!f) return;
+  const dt = new DataTransfer(); dt.items.add(f);
+  fileInput.files = dt.files;
+  showFileChip(f);
+  document.querySelector('[data-panel="file"]').click();
+});
+
+/* ═════════════════════════════════
+   ANALYZE
+═════════════════════════════════ */
+document.getElementById('analyze-btn').addEventListener('click', handleAnalyze);
+
+async function handleAnalyze() {
+  const file = fileInput.files[0];
+  const text = document.getElementById('report-text').value.trim();
+  const activePanel = document.querySelector('.upanel.active').id;
+  const useFile = activePanel === 'upanel-file';
+
+  if (useFile && !file) { showError('Please choose a file first.'); return; }
+  if (!useFile && !text) {
+    const ta = document.getElementById('report-text');
+    ta.style.borderColor = 'var(--red)';
+    setTimeout(() => ta.style.borderColor = '', 2000);
+    return;
+  }
+
+  document.getElementById('analyze-btn').disabled = true;
+  showScreen('loading');
+  startLoadingAnim();
+
+  try {
+    const fd = new FormData();
+    if (useFile && file) fd.append('file', file);
+    else fd.append('text', text);
+
+    const res = await fetch(`${API_BASE}/api/analyze`, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || `Error ${res.status}`);
+
+    currentAnalysis = data;
+    renderResults(data);
+    initMeddie(data);
+    saveHistory(data);
+    showScreen('results');
+
+  } catch (err) {
+    showScreen('upload');
+    showError(err.message || 'Analysis failed. Please try again.');
+  } finally {
+    document.getElementById('analyze-btn').disabled = false;
+    stopLoadingAnim();
+  }
+}
+
+/* Loading anim */
+const LOAD_MSGS = ['Reading values and cross-referencing…','Identifying abnormal findings…','Assessing risk indicators…','Generating insights…'];
+let _li = null;
+
+function startLoadingAnim() {
+  let i = 0;
+  const el = document.getElementById('load-sub');
+  const bar = document.getElementById('load-bar');
+  if (el) el.textContent = LOAD_MSGS[0];
+  setLoadStep(0);
+  setTimeout(() => { if (bar) bar.style.width = '30%'; }, 100);
+  _li = setInterval(() => {
+    i = (i+1) % LOAD_MSGS.length;
+    if (el) el.textContent = LOAD_MSGS[i];
+    const step = Math.min(i, 2);
+    setLoadStep(step);
+    if (bar) bar.style.width = (30 + step * 25) + '%';
+  }, 2400);
+}
+
+function stopLoadingAnim() {
+  clearInterval(_li);
+  const bar = document.getElementById('load-bar');
+  if (bar) bar.style.width = '100%';
+}
+
+function setLoadStep(n) {
+  document.querySelectorAll('.lstep').forEach((el, i) => {
+    el.classList.toggle('active', i === n);
+    el.classList.toggle('done', i < n);
+  });
+}
+
+/* ═════════════════════════════════
+   RENDER RESULTS
+═════════════════════════════════ */
+function renderResults(data) {
+  renderRisk(data.risk);
+  renderSummary(data.summary);
+  renderFindings(data.findings);
+  renderLifestyle(data.lifestyle);
+  renderQuestions(data.questions);
+  renderSpecialists(data.specialists);
+  highlightOrgans(data);
+  document.getElementById('dash-title').textContent = data.title || 'Medical Report';
+  const st = data.findings ? data.findings.length : 0;
+  document.getElementById('stat-findings').textContent = st;
+  document.getElementById('stat-lifestyle').textContent = data.lifestyle ? data.lifestyle.length : 0;
+  document.getElementById('stat-questions').textContent = data.questions ? (Array.isArray(data.questions) ? data.questions.length : parseList(data.questions).length) : 0;
+}
+
+function renderRisk(risk) {
+  if (!risk) return;
+  const lv = (risk.level || '').toLowerCase();
+  let cls = '', label = 'Unknown';
+  if (lv.includes('low')) { cls = 'low'; label = 'Low Risk'; }
+  else if (lv.includes('moderate')) { cls = 'moderate'; label = 'Moderate Risk'; }
+  else if (lv.includes('high')) { cls = 'high'; label = 'High Risk'; }
+
+  const el = document.getElementById('risk-level-text');
+  const badge = document.getElementById('risk-badge');
+  const reason = document.getElementById('risk-reason');
+
+  if (el) el.textContent = risk.level ? risk.level.charAt(0).toUpperCase() + risk.level.slice(1) + ' Risk' : '—';
+  if (badge) { badge.textContent = label; badge.className = 'risk-badge ' + cls; }
+  if (reason) reason.textContent = risk.reason || '';
+
+  // Animate gauge
+  const arc = document.getElementById('gauge-arc');
+  const num = document.getElementById('gauge-num');
+  const score = Math.min(Math.max(risk.score || 0, 0), 10);
+  const total = 257;
+  const offset = total - (score / 10) * total;
+  if (arc) setTimeout(() => { arc.style.strokeDashoffset = offset; }, 200);
+  if (num) num.textContent = score;
+}
+
+function renderSummary(text) {
+  const el = document.getElementById('summary-text');
+  if (el) el.textContent = text || 'No summary available.';
+}
+
+const STATUS_ORDER = {high:0,abnormal:0,critical:0,moderate:1,borderline:1,low:2,normal:3,info:4};
+function getStatus(s) {
+  const v = (s||'').toLowerCase();
+  if (v.includes('high')||v.includes('abnormal')||v.includes('critical')) return 'high';
+  if (v.includes('moderate')||v.includes('borderline')) return 'moderate';
+  if (v.includes('low')) return 'low';
+  if (v.includes('normal')) return 'normal';
+  return 'info';
+}
+
+function renderFindings(findings) {
+  const grid = document.getElementById('findings-grid');
+  const cnt = document.getElementById('findings-count');
+  if (!grid || !findings?.length) return;
+
+  const sorted = [...findings].sort((a,b) => (STATUS_ORDER[getStatus(a.status)] ?? 5) - (STATUS_ORDER[getStatus(b.status)] ?? 5));
+
+  grid.innerHTML = '';
+  sorted.forEach(f => {
+    const st = getStatus(f.status || f.flag);
+    const chip = document.createElement('div');
+    chip.className = `f-chip st-${st}`;
+    chip.innerHTML = `
+      <div>
+        <div class="f-chip-name">${esc(f.name || f.test || '')}</div>
+        <div class="f-chip-val">${esc(f.value || f.result || '—')}${f.reference ? ' · ref: '+esc(f.reference) : ''}</div>
+      </div>
+      <span class="f-chip-status">${esc(f.status || f.flag || 'Info')}</span>
+    `;
+    grid.appendChild(chip);
+  });
+
+  if (cnt) {
+    const abn = findings.filter(f => ['high','moderate','abnormal'].includes(getStatus(f.status||f.flag))).length;
+    cnt.textContent = abn > 0 ? `${abn} abnormal` : `${findings.length} findings`;
+    cnt.style.background = abn > 0 ? 'var(--red-dim)' : 'var(--accent-dim)';
+    cnt.style.color = abn > 0 ? 'var(--red)' : 'var(--accent)';
+  }
+}
+
+function renderLifestyle(items) {
+  const list = document.getElementById('lifestyle-list');
+  if (!list || !items?.length) return;
+  list.innerHTML = '';
+  items.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'lifestyle-item';
+    const icon = typeof item === 'object' ? (item.icon||'→') : '→';
+    const cat = typeof item === 'object' ? (item.category||'') : '';
+    const text = typeof item === 'object' ? (item.suggestion||'') : String(item);
+    div.innerHTML = `<span class="ls-icon">${icon}</span><div><div class="ls-cat">${esc(cat)}</div><div class="ls-text">${esc(text)}</div></div>`;
+    list.appendChild(div);
+  });
+}
+
+function renderQuestions(items) {
+  const list = document.getElementById('questions-list');
+  if (!list || !items?.length) return;
+  list.innerHTML = '';
+  (Array.isArray(items) ? items : parseList(items)).forEach(q => {
+    const li = document.createElement('li');
+    li.className = 'question-item';
+    li.textContent = q;
+    list.appendChild(li);
+  });
+}
+
+function renderSpecialists(specialists) {
+  const row = document.getElementById('specialists-list');
+  const card = document.getElementById('specialists-card');
+  if (!row || !card) return;
+  if (!specialists?.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  row.innerHTML = '';
+  specialists.forEach(s => {
+    const chip = document.createElement('div');
+    chip.className = 'spec-chip';
+    chip.textContent = s;
+    chip.addEventListener('click', () => openModal('doctors-modal'));
+    row.appendChild(chip);
+  });
+}
+
+/* ═════════════════════════════════
+   ORGAN HIGHLIGHTING
+═════════════════════════════════ */
+const ORGAN_MAP = {
+  'org-brain':   ['brain','neurologist','neuro','headache','cognitive','memory','seizure'],
+  'org-thyroid': ['thyroid','tsh','t3','t4','endocrinologist','hypothyroid','hyperthyroid'],
+  'org-heart':   ['heart','cardiac','cardiologist','cholesterol','ecg','ekg','coronary','blood pressure','hypertension','ldl','hdl','triglyceride'],
+  'org-lung-l':  ['lung','pulmonologist','respiratory','oxygen','saturation','breathing','spo2'],
+  'org-lung-r':  ['lung','pulmonologist','respiratory','oxygen'],
+  'org-liver':   ['liver','hepatologist','bilirubin','alt','ast','sgpt','sgot','hepatic','albumin'],
+  'org-stomach': ['glucose','diabetes','hba1c','insulin','pancreas','gastroenterologist','blood sugar'],
+  'org-kidney-l':['kidney','nephrologist','creatinine','urea','bun','renal','uric','gfr'],
+  'org-kidney-r':['kidney','nephrologist','creatinine','urea'],
+};
+const LABEL_MAP = {
+  'org-brain':'lbl-brain','org-thyroid':'lbl-thyroid','org-heart':'lbl-heart',
+  'org-lung-l':'lbl-lungs','org-lung-r':'lbl-lungs','org-liver':'lbl-liver',
+  'org-stomach':'lbl-stomach','org-kidney-l':'lbl-kidneys','org-kidney-r':'lbl-kidneys',
+};
+
+function highlightOrgans(analysis) {
+  document.querySelectorAll('.organ').forEach(el => { el.style.opacity='0'; el.classList.remove('active'); el.style.filter=''; el.style.fill='transparent'; el.style.stroke='transparent'; });
+  document.querySelectorAll('[id^="lbl-"]').forEach(el => { el.style.opacity='0'; });
+
+  const text = [analysis.summary||'', JSON.stringify(analysis.findings||[]), (analysis.specialists||[]).join(' '), (analysis.questions||[]).join(' ')].join(' ').toLowerCase();
+
+  let anyActive = false;
+  const activeLbls = new Set();
+
+  Object.entries(ORGAN_MAP).forEach(([orgId, kws]) => {
+    if (kws.some(kw => text.includes(kw))) {
+      const el = document.getElementById(orgId);
+      if (el) {
+        const col = el.dataset.color || '0,212,170';
+        el.style.fill = `rgba(${col},0.25)`;
+        el.style.stroke = `rgba(${col},0.8)`;
+        el.style.strokeWidth = '2';
+        el.style.filter = 'url(#oglow)';
+        el.style.opacity = '1';
+        el.classList.add('active');
+        anyActive = true;
+        const lblId = LABEL_MAP[orgId];
+        if (lblId && !activeLbls.has(lblId)) {
+          const lbl = document.getElementById(lblId);
+          if (lbl) { lbl.style.opacity = '1'; lbl.style.fill = `rgba(${el.dataset.color},0.9)`; activeLbls.add(lblId); }
+        }
+      }
+    }
+  });
+
+  const hint = document.getElementById('body-hint');
+  if (hint) hint.textContent = anyActive ? 'Tap highlighted areas for details' : 'No specific organ areas identified';
+}
+
+/* Organ tooltip */
+const orgTT = document.getElementById('organ-tt');
+document.querySelectorAll('.organ').forEach(el => {
+  el.addEventListener('mouseenter', () => { orgTT.textContent = el.dataset.name || ''; orgTT.classList.add('show'); });
+  el.addEventListener('mousemove', e => { orgTT.style.left = (e.clientX + 14) + 'px'; orgTT.style.top = (e.clientY - 30) + 'px'; });
+  el.addEventListener('mouseleave', () => orgTT.classList.remove('show'));
+});
+
+/* ═════════════════════════════════
+   MEDDIE CHAT
+═════════════════════════════════ */
+function initMeddie(data) {
+  chatHistory = [];
+  document.getElementById('chat-messages').innerHTML = '';
+  document.getElementById('chat-starters').style.display = 'flex';
+  const risk = data.risk || {};
+  const rNote = risk.level ? ` Your risk level is <strong>${esc(risk.level)}</strong> (${risk.score||0}/10).` : '';
+  addMsg('ai', `Hi! I'm Meddie. I've reviewed <em>${esc(data.title||'your report')}</em>.${rNote} Ask me anything about your findings.`, true);
+}
+
+document.getElementById('chat-input').addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } });
+document.getElementById('chat-send-btn').addEventListener('click', sendChat);
+
+document.querySelectorAll('.starter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('chat-input').value = btn.dataset.msg;
+    document.getElementById('chat-starters').style.display = 'none';
+    sendChat();
+  });
+});
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('chat-send-btn');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  sendBtn.disabled = true;
+  addMsg('user', msg);
+  const typing = addTyping();
+  chatHistory.push({ role:'user', content:msg });
+
+  try {
+    const res = await fetch(`${API_BASE}/api/chat`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ message:msg, context:currentAnalysis, history:chatHistory.slice(-10) })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error);
+    const reply = data.response || 'I could not generate a response. Please try again.';
+    chatHistory.push({ role:'assistant', content:reply });
+    typing.remove();
+    addMsg('ai', reply);
+  } catch(err) {
+    typing.remove();
+    addMsg('ai', 'Sorry, I encountered an error. Please try again.');
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
+function addMsg(role, text, asHTML=false) {
+  const win = document.getElementById('chat-messages');
+  const wrap = document.createElement('div');
+  wrap.className = `chat-msg chat-msg--${role==='ai'?'ai':'user'}`;
+  const av = document.createElement('div');
+  av.className = 'msg-av';
+  if (role==='ai') { av.innerHTML=`<svg width="11" height="11" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 7c0-1.4 1.1-2.5 2.5-2.5s2.5 1.1 2.5 2.5v.3H4.5V7z" stroke="currentColor" stroke-width="1.1"/></svg>`; }
+  else { av.textContent='You'; }
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  asHTML ? (bubble.innerHTML=text) : (bubble.textContent=text);
+  wrap.appendChild(av); wrap.appendChild(bubble);
+  win.appendChild(wrap);
+  requestAnimationFrame(() => { win.scrollTop = win.scrollHeight; });
+}
+
+function addTyping() {
+  const win = document.getElementById('chat-messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-msg chat-msg--ai';
+  wrap.innerHTML = `<div class="msg-av"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="typing-bubble"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;
+  win.appendChild(wrap);
+  requestAnimationFrame(() => { win.scrollTop = win.scrollHeight; });
+  return wrap;
+}
+
+/* ═════════════════════════════════
+   DOCTORS
+═════════════════════════════════ */
+document.getElementById('find-doctors-btn').addEventListener('click', handleDoctors);
+document.getElementById('doctor-location').addEventListener('keydown', e => { if (e.key==='Enter') handleDoctors(); });
+
+async function handleDoctors() {
+  const loc = document.getElementById('doctor-location').value.trim();
+  if (!loc) { document.getElementById('doctor-location').focus(); return; }
+  const list = document.getElementById('doctor-list');
+  const btn = document.getElementById('find-doctors-btn');
+  btn.disabled = true;
+  btn.textContent = 'Searching…';
+  list.innerHTML = '<div class="modal-empty"><p>Searching near you…</p></div>';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/doctors`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ location:loc, specialty:deriveSpecialty() })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error);
+    if (data.note && !data.doctors?.length) { list.innerHTML = `<div class="modal-empty"><p>${esc(data.note)}</p></div>`; return; }
+    renderDoctors(data.doctors || []);
+  } catch(err) {
+    list.innerHTML = `<div class="modal-empty"><p>${esc(err.message||'Search failed. Try a different location.')}</p></div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Search';
+  }
+}
+
+function renderDoctors(docs) {
+  const list = document.getElementById('doctor-list');
+  if (!docs.length) { list.innerHTML = '<div class="modal-empty"><p>No results. Try a larger city.</p></div>'; return; }
+  list.innerHTML = '';
+  docs.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'doctor-card';
+    card.innerHTML = `
+      <div class="doc-av">${esc(getInitials(d.name||'Dr'))}</div>
+      <div>
+        <div class="doc-name">${esc(d.name||'Unknown')}</div>
+        <div class="doc-spec">${esc(d.specialty||d.type||'Medical Facility')}</div>
+        <div class="doc-addr">${esc([d.address, d.distance_km?d.distance_km+' km':''].filter(Boolean).join(' · '))}</div>
+        <div class="doc-links">
+          ${d.maps_url?`<a href="${esc(d.maps_url)}" target="_blank" rel="noopener" class="doc-link">📍 Maps</a>`:''}
+          ${d.phone?`<a href="tel:${esc(d.phone)}" class="doc-link">📞 Call</a>`:''}
+          ${d.website?`<a href="${esc(d.website)}" target="_blank" rel="noopener" class="doc-link">🌐 Web</a>`:''}
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function deriveSpecialty() {
+  if (!currentAnalysis) return 'general physician';
+  const t = [currentAnalysis.summary||'', JSON.stringify(currentAnalysis.findings||[]), (currentAnalysis.specialists||[]).join(' ')].join(' ').toLowerCase();
+  if (t.includes('cardio')||t.includes('heart')||t.includes('cholesterol')) return 'cardiologist';
+  if (t.includes('glucose')||t.includes('diabetes')||t.includes('thyroid')) return 'endocrinologist';
+  if (t.includes('kidney')||t.includes('creatinine')) return 'nephrologist';
+  if (t.includes('liver')||t.includes('bilirubin')) return 'hepatologist';
+  if (t.includes('lung')||t.includes('respiratory')) return 'pulmonologist';
+  if ((currentAnalysis.specialists||[]).length) return currentAnalysis.specialists[0].toLowerCase();
+  return 'general physician';
+}
+
+/* ═════════════════════════════════
+   PDF EXPORT
+═════════════════════════════════ */
+document.getElementById('download-btn').addEventListener('click', downloadPDF);
+
+function downloadPDF() {
+  if (!currentAnalysis) return;
+  window.print();
+}
+
+/* ═════════════════════════════════
+   HISTORY
+═════════════════════════════════ */
+const HKEY = 'medclear_history_v3';
+
+function saveHistory(data) {
+  try {
+    const h = JSON.parse(localStorage.getItem(HKEY)||'[]');
+    h.unshift({ id:Date.now(), title:data.title, date:new Date().toISOString(), riskLevel:data.risk?.level||'unknown', summary:(data.summary||'').slice(0,120), data });
+    localStorage.setItem(HKEY, JSON.stringify(h.slice(0,5)));
+  } catch(e) {}
+}
+
+function openHistory() {
+  const list = document.getElementById('hist-list');
+  let h = [];
+  try { h = JSON.parse(localStorage.getItem(HKEY)||'[]'); } catch(e) {}
+  list.innerHTML = '';
+  if (!h.length) { list.innerHTML = '<p style="font-size:13px;color:var(--ink-30);text-align:center;padding:40px">No past analyses yet.</p>'; }
+  else h.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'hist-item';
+    const rl = item.riskLevel||'unknown';
+    div.innerHTML = `<div class="hist-item-title">${esc(item.title||'Report')}</div><div class="hist-item-meta"><span class="rc rc-${rl}">${rl}</span><span style="font-size:11px;color:var(--ink-30)">${new Date(item.date).toLocaleDateString()}</span></div><div class="hist-item-sum">${esc(item.summary)}…</div>`;
+    div.addEventListener('click', () => {
+      currentAnalysis = item.data;
+      renderResults(item.data); initMeddie(item.data);
+      closeHistory(); showScreen('results');
+    });
+    list.appendChild(div);
+  });
+  document.getElementById('hist-panel').style.display = 'flex';
+  document.getElementById('hist-overlay').style.display = 'block';
+}
+
+function closeHistory() {
+  document.getElementById('hist-panel').style.display = 'none';
+  document.getElementById('hist-overlay').style.display = 'none';
+}
+
+document.querySelectorAll('[id^="history-btn"]').forEach(btn => btn.addEventListener('click', openHistory));
+document.getElementById('hist-close').addEventListener('click', closeHistory);
+document.getElementById('hist-overlay').addEventListener('click', closeHistory);
+
+/* ═════════════════════════════════
+   MODALS
+═════════════════════════════════ */
+function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+document.querySelectorAll('.modal-close[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => closeModal(btn.dataset.close));
+});
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) closeModal(el.id); });
+});
+
+document.getElementById('doctors-btn').addEventListener('click', () => openModal('doctors-modal'));
+document.getElementById('act-doctors').addEventListener('click', () => openModal('doctors-modal'));
+document.getElementById('lifestyle-btn').addEventListener('click', () => openModal('lifestyle-modal'));
+document.getElementById('act-lifestyle').addEventListener('click', () => openModal('lifestyle-modal'));
+document.getElementById('questions-btn').addEventListener('click', () => openModal('questions-modal'));
+document.getElementById('act-questions').addEventListener('click', () => openModal('questions-modal'));
+
+/* ═════════════════════════════════
+   BACK BUTTON
+═════════════════════════════════ */
+document.getElementById('back-btn').addEventListener('click', () => {
+  currentAnalysis = null; chatHistory = [];
+  fileInput.value = '';
+  document.getElementById('report-text').value = '';
+  const chip = dropZone?.querySelector('.file-chip');
+  if (chip) chip.remove();
+  document.getElementById('chat-messages').innerHTML = '';
+  document.getElementById('doctor-list').innerHTML = '<div class="modal-empty"><p>Enter your city above to find nearby specialists</p></div>';
+  document.querySelectorAll('.organ').forEach(el => { el.style.opacity='0'; el.classList.remove('active'); el.style.fill='transparent'; el.style.stroke='transparent'; el.style.filter=''; });
+  showScreen('upload');
+});
+
+/* ═════════════════════════════════
+   ERROR TOAST
+═════════════════════════════════ */
+function showError(msg) {
+  const old = document.querySelector('.err-toast');
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.className = 'err-toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 5000);
+}
+
+/* ═════════════════════════════════
+   UTILITIES
+═════════════════════════════════ */
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function getInitials(n) { return n.split(' ').filter(Boolean).slice(0,2).map(x=>x[0].toUpperCase()).join(''); }
+function parseList(v) {
+  if (!v) return [];
+  if (Array.isArray(v)) return v;
+  return String(v).split(/\n+/).map(l=>l.replace(/^[\d.\-*•\s]+/,'').trim()).filter(Boolean);
+}
+
+/* ═════════════════════════════════
+   INIT
+═════════════════════════════════ */
+// Initial screen fade in
+screens.upload.style.opacity = '0';
+requestAnimationFrame(() => {
+  screens.upload.style.transition = 'opacity .5s ease';
+  screens.upload.style.opacity = '1';
+});
+</script>
 </body>
 </html>
