@@ -1,18 +1,28 @@
-from flask import Blueprint, request, jsonify
-import google.generativeai as genai
-import pdfplumber
+import os
 import json
-import io
+import pdfplumber
+import google.generativeai as genai
+from flask import Blueprint, request, jsonify
+from io import BytesIO
 
-analyze_bp = Blueprint('analyze', __name__)
+analyze_bp = Blueprint("analyze", __name__)
 
-SYSTEM_PROMPT = """You are MedClear, a compassionate medical report interpreter.
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+ANALYZE_PROMPT = """
+You are MedClear, a compassionate medical report interpreter. 
 Your job is to explain medical reports in simple, reassuring plain language — not to diagnose or treat.
 
 Analyze the report and respond ONLY with a valid JSON object (no markdown, no backticks, no extra text) with this exact structure:
 {
   "title": "short descriptive title like 'Complete Blood Count Analysis'",
   "summary": "2-3 sentence plain-English overview of the overall picture. Be warm and clear.",
+  "risk": {
+    "level": "low|moderate|high",
+    "score": <integer 0-100>,
+    "reason": "1 sentence explaining the risk level based on findings"
+  },
   "findings": [
     {
       "name": "Test or Parameter Name",
@@ -24,137 +34,97 @@ Analyze the report and respond ONLY with a valid JSON object (no markdown, no ba
   ],
   "questions": [
     "Specific question the patient should ask their doctor",
-    "Another specific question"
-  ]
+    "..."
+  ],
+  "lifestyle": [
+    {
+      "category": "Diet|Exercise|Sleep|Hydration|Stress|Other",
+      "icon": "🥗|🏃|😴|💧|🧘|✨",
+      "suggestion": "One specific, actionable suggestion based on the findings"
+    }
+  ],
+  "specialists": ["Cardiologist", "Endocrinologist"]
 }
 
 Rules:
-- findings array: 3-8 items covering the most important values
-- questions array: 4-6 specific, useful questions
-- status must be exactly one of: normal, high, low, or info
+- findings: 3-8 items covering the most important values
+- questions: 4-6 specific, useful questions
+- lifestyle: 4-6 personalized suggestions based on actual findings
+- specialists: 1-3 relevant specialist types inferred from findings
+- risk.score: 0-30 = low, 31-60 = moderate, 61-100 = high
+- status must be exactly: normal, high, low, or info
 - If a value has no reference range, use status "info"
-- Never say "consult a doctor" in the summary — the disclaimer handles that
-- Tone: calm, clear, supportive — like a knowledgeable friend
-- For prescriptions or discharge summaries without specific values, create info-type findings explaining each medication/instruction
-- Return ONLY the JSON object. No markdown. No backticks. No explanation before or after."""
+- Tone: calm, clear, supportive
+- For prescriptions without specific values, create info-type findings
+- Never say "consult a doctor" in the summary
+"""
 
+def extract_pdf_text(file_bytes):
+    """Extract text from PDF bytes using pdfplumber."""
+    try:
+        with pdfplumber.open(BytesIO(file_bytes)) as pdf:
+            text = ""
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n"
+        return text.strip()
+    except Exception as e:
+        return None
 
-def extract_text_from_pdf(file_bytes):
-    text = ""
-    with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
-        for page in pdf.pages:
-            page_text = page.extract_text()
-            if page_text:
-                text += page_text + "\n"
-    return text.strip()
-
-
-def parse_gemini_response(raw_text):
-    cleaned = raw_text.strip()
-    if cleaned.startswith("```"):
-        cleaned = cleaned.split("```")[1]
-        if cleaned.startswith("json"):
-            cleaned = cleaned[4:]
-        cleaned = cleaned.strip()
-    if cleaned.endswith("```"):
-        cleaned = cleaned[:-3].strip()
-    return json.loads(cleaned)
-
-
-def validate_response(data):
-    if not isinstance(data, dict):
-        raise ValueError("Response is not a JSON object")
-    if "title" not in data or not isinstance(data["title"], str):
-        raise ValueError("Missing or invalid 'title'")
-    if "summary" not in data or not isinstance(data["summary"], str):
-        raise ValueError("Missing or invalid 'summary'")
-    if "findings" not in data or not isinstance(data["findings"], list):
-        raise ValueError("Missing or invalid 'findings'")
-    if "questions" not in data or not isinstance(data["questions"], list):
-        raise ValueError("Missing or invalid 'questions'")
-
-    valid_statuses = {"normal", "high", "low", "info"}
-    for i, finding in enumerate(data["findings"]):
-        if not isinstance(finding, dict):
-            raise ValueError(f"Finding {i} is not an object")
-        for field in ["name", "value", "reference", "status", "explanation"]:
-            if field not in finding:
-                finding[field] = ""
-        if finding["status"] not in valid_statuses:
-            finding["status"] = "info"
-
-    return data
-
-
-@analyze_bp.route("/analyze", methods=["POST"])
+@analyze_bp.route("/api/analyze", methods=["POST"])
 def analyze():
     report_text = ""
 
-    # ── Handle multipart (file upload) ──
-    if request.content_type and "multipart/form-data" in request.content_type:
-        file = request.files.get("file")
-        if file:
-            file_bytes = file.read()
-            filename = file.filename.lower()
-            if filename.endswith(".pdf"):
-                try:
-                    report_text = extract_text_from_pdf(file_bytes)
-                except Exception:
-                    return jsonify({"error": "Failed to extract text from PDF."}), 422
-            else:
-                try:
-                    report_text = file_bytes.decode("utf-8")
-                except UnicodeDecodeError:
-                    return jsonify({"error": "Could not read file. Please use a PDF or plain text file."}), 422
+    # Handle PDF upload
+    if "file" in request.files:
+        f = request.files["file"]
+        if f.filename.lower().endswith(".pdf"):
+            pdf_text = extract_pdf_text(f.read())
+            if not pdf_text:
+                return jsonify({"error": "Could not extract text from this PDF. Please try a text-based PDF or paste the text manually."}), 422
+            report_text = pdf_text
         else:
-            report_text = request.form.get("report", "").strip()
+            # Plain text file
+            try:
+                report_text = f.read().decode("utf-8", errors="replace")
+            except Exception:
+                return jsonify({"error": "Could not read the uploaded file."}), 422
 
-    # ── Handle JSON body ──
+    # Handle JSON body with text
+    elif request.is_json:
+        data = request.get_json(silent=True) or {}
+        report_text = data.get("text", "").strip()
     else:
-        body = request.get_json(silent=True)
-        if not body:
-            return jsonify({"error": "Invalid request body."}), 400
-        report_text = body.get("report", "").strip()
+        report_text = (request.form.get("text") or "").strip()
 
     if not report_text:
-        return jsonify({"error": "No report text provided."}), 400
+        return jsonify({"error": "No report content provided. Please upload a file or paste your report text."}), 400
 
-    if len(report_text) > 20000:
-        return jsonify({"error": "Report is too long. Please limit to 20,000 characters."}), 413
+    if len(report_text) < 20:
+        return jsonify({"error": "Report text is too short. Please provide more content."}), 400
 
-    # ── Call Gemini ──
     try:
-        model = genai.GenerativeModel("gemini-2.5-flash")
-        response = model.generate_content(
-            f"""
-        {SYSTEM_PROMPT}
-        Medical Report:
-        {report_text}
+        prompt = f"{ANALYZE_PROMPT}\n\nAnalyze this medical report:\n\n{report_text[:8000]}"
+        response = model.generate_content(prompt)
+        raw = response.text.strip()
 
-        Return ONLY valid JSON.
-        """,
-            generation_config=genai.types.GenerationConfig(
-                temperature=0.0,
-                max_output_tokens=1500,
-            )
-        )
-        raw_text = response.text
-        print("\n===== RAW GEMINI RESPONSE =====")
-        print(response.text)
+        # Strip markdown fences if present
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        raw = raw.strip()
 
-    except Exception as e:
-        return jsonify({"error": f"Gemini API error: {str(e)}"}), 502
+        result = json.loads(raw)
+        return jsonify(result)
 
-    # ── Parse response ──
-    try:
-        parsed = parse_gemini_response(raw_text)
     except json.JSONDecodeError:
-        return jsonify({"error": "AI returned malformed JSON. Please try again."}), 502
-
-    # ── Validate structure ──
-    try:
-        validated = validate_response(parsed)
-    except ValueError as e:
-        return jsonify({"error": f"AI response validation failed: {str(e)}"}), 502
-
-    return jsonify(validated), 200
+        return jsonify({"error": "AI returned an unexpected format. Please try again."}), 500
+    except Exception as e:
+        error_msg = str(e)
+        if "quota" in error_msg.lower() or "429" in error_msg:
+            return jsonify({"error": "API rate limit reached. Please wait a moment and try again."}), 429
+        if "api_key" in error_msg.lower() or "401" in error_msg:
+            return jsonify({"error": "API configuration error. Please contact support."}), 500
+        return jsonify({"error": "Analysis failed. Please try again."}), 500
