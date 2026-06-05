@@ -38,15 +38,19 @@ def chat():
             return jsonify({"error": "Invalid request body."}), 400
 
         user_message = (data.get("message") or "").strip()
-        report_context = data.get("context") or {}
+        report_context = data.get("context")
         history = data.get("history") or []
 
         if not user_message:
             return jsonify({"error": "Message cannot be empty."}), 400
 
-        context_parts = []
+        # Handle both string context and object context
+        if isinstance(report_context, str):
+            context_str = report_context
 
-        if report_context:
+        elif isinstance(report_context, dict):
+            context_parts = []
+
             context_parts.append(
                 f"REPORT TITLE: {report_context.get('title', 'Medical Report')}"
             )
@@ -75,7 +79,10 @@ def chat():
                     f"(score: {risk.get('score')})"
                 )
 
-        context_str = "\n".join(context_parts)
+            context_str = "\n".join(context_parts)
+
+        else:
+            context_str = ""
 
         messages = [
             {
@@ -103,13 +110,20 @@ USER QUESTION:
 """
         })
 
+        print("OPENROUTER KEY EXISTS:", bool(os.environ.get("OPENROUTER_API_KEY")))
+
         response = client.chat.completions.create(
             model="meta-llama/llama-3.3-70b-instruct:free",
             messages=messages,
             temperature=0.4
         )
 
-        reply = response.choices[0].message.content.strip()
+        if not response.choices:
+            return jsonify({
+                "error": "No response received from OpenRouter."
+            }), 500
+
+        reply = (response.choices[0].message.content or "").strip()
 
         return jsonify({
             "response": reply
