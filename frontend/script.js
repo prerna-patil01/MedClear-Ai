@@ -6,7 +6,7 @@
      POST /api/doctors → { doctors[] }
 ══════════════════════════════════════════════════ */
 
-const API_BASE = "https://medclear-ai-zcox.onrender.com"; // ← your Render URL
+const API_BASE = "https://medclearai.onrender.com";; // ← your Render URL
 
 /* ── State ──────────────────────────────────────── */
 let currentAnalysis  = null;
