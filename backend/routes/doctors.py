@@ -5,7 +5,6 @@ from math import radians, cos, sin, asin, sqrt
 
 doctors_bp = Blueprint("doctors", __name__)
 
-NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 OVERPASS_URLS = [
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
@@ -40,9 +39,10 @@ def haversine(lat1, lon1, lat2, lon2) -> float:
 
 
 def geocode(location: str):
+    # Try Nominatim first
     try:
         r = requests.get(
-            NOMINATIM_URL,
+            "https://nominatim.openstreetmap.org/search",
             params={"q": location, "format": "json", "limit": 1},
             headers=HEADERS,
             timeout=10,
@@ -51,7 +51,25 @@ def geocode(location: str):
         if data:
             return float(data[0]["lat"]), float(data[0]["lon"]), data[0].get("display_name", location)
     except Exception as e:
-        print(f"[GEO] Nominatim error: {e}")
+        print(f"[GEO] Nominatim failed: {e}")
+
+    # Fallback: Photon geocoder (Komoot, no API key needed)
+    try:
+        r = requests.get(
+            "https://photon.komoot.io/api/",
+            params={"q": location, "limit": 1},
+            headers=HEADERS,
+            timeout=10,
+        )
+        data = r.json()
+        features = data.get("features", [])
+        if features:
+            coords = features[0]["geometry"]["coordinates"]
+            name = features[0]["properties"].get("name", location)
+            return float(coords[1]), float(coords[0]), name
+    except Exception as e:
+        print(f"[GEO] Photon failed: {e}")
+
     return None, None, None
 
 
@@ -94,14 +112,6 @@ def query_overpass(lat: float, lon: float) -> list:
     return []
 
 
-def specialty_matches(tags: dict, specialty: str) -> bool:
-    """Check if OSM tags suggest this facility handles the given specialty."""
-    specialty_lower = specialty.lower()
-    keywords = SPECIALTY_TAGS.get(specialty_lower, [specialty_lower])
-    combined = " ".join(str(v) for v in tags.values()).lower()
-    return any(kw in combined for kw in keywords)
-
-
 def elements_to_doctors(elements: list, clat: float, clon: float, specialty: str) -> list:
     results = []
     seen: set = set()
@@ -121,7 +131,6 @@ def elements_to_doctors(elements: list, clat: float, clon: float, specialty: str
         dlon = el.get("lon") or el.get("center", {}).get("lon", clon)
         dist = haversine(clat, clon, float(dlat), float(dlon))
 
-        # Build address from OSM tags
         addr_parts = []
         for tag in ["addr:housenumber", "addr:street", "addr:suburb", "addr:city", "addr:state"]:
             v = tags.get(tag)
@@ -129,11 +138,9 @@ def elements_to_doctors(elements: list, clat: float, clon: float, specialty: str
                 addr_parts.append(v)
         address = ", ".join(addr_parts) if addr_parts else tags.get("addr:full", "")
 
-        # Determine facility type
         amenity = tags.get("amenity") or tags.get("healthcare") or "Medical Facility"
         facility_type = amenity.replace("_", " ").title()
 
-        # Phone
         phone = (
             tags.get("phone")
             or tags.get("contact:phone")
@@ -141,10 +148,8 @@ def elements_to_doctors(elements: list, clat: float, clon: float, specialty: str
             or tags.get("telephone")
         )
 
-        # Website
         website = tags.get("website") or tags.get("contact:website") or tags.get("url")
 
-        # Google Maps URL
         maps_url = (
             f"https://www.google.com/maps/search/?api=1&query="
             f"{requests.utils.quote(name + ' ' + (address or ''))}"
@@ -161,7 +166,6 @@ def elements_to_doctors(elements: list, clat: float, clon: float, specialty: str
             "maps_url": maps_url,
         })
 
-    # Sort by distance, return top 8
     results.sort(key=lambda x: x["distance_km"])
     return results[:8]
 
@@ -197,7 +201,7 @@ def get_doctors():
                 "doctors": [],
                 "note": (
                     f"No clinics or hospitals found near '{location}' within 20 km. "
-                    "Try a larger city or a more central area."
+                    "Try a larger city or more central area."
                 ),
             })
 
