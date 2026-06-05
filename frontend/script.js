@@ -182,7 +182,7 @@ async function analyzeReport() {
       const formData = new FormData();
       formData.append('file', uploadedFile);
 
-      response = await fetch('http://127.0.0.1:5000/analyze', {
+      response = await fetch('https://medclear-ai.onrender.com/analyze', {
         method: 'POST',
         body: formData,
         // Do NOT set Content-Type — browser sets it with boundary automatically
@@ -190,7 +190,7 @@ async function analyzeReport() {
 
     } else {
       // ── Send pasted / plain-text content as JSON ──
-      response = await fetch('http://127.0.0.1:5000/analyze', {
+      response = await fetch('https://medclear-ai.onrender.com/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ report: text }),
