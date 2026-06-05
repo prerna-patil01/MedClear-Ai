@@ -2,15 +2,18 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
+from extensions import limiter
 
 load_dotenv()
 
 app = Flask(__name__)
 
-# Allow all origins (fine for a student project; lock down for production)
-CORS(app)
+# 10 MB max upload size
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 
-# Register blueprints
+CORS(app, origins="*")
+limiter.init_app(app)
+
 from routes.analyze import analyze_bp
 from routes.chat import chat_bp
 from routes.doctors import doctors_bp
@@ -21,22 +24,32 @@ app.register_blueprint(doctors_bp)
 
 
 @app.route("/")
-def health():
-    return {"status": "MedClear API running", "version": "2.0.0"}
+def root():
+    return {"status": "MedClear API running", "version": "3.0.0"}
 
 
 @app.route("/health")
-def health_check():
-    return {"status": "ok", "version": "2.0.0"}
+def health():
+    return {"status": "ok"}
 
 
 @app.errorhandler(404)
-def not_found(error):
+def not_found(e):
     return {"error": "Endpoint not found"}, 404
 
 
+@app.errorhandler(413)
+def too_large(e):
+    return {"error": "File too large. Maximum size is 10 MB."}, 413
+
+
+@app.errorhandler(429)
+def rate_limited(e):
+    return {"error": "Too many requests. Please wait a moment."}, 429
+
+
 @app.errorhandler(500)
-def internal_error(error):
+def server_error(e):
     return {"error": "Internal server error"}, 500
 
 
