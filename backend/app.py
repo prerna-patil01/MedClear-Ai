@@ -7,53 +7,39 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# CORS
+# Allow all origins (fine for a student project; lock down for production)
 CORS(app)
 
-# Import blueprints
+# Register blueprints
 from routes.analyze import analyze_bp
 from routes.chat import chat_bp
 from routes.doctors import doctors_bp
 
-# Register blueprints
 app.register_blueprint(analyze_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(doctors_bp)
 
-# Root route
+
 @app.route("/")
 def health():
-    return {
-        "status": "MedClear API running",
-        "version": "2.0.0"
-    }
+    return {"status": "MedClear API running", "version": "2.0.0"}
 
-# Optional health route
+
 @app.route("/health")
 def health_check():
-    return {
-        "status": "ok",
-        "version": "2.0.0"
-    }
+    return {"status": "ok", "version": "2.0.0"}
 
-# Error handlers
+
 @app.errorhandler(404)
 def not_found(error):
-    return {
-        "error": "Endpoint not found"
-    }, 404
+    return {"error": "Endpoint not found"}, 404
+
 
 @app.errorhandler(500)
 def internal_error(error):
-    return {
-        "error": "Internal server error"
-    }, 500
+    return {"error": "Internal server error"}, 500
 
-# Run app
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(
-        host="0.0.0.0",
-        port=port,
-        debug=False
-    )
+    app.run(host="0.0.0.0", port=port, debug=False)
