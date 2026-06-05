@@ -1,17 +1,19 @@
 import os
 import json
 import pdfplumber
-import google.generativeai as genai
+from openai import OpenAI
 from flask import Blueprint, request, jsonify
 from io import BytesIO
 
 analyze_bp = Blueprint("analyze", __name__)
 
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-1.5-flash")
+client = OpenAI(
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
+    base_url="https://openrouter.ai/api/v1"
+)
 
 ANALYZE_PROMPT = """
-You are MedClear, a compassionate medical report interpreter. 
+You are MedClear, a compassionate medical report interpreter.
 Your job is to explain medical reports in simple, reassuring plain language — not to diagnose or treat.
 
 Analyze the report and respond ONLY with a valid JSON object (no markdown, no backticks, no extra text) with this exact structure:
@@ -33,8 +35,7 @@ Analyze the report and respond ONLY with a valid JSON object (no markdown, no ba
     }
   ],
   "questions": [
-    "Specific question the patient should ask their doctor",
-    "..."
+    "Specific question the patient should ask their doctor"
   ],
   "lifestyle": [
     {
@@ -43,24 +44,11 @@ Analyze the report and respond ONLY with a valid JSON object (no markdown, no ba
       "suggestion": "One specific, actionable suggestion based on the findings"
     }
   ],
-  "specialists": ["Cardiologist", "Endocrinologist"]
+  "specialists": ["Cardiologist"]
 }
-
-Rules:
-- findings: 3-8 items covering the most important values
-- questions: 4-6 specific, useful questions
-- lifestyle: 4-6 personalized suggestions based on actual findings
-- specialists: 1-3 relevant specialist types inferred from findings
-- risk.score: 0-30 = low, 31-60 = moderate, 61-100 = high
-- status must be exactly: normal, high, low, or info
-- If a value has no reference range, use status "info"
-- Tone: calm, clear, supportive
-- For prescriptions without specific values, create info-type findings
-- Never say "consult a doctor" in the summary
 """
 
 def extract_pdf_text(file_bytes):
-    """Extract text from PDF bytes using pdfplumber."""
     try:
         with pdfplumber.open(BytesIO(file_bytes)) as pdf:
             text = ""
@@ -69,74 +57,113 @@ def extract_pdf_text(file_bytes):
                 if page_text:
                     text += page_text + "\n"
         return text.strip()
-    except Exception as e:
+    except Exception:
         return None
+
 
 @analyze_bp.route("/api/analyze", methods=["POST"])
 def analyze():
     report_text = ""
 
-    # Handle PDF upload
     if "file" in request.files:
         f = request.files["file"]
+
         if f.filename.lower().endswith(".pdf"):
             pdf_text = extract_pdf_text(f.read())
+
             if not pdf_text:
-                return jsonify({"error": "Could not extract text from this PDF. Please try a text-based PDF or paste the text manually."}), 422
+                return jsonify({
+                    "error": "Could not extract text from this PDF. Please try a text-based PDF or paste the text manually."
+                }), 422
+
             report_text = pdf_text
+
         else:
-            # Plain text file
             try:
                 report_text = f.read().decode("utf-8", errors="replace")
             except Exception:
-                return jsonify({"error": "Could not read the uploaded file."}), 422
+                return jsonify({
+                    "error": "Could not read the uploaded file."
+                }), 422
 
-    # Handle JSON body with text
     elif request.is_json:
         data = request.get_json(silent=True) or {}
         report_text = data.get("text", "").strip()
+
     else:
         report_text = (request.form.get("text") or "").strip()
 
     if not report_text:
-        return jsonify({"error": "No report content provided. Please upload a file or paste your report text."}), 400
+        return jsonify({
+            "error": "No report content provided. Please upload a file or paste your report text."
+        }), 400
 
     if len(report_text) < 20:
-        return jsonify({"error": "Report text is too short. Please provide more content."}), 400
+        return jsonify({
+            "error": "Report text is too short. Please provide more content."
+        }), 400
 
     try:
         prompt = f"{ANALYZE_PROMPT}\n\nAnalyze this medical report:\n\n{report_text[:8000]}"
+
         print("=== DEBUG ===")
-        print("API KEY EXISTS:", bool(os.environ.get("GEMINI_API_KEY")))
-        
-        key = os.environ.get("GEMINI_API_KEY")
+        print("API KEY EXISTS:", bool(os.environ.get("OPENROUTER_API_KEY")))
+
+        key = os.environ.get("OPENROUTER_API_KEY")
         if key:
             print("KEY PREFIX:", key[:10])
-        
-        print("MODEL:", "gemini-1.5-flash")
+
+        print("MODEL:", "google/gemma-3-27b-it:free")
         print("============")
-        response = model.generate_content(prompt)
-        raw = response.text.strip()
 
-        # Strip markdown fences if present
+        response = client.chat.completions.create(
+            model="google/gemma-3-27b-it:free",
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0.3
+        )
+
+        if not response.choices:
+            return jsonify({
+                "error": "No response received from AI model."
+            }), 500
+
+        raw = (response.choices[0].message.content or "").strip()
+
+        if not raw:
+            return jsonify({
+                "error": "AI returned an empty response."
+            }), 500
+
         if raw.startswith("```"):
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        raw = raw.strip()
+            raw = raw.replace("```json", "")
+            raw = raw.replace("```", "")
+            raw = raw.strip()
 
-        result = json.loads(raw)
+        try:
+            result = json.loads(raw)
+        except Exception:
+            print("===== RAW AI RESPONSE =====")
+            print(raw)
+            print("===========================")
+            return jsonify({
+                "error": "Model returned invalid JSON",
+                "raw_response": raw[:1000]
+            }), 500
+
         return jsonify(result)
 
-    except json.JSONDecodeError:
-        return jsonify({"error": "AI returned an unexpected format. Please try again."}), 500
     except Exception as e:
         import traceback
-    
+
         print("===== ANALYZE ERROR =====")
         traceback.print_exc()
         print("=========================")
-    
+
         return jsonify({
             "error": str(e)
         }), 500
