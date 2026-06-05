@@ -106,6 +106,15 @@ def analyze():
 
     try:
         prompt = f"{ANALYZE_PROMPT}\n\nAnalyze this medical report:\n\n{report_text[:8000]}"
+        print("=== DEBUG ===")
+        print("API KEY EXISTS:", bool(os.environ.get("GEMINI_API_KEY")))
+        
+        key = os.environ.get("GEMINI_API_KEY")
+        if key:
+            print("KEY PREFIX:", key[:10])
+        
+        print("MODEL:", "gemini-2.5-flash")
+        print("============")
         response = model.generate_content(prompt)
         raw = response.text.strip()
 
