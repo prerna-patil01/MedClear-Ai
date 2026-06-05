@@ -32,7 +32,7 @@ def chat():
         return jsonify({"error": "Invalid request body."}), 400
 
     user_message = (data.get("message") or "").strip()
-    report_context = data.get("reportContext") or {}
+    report_context = data.get("context") or {}
     history = data.get("history") or []  # [{role, content}]
 
     if not user_message:
@@ -86,7 +86,7 @@ User's question: {user_message}
             response = model.generate_content(full_user_message)
 
         reply = response.text.strip()
-        return jsonify({"reply": reply})
+        return jsonify({"response": reply})
 
     except Exception as e:
         error_msg = str(e)
