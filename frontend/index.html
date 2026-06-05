@@ -1,37 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MedClear — AI Medical Report Explainer</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MedClear — AI Health Platform</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
-  <!-- ── ANIMATED BACKGROUND ── -->
-  <div class="bg-canvas">
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
-    <div class="orb orb3"></div>
-    <div class="grid-bg"></div>
-    <div class="dna-wrap">
-      <svg class="dna-strand" id="dnasvg"  viewBox="0 0 200 2000" xmlns="http://www.w3.org/2000/svg"></svg>
-      <svg class="dna-strand" id="dnasvg2" viewBox="0 0 200 2000" xmlns="http://www.w3.org/2000/svg"></svg>
-    </div>
+<!-- ── ANIMATED BACKGROUND ── -->
+<div class="bg-canvas">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="grid-bg"></div>
+  <div class="dna-wrap">
+    <svg class="dna-strand" id="dnasvg" viewBox="0 0 200 2000" xmlns="http://www.w3.org/2000/svg"></svg>
+    <svg class="dna-strand" id="dnasvg2" viewBox="0 0 200 2000" xmlns="http://www.w3.org/2000/svg"></svg>
   </div>
+</div>
 
-  <!-- ── APP SHELL ── -->
-  <div class="shell">
+<!-- ── TOAST NOTIFICATIONS ── -->
+<div id="toastContainer" class="toast-container"></div>
 
-    <!-- HEADER -->
-    <header>
-      <div class="logo-mark">⚕</div>
-      <div class="brand">
-        <h1>MedClear</h1>
-        <p>AI-powered medical report explainer — plain language, instant clarity</p>
-      </div>
-    </header>
+<!-- ── SHELL ── -->
+<div class="shell">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo-mark">⚕</div>
+    <div class="brand">
+      <h1>MedClear</h1>
+      <p>AI-powered health platform — clarity, guidance, and your companion Meddie</p>
+    </div>
+    <nav class="header-nav">
+      <button class="nav-btn active" onclick="showView('analyze')" id="navAnalyze">Analyze</button>
+      <button class="nav-btn" onclick="showView('history')" id="navHistory">History <span id="historyBadge" class="badge" style="display:none">0</span></button>
+    </nav>
+  </header>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- VIEW: ANALYZE                                -->
+  <!-- ════════════════════════════════════════════ -->
+  <div id="viewAnalyze">
 
     <!-- INPUT SECTION -->
     <div id="inputSection">
@@ -40,9 +52,9 @@
         <h2>Drop your medical report here</h2>
         <p>Lab results, prescriptions, discharge summaries, blood work — anything medical</p>
         <label class="btn-file" for="fileInput">📎 Choose file (PDF or TXT)</label>
-        <input type="file" id="fileInput" accept=".txt,.pdf,.csv" />
+        <input type="file" id="fileInput" accept=".txt,.pdf" />
         <div id="filePill" style="display:none">
-          <span class="file-pill">📄 <span id="fileName"></span></span>
+          <span class="file-pill">📄 <span id="fileName"></span> <button onclick="clearFile()" class="pill-remove">✕</button></span>
         </div>
       </div>
 
@@ -55,50 +67,133 @@ CBC Results:
 Hemoglobin: 10.2 g/dL (Reference: 12.0–16.0)
 WBC: 11,500 /μL (Reference: 4,500–11,000)
 Platelets: 145,000 /μL (Reference: 150,000–400,000)
-..."></textarea>
+Blood Pressure: 145/92 mmHg"></textarea>
 
-      <button class="btn-primary" id="analyzeBtn">
+      <div id="inputError" class="input-error" style="display:none"></div>
+
+      <button class="btn-primary" id="analyzeBtn" onclick="analyzeReport()">
         ✦ Analyze My Report
       </button>
     </div>
 
-    <!-- LOADING STATE -->
+    <!-- LOADING -->
     <div class="loading-state" id="loadingState">
-      <div class="dna-loader">
-        <canvas id="loaderCanvas" width="60" height="120"></canvas>
-      </div>
+      <canvas id="loaderCanvas" width="60" height="120"></canvas>
       <div class="loading-label">Analyzing your report…</div>
-      <div class="loading-sub" id="loadingStep">Reading values and references</div>
+      <div class="loading-sub" id="loadingStep">Reading values and reference ranges</div>
       <div class="progress-bar"><div class="progress-fill"></div></div>
     </div>
 
-    <!-- RESULTS SECTION -->
-    <div id="results">
+    <!-- RESULTS -->
+    <div id="results" style="display:none">
+
+      <!-- Risk Banner -->
+      <div id="riskBanner" class="risk-banner"></div>
+
+      <!-- Summary -->
       <div class="section-label">Summary</div>
       <div class="summary-card">
         <h3 id="summaryTitle">Report Analysis</h3>
         <p id="summaryText"></p>
       </div>
 
-      <div class="section-label">Findings Breakdown</div>
+      <!-- Action Bar -->
+      <div class="action-bar">
+        <button class="btn-action" onclick="exportPDF()">⬇ Download PDF Report</button>
+        <button class="btn-action" onclick="scrollToSection('findingsSection')">📊 View Findings</button>
+        <button class="btn-action" onclick="scrollToSection('meddieSection')">💬 Ask Meddie</button>
+        <button class="btn-action" onclick="scrollToSection('doctorsSection')">📍 Find Doctors</button>
+      </div>
+
+      <!-- Findings -->
+      <div class="section-label" id="findingsSection">Findings Breakdown</div>
       <div class="findings-grid" id="findingsGrid"></div>
 
+      <!-- Lifestyle -->
+      <div class="section-label">Lifestyle Recommendations</div>
+      <div class="lifestyle-note">✨ Personalized wellness guidance based on your report — not medical advice.</div>
+      <div class="lifestyle-grid" id="lifestyleGrid"></div>
+
+      <!-- Questions -->
       <div class="section-label">Questions to Ask Your Doctor</div>
       <div class="questions-list">
         <h3>💬 Suggested questions</h3>
         <div id="questionsList"></div>
       </div>
 
-      <div class="disclaimer">
-        ⚠️ <strong>This is not medical advice.</strong> MedClear is an AI tool for educational purposes only.
-        Always consult a qualified healthcare professional for diagnosis, treatment, or any medical decisions.
+      <!-- Meddie Chatbot -->
+      <div class="section-label" id="meddieSection">Meddie — Your AI Health Companion</div>
+      <div class="meddie-card">
+        <div class="meddie-header">
+          <div class="meddie-avatar">🤖</div>
+          <div>
+            <div class="meddie-name">Meddie</div>
+            <div class="meddie-status"><span class="status-dot"></span> Ready to help</div>
+          </div>
+          <div class="meddie-disclaimer-badge">Educational only</div>
+        </div>
+        <div class="chat-window" id="chatWindow">
+          <div class="chat-msg meddie-msg" id="meddieGreeting">
+            <div class="msg-avatar">🤖</div>
+            <div class="msg-bubble">
+              Hi! I'm Meddie, your AI health companion. I've reviewed your report and I'm ready to help you understand it. Ask me anything — like <em>"Why is my hemoglobin low?"</em> or <em>"What does high WBC mean?"</em>
+            </div>
+          </div>
+        </div>
+        <div class="chat-typing" id="chatTyping" style="display:none">
+          <div class="msg-avatar">🤖</div>
+          <div class="typing-dots"><span></span><span></span><span></span></div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Ask Meddie about your report…" onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendChat(); }" maxlength="500" />
+          <button class="chat-send-btn" onclick="sendChat()" id="chatSendBtn">→</button>
+        </div>
+        <div class="chat-disclaimer">⚠️ Meddie provides educational information only. Always consult a qualified healthcare professional for medical decisions.</div>
       </div>
 
-      <button class="btn-reset" id="resetBtn">← Analyze another report</button>
+      <!-- Nearby Doctors -->
+      <div class="section-label" id="doctorsSection">Nearby Specialist Recommendations</div>
+      <div class="doctors-card" id="doctorsCard">
+        <div class="doctors-header">
+          <div>
+            <div class="doctors-title">Find doctors near you</div>
+            <div class="doctors-sub" id="doctorsSpecialtySub">Based on your report findings</div>
+          </div>
+          <button class="btn-locate" id="locateBtn" onclick="findDoctors()">📍 Use My Location</button>
+        </div>
+        <div id="doctorsLoading" style="display:none" class="doctors-loading">
+          <div class="mini-spinner"></div> Finding nearby specialists…
+        </div>
+        <div id="doctorsList"></div>
+        <div id="doctorsEmpty" style="display:none" class="doctors-empty">
+          <p>No facilities found nearby. <a id="gmapsLink" href="#" target="_blank" class="link-accent">Search on Google Maps →</a></p>
+        </div>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="disclaimer">
+        ⚠️ <strong>This is not medical advice.</strong> MedClear is an AI tool for educational purposes only. Always consult a qualified healthcare professional for diagnosis, treatment, or any medical decisions.
+      </div>
+
+      <button class="btn-reset" onclick="resetApp()">← Analyze another report</button>
     </div>
+  </div>
 
-  </div><!-- /.shell -->
+  <!-- ════════════════════════════════════════════ -->
+  <!-- VIEW: HISTORY                                -->
+  <!-- ════════════════════════════════════════════ -->
+  <div id="viewHistory" style="display:none">
+    <div class="section-label">Health History</div>
+    <div id="historyEmpty" class="history-empty" style="display:none">
+      <span style="font-size:36px">📂</span>
+      <p>No past analyses yet. Analyze a report to see your history here.</p>
+      <button class="btn-primary" style="width:auto;padding:12px 28px" onclick="showView('analyze')">Analyze a Report</button>
+    </div>
+    <div id="historyList" class="history-list"></div>
+  </div>
 
-  <script src="script.js"></script>
+</div><!-- /shell -->
+
+<script src="script.js"></script>
 </body>
 </html>
