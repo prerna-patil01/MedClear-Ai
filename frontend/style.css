@@ -412,6 +412,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  overflow: hidden; /* the screen itself must not scroll — only content-scroll does */
 }
 
 /* HEADER */
@@ -529,17 +530,18 @@ body {
 .layout {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
-  gap: 10px;
-  padding: 10px;
+  gap: 12px;
+  padding: 12px;
+  /* Take all remaining height after the 58px header */
   flex: 1;
-  min-height: 0;
+  min-height: 0;   /* critical: stops the grid from blowing past its flex container */
   overflow: hidden;
 }
 
 .panel-left {
   min-height: 0;
   border-radius: var(--r-lg);
-  overflow: hidden;
+  overflow: hidden;          /* intentional: clips the rounded corners of the panel bg */
   background: rgba(255,252,240,0.025);
   border: 1px solid var(--border);
   display: flex;
@@ -553,16 +555,18 @@ body {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  /* no gap here — content-scroll is the only child that matters */
+  overflow: hidden; /* keeps the flex container from leaking */
 }
 
 .content-scroll {
   flex: 1;
+  min-height: 0;           /* required: lets flex child scroll instead of grow */
   overflow-y: auto;
-  padding-right: 4px;
+  padding: 2px 6px 16px 2px; /* bottom pad so last card isn't flush */
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;               /* consistent 16px between every card */
 }
 
 .content-scroll::-webkit-scrollbar { width: 5px; }
@@ -596,12 +600,16 @@ body {
   background: rgba(255,252,240,0.028);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 20px 22px;
+  padding: 22px 24px;
   transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.25s ease;
   position: relative;
-  overflow: hidden;
+  /* overflow: visible — never clip card content */
+  overflow: visible;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  /* Cards must never compress — height is purely content-driven */
+  flex-shrink: 0;
+  width: 100%;
 }
 
 .card::before {
@@ -610,6 +618,9 @@ body {
   top: 0; left: 0; right: 0;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255,252,240,0.07), transparent);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .card::after {
@@ -622,6 +633,7 @@ body {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.4s ease;
+  z-index: 0;
 }
 
 .card:hover {
@@ -636,7 +648,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+  position: relative;
+  z-index: 2;
 }
 
 .card-title {
@@ -645,6 +659,8 @@ body {
   font-weight: 600;
   color: var(--text);
   letter-spacing: 0.01em;
+  position: relative;
+  z-index: 2;
 }
 
 .card-icon {
@@ -654,6 +670,9 @@ body {
   padding: 3px 10px;
   border-radius: 6px;
   letter-spacing: 0.04em;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
 }
 
 .warn-icon {
@@ -679,24 +698,30 @@ body {
   color: var(--text2);
   line-height: 1.75;
   letter-spacing: 0.01em;
+  position: relative;
+  z-index: 2;
 }
 
 /* Findings grid */
 .findings-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 9px;
+  gap: 10px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .finding-item {
   background: rgba(0,0,0,0.18);
   border: 1px solid rgba(200,169,110,0.1);
   border-radius: var(--r-sm);
-  padding: 13px 14px;
+  padding: 14px 15px;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, transform 0.2s;
   position: relative;
-  overflow: hidden;
+  overflow: hidden;          /* clip the ::before accent bar only — item is safe, content fits */
+  min-height: 72px;          /* prevents zero-height collapse before JS populates */
 }
 
 .finding-item::before {
@@ -749,7 +774,10 @@ body {
 .recommendations-list {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 10px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .abnormal-item,
@@ -757,12 +785,14 @@ body {
   background: rgba(0,0,0,0.18);
   border-left: 2px solid var(--rouge);
   border-radius: 0 var(--r-sm) var(--r-sm) 0;
-  padding: 12px 14px;
+  padding: 13px 15px;
   font-size: 12.5px;
   font-weight: 300;
   color: var(--text2);
-  line-height: 1.55;
+  line-height: 1.6;
   transition: background 0.2s;
+  /* Never clip — content must show */
+  overflow: visible;
 }
 
 .abnormal-item:hover,
@@ -778,9 +808,12 @@ body {
 .questions-list {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 10px;
   list-style: none;
   counter-reset: q-counter;
+  width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .questions-list li {
@@ -788,15 +821,17 @@ body {
   background: rgba(0,0,0,0.15);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  padding: 12px 12px 12px 42px;
+  padding: 13px 13px 13px 44px;
   font-size: 12.5px;
   font-weight: 300;
   color: var(--text2);
   position: relative;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, color 0.2s;
-  line-height: 1.55;
+  line-height: 1.6;
   letter-spacing: 0.01em;
+  /* Content-height only — no fixed height, no overflow hidden */
+  overflow: visible;
 }
 
 .questions-list li::before {
