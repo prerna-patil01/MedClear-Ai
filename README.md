@@ -4,6 +4,7 @@ MedClear AI is an advanced AI-powered medical report intelligence platform that 
 
 Users can upload medical reports, laboratory results, prescriptions, discharge summaries, or report images and instantly receive an interactive analysis dashboard powered by modern AI.
 
+Application can be accessed here : https://med-clear-ai.vercel.app/
 ---
 
 ## Features
