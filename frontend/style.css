@@ -2,28 +2,19 @@
    OLD MONEY PALETTE — REFINED TOKENS
 ══════════════════════════════════════ */
 :root {
-  /* Backgrounds */
   --bg:        #0d0f0e;
   --bg2:       #111410;
   --bg3:       #161810;
-
-  /* Surfaces — glass */
   --surface:   rgba(255,252,240,0.035);
   --surface2:  rgba(255,252,240,0.06);
   --surface3:  rgba(255,252,240,0.09);
-
-  /* Borders */
   --border:    rgba(255,252,240,0.07);
   --border2:   rgba(255,252,240,0.14);
   --border3:   rgba(255,252,240,0.22);
-
-  /* Text */
   --text:      #f5f0e8;
   --text2:     rgba(245,240,232,0.58);
   --text3:     rgba(245,240,232,0.32);
   --text4:     rgba(245,240,232,0.18);
-
-  /* Old Money accents */
   --gold:      #c8a96e;
   --gold-lt:   #e2c99a;
   --gold-dk:   #8a6e3d;
@@ -33,28 +24,19 @@
   --rouge:     #b05c5c;
   --rouge-lt:  #d98080;
   --slate:     #6e8a9e;
-
-  /* Semantic */
   --accent:    var(--gold);
   --accent-lt: var(--gold-lt);
   --danger:    var(--rouge);
   --success:   var(--sage);
-
-  /* Typography */
   --font-d: 'Cormorant Garamond', Georgia, serif;
   --font-b: 'Jost', sans-serif;
   --font-m: 'DM Mono', monospace;
-
-  /* Spacing */
   --r-sm: 10px;
   --r-md: 14px;
   --r-lg: 20px;
   --r-xl: 26px;
 }
 
-/* ══════════════════════════════════════
-   BASE RESET
-══════════════════════════════════════ */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { height: 100%; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 
@@ -71,9 +53,6 @@ body {
   background-attachment: fixed;
 }
 
-/* ══════════════════════════════════════
-   CURSOR
-══════════════════════════════════════ */
 #cursor-dot {
   position: fixed;
   width: 7px;
@@ -99,9 +78,6 @@ body {
   transform: translate(-50%, -50%);
 }
 
-/* ══════════════════════════════════════
-   SCREENS
-══════════════════════════════════════ */
 .screen {
   position: fixed;
   inset: 0;
@@ -115,9 +91,6 @@ body {
   pointer-events: auto;
 }
 
-/* ══════════════════════════════════════
-   UPLOAD SCREEN
-══════════════════════════════════════ */
 #upload-screen {
   background:
     radial-gradient(ellipse 90% 55% at 50% -5%, rgba(200,169,110,0.09), transparent 70%),
@@ -178,10 +151,7 @@ body {
   backdrop-filter: blur(28px) saturate(140%);
   -webkit-backdrop-filter: blur(28px) saturate(140%);
   padding: 40px 38px;
-  box-shadow:
-    0 24px 64px rgba(0,0,0,0.45),
-    0 1px 0 rgba(255,252,240,0.08) inset,
-    0 -1px 0 rgba(0,0,0,0.3) inset;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.45), 0 1px 0 rgba(255,252,240,0.08) inset, 0 -1px 0 rgba(0,0,0,0.3) inset;
   position: relative;
   overflow: hidden;
 }
@@ -398,9 +368,6 @@ body {
   text-align: center;
 }
 
-/* ══════════════════════════════════════
-   RESULTS SCREEN
-══════════════════════════════════════ */
 #results-screen {
   display: flex;
   flex-direction: column;
@@ -516,9 +483,10 @@ body {
   color: var(--gold-lt);
 }
 
-/* ══════════════════════════════════════
-   LAYOUT
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════════
+   LAYOUT — RESPONSIVE GRID STRUCTURE
+══════════════════════════════════════════════════════════════════════════════ */
+
 .layout {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
@@ -583,9 +551,6 @@ body {
   box-shadow: 0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,252,240,0.04);
 }
 
-/* ══════════════════════════════════════
-   CARDS
-══════════════════════════════════════ */
 .card {
   background: rgba(255,252,240,0.028);
   border: 1px solid var(--border);
@@ -841,9 +806,6 @@ body {
   color: var(--text);
 }
 
-/* ══════════════════════════════════════
-   MEDDIE CHAT
-══════════════════════════════════════ */
 .meddie-container {
   display: flex;
   flex-direction: column;
@@ -1033,9 +995,6 @@ body {
 
 .chat-send:active { transform: scale(0.96); }
 
-/* ══════════════════════════════════════
-   ANATOMY PANEL
-══════════════════════════════════════ */
 .anatomy-container {
   position: relative;
   width: 100%;
@@ -1112,9 +1071,12 @@ body {
 .organ-tooltip.visible { opacity: 1; }
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   RESPONSIVE DESIGN — Media Queries
+   RESPONSIVE DESIGN — VERIFIED BREAKPOINTS
 ══════════════════════════════════════════════════════════════════════════════ */
 
+/* DESKTOP (1440px+) — No changes needed, base styles apply */
+
+/* LAPTOP (1024px–1439px) — Keep 3 columns, scale proportionally */
 @media (max-width: 1439px) {
   .upload-heading {
     font-size: 32px;
@@ -1126,11 +1088,6 @@ body {
 
   .card-text {
     font-size: 13px;
-  }
-
-  .findings-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 9px;
   }
 
   .layout {
@@ -1150,15 +1107,26 @@ body {
     font-size: 11px;
     padding: 6px 11px;
   }
+
+  .meddie-name {
+    font-size: 14px;
+  }
+
+  .findings-grid {
+    gap: 9px;
+  }
 }
 
+/* TABLET (768px–1023px) — Convert to 2-column layout */
 @media (max-width: 1023px) {
+  /* Change grid to 2 columns: Findings | Anatomy */
   .layout {
     grid-template-columns: 1fr 1.2fr;
     gap: 10px;
     padding: 10px;
   }
 
+  /* Meddie spans full width at top (collapsed) */
   .panel-left {
     grid-column: 1 / -1;
     max-height: 140px;
@@ -1175,12 +1143,14 @@ body {
     padding-bottom: 8px;
   }
 
+  /* Hide chat history on tablet */
   .chat-messages {
     max-height: 40px;
     margin-bottom: 6px;
     display: none;
   }
 
+  /* Hide prompts on tablet */
   .chat-prompts {
     display: none;
   }
@@ -1198,15 +1168,19 @@ body {
     height: 28px;
   }
 
-  .panel-right {
-    min-height: auto;
-  }
-
+  /* Center panel fills remaining space */
   .panel-center {
     grid-column: 1 / -1;
     order: 2;
   }
 
+  /* Right panel visible */
+  .panel-right {
+    min-height: auto;
+    max-height: 400px;
+  }
+
+  /* Header buttons become scrollable */
   .header-right {
     gap: 4px;
     overflow-x: auto;
@@ -1227,6 +1201,7 @@ body {
     flex-shrink: 0;
   }
 
+  /* Hide button text on tablet, keep icons */
   .header-btn span:last-child {
     display: none;
   }
@@ -1236,6 +1211,7 @@ body {
     height: 13px;
   }
 
+  /* Scale down cards */
   .card {
     padding: 16px 18px;
   }
@@ -1268,19 +1244,18 @@ body {
   .meddie-status {
     font-size: 9px;
   }
-
-  .meddie-header {
-    white-space: nowrap;
-  }
 }
 
+/* MOBILE (<768px) — Convert to single column with floating Meddie */
 @media (max-width: 767px) {
+  /* Single column layout */
   .layout {
     grid-template-columns: 1fr;
     gap: 8px;
     padding: 8px;
   }
 
+  /* Meddie becomes fixed floating button at bottom */
   .panel-left {
     position: fixed;
     bottom: 0;
@@ -1296,6 +1271,7 @@ body {
     overflow: hidden;
   }
 
+  /* Meddie panel opens when active class is added */
   .panel-left.active {
     height: 50vh;
     opacity: 1;
@@ -1305,18 +1281,21 @@ body {
     height: 100%;
   }
 
+  /* Findings first in visual order */
   .panel-center {
     order: 1;
   }
 
+  /* Anatomy second in visual order */
   .panel-right {
     order: 2;
     max-height: 300px;
     margin-top: 8px;
   }
 
+  /* Floating Meddie button */
   #meddie-btn {
-    display: flex;
+    display: flex !important;
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -1330,9 +1309,11 @@ body {
     justify-content: center;
     box-shadow: 0 8px 24px rgba(200,169,110,0.3);
     padding: 0 !important;
+    gap: 0 !important;
   }
 
-  #meddie-btn span {
+  /* Hide text on floating button */
+  #meddie-btn span:not(.meddie-avatar) {
     display: none;
   }
 
@@ -1341,6 +1322,7 @@ body {
     height: 20px;
   }
 
+  /* Header responsive */
   .header {
     height: auto;
     padding: 12px 14px;
@@ -1361,6 +1343,7 @@ body {
     font-size: 10px;
   }
 
+  /* Header buttons scrollable */
   .header-right {
     width: 100%;
     order: 2;
@@ -1377,6 +1360,7 @@ body {
     background: rgba(200,169,110,0.2);
   }
 
+  /* Icon-only buttons on mobile */
   .header-btn {
     font-size: 9px;
     padding: 5px 8px;
@@ -1397,6 +1381,7 @@ body {
     font-size: 9px;
   }
 
+  /* Stack cards vertically */
   .card {
     padding: 14px 16px;
   }
@@ -1413,6 +1398,7 @@ body {
     font-size: 12px;
   }
 
+  /* Single column for findings */
   .findings-grid {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -1500,6 +1486,7 @@ body {
     flex: 1;
   }
 
+  /* Hide cursor on touch devices */
   @media (hover: none) {
     #cursor-dot,
     #cursor-glow {
@@ -1512,6 +1499,7 @@ body {
   }
 }
 
+/* SMALL MOBILE (≤480px) — Extra compact */
 @media (max-width: 480px) {
   .header {
     height: auto;
@@ -1576,6 +1564,7 @@ body {
   }
 }
 
+/* LANDSCAPE (height <600px) — Optimize for landscape */
 @media (max-height: 600px) {
   .header {
     height: auto;
