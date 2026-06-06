@@ -1,50 +1,72 @@
-#  MedClear AI
+# MedClear AI
 
-MedClear AI is an intelligent medical report explainer that helps users understand complex healthcare documents in plain language.
+MedClear AI is an advanced AI-powered medical report intelligence platform that transforms complex healthcare reports into clear, actionable insights.
 
-Instead of struggling with medical jargon, users can upload a PDF report or paste report text and instantly receive:
-
-- Simple explanations of medical findings
-- Identification of abnormal values
-- Easy-to-understand summaries
-- Suggested questions to discuss with healthcare professionals
+Users can upload medical reports, laboratory results, prescriptions, discharge summaries, or report images and instantly receive an interactive analysis dashboard powered by modern AI.
 
 ---
 
 ## Features
 
-###  Medical Report Analysis
-- Upload PDF medical reports
-- Paste laboratory reports, prescriptions, or discharge summaries
-- Automatic text extraction from PDFs
+### AI Medical Report Analysis
+- Upload PDF reports
+- Upload medical report images
+- Paste report text directly
+- Automatic document extraction and processing
+- Intelligent medical data interpretation
 
-###  AI-Powered Interpretation
-- Uses Google's Gemini AI
-- Converts medical terminology into plain English
-- Generates patient-friendly explanations
+### AI-Powered Insights
+- Plain-language explanations of medical findings
+- Comprehensive AI-generated report summaries
+- Abnormal value detection
+- Risk assessment and severity analysis
+- Organ-specific impact visualization
 
-###  Structured Insights
-- Report summary
-- Findings breakdown
-- Status indicators:
-  - Normal
-  - High
-  - Low
-  - Informational
+### Interactive Anatomy Visualization
+- Interactive human anatomy panel
+- Organ highlighting based on report findings
+- Visual representation of affected body systems
+- Severity-based organ indicators
 
-###  Doctor Discussion Questions
-- Generates relevant follow-up questions
-- Helps patients prepare for appointments
+### Meddie AI Assistant
+- Built-in AI healthcare assistant
+- Ask questions about your report
+- Explain abnormal values
+- Understand medical terminology
+- Receive contextual follow-up guidance
 
-###  Modern UI
-- Futuristic medical-themed design
-- Animated DNA visualization
-- Responsive layout
-- Drag-and-drop file upload
+### Personalized Recommendations
+- Lifestyle recommendations
+- Dietary suggestions
+- Preventive healthcare guidance
+- Wellness improvement suggestions
+
+### Doctor Preparation Tools
+- Automatically generated questions for healthcare professionals
+- Appointment preparation assistance
+- Discussion point recommendations
+
+### Doctor Discovery
+- Find relevant specialists nearby
+- Specialty-based recommendations
+- Location-aware doctor search
+
+### PDF Export
+- Download professional report summaries
+- Export AI-generated insights
+- Share findings easily
+
+### Modern Dashboard Experience
+- Premium healthcare-inspired UI
+- Glassmorphism design system
+- Interactive analytics cards
+- Dark mode interface
+- Responsive design for desktop, tablet, and mobile
+- Smooth animations and micro-interactions
 
 ---
 
-##  Tech Stack
+## Tech Stack
 
 ### Frontend
 - HTML5
@@ -56,17 +78,26 @@ Instead of struggling with medical jargon, users can upload a PDF report or past
 - Flask
 - Flask-CORS
 
-### AI
-- Google Gemini API
+### AI Services
+- Groq API
+- OpenRouter API
+- Large Language Models for medical explanation and reasoning
 
-### PDF Processing
-- pdfplumber
+### Medical Report Processing
+- PDF extraction
+- Image processing
+- OCR support
+- Structured medical data parsing
+
+### Deployment
+- Frontend: Vercel
+- Backend: Render
 
 ---
 
-##  Project Structure
+## Project Structure
 
-text MedClear-AI/ │ ├── frontend/ │   ├── index.html │   ├── style.css │   └── script.js │ ├── backend/ │   ├── app.py │   ├── requirements.txt │   └── routes/ │ └── README.md 
+text MedClear-AI/ │ ├── frontend/ │   ├── index.html │   ├── style.css │   └── script.js │ ├── backend/ │   ├── app.py │   ├── extensions.py │   ├── requirements.txt │   │ │   └── routes/ │       ├── __init__.py │       ├── analyze.py │       ├── chat.py │       └── doctors.py │ ├── .gitignore └── README.md 
 
 ---
 
@@ -78,17 +109,25 @@ bash git clone https://github.com/prerna-patil01/MedClear-Ai.git cd MedClear-Ai
 
 ### Backend Setup
 
-bash cd backend  python -m venv venv  source venv/bin/activate 
+bash cd backend  python -m venv venv 
+
+#### Windows
+
+bash venv\Scripts\activate 
+
+#### Linux / macOS
+
+bash source venv/bin/activate 
 
 ### Install Dependencies
 
 bash pip install -r requirements.txt 
 
-### Create Environment File
+### Create Environment Variables
 
-Create a .env file inside the backend folder:
+Create a .env file inside the backend directory:
 
-env GEMINI_API_KEY=your_api_key_here 
+env GROQ_API_KEY=your_groq_api_key OPENROUTER_API_KEY=your_openrouter_api_key 
 
 ### Run Backend
 
@@ -100,28 +139,39 @@ text http://localhost:5000
 
 ---
 
-##  Usage
+## Usage
 
-1. Start the Flask backend
-2. Open frontend/index.html
-3. Upload a PDF report or paste report text
-4. Click Analyze My Report
-5. View AI-generated insights
+1. Start the backend server.
+2. Open the frontend application.
+3. Upload a medical report, image, or paste report text.
+4. Click Analyze Report.
+5. Review:
+   - AI Summary
+   - Key Findings
+   - Abnormal Values
+   - Risk Assessment
+   - Interactive Anatomy View
+   - Lifestyle Recommendations
+   - Questions for Your Doctor
+6. Chat with Meddie AI for additional explanations.
+7. Export insights as PDF if required.
 
 ---
 
-##  Disclaimer
+## Disclaimer
 
 MedClear AI is intended for educational and informational purposes only.
 
-The application does not provide medical diagnosis, treatment recommendations, or professional healthcare advice. Always seek guidance from qualified healthcare professionals for medical decisions.
+The application does not provide medical diagnoses, treatment plans, emergency medical advice, or professional healthcare recommendations.
+
+Always consult qualified healthcare professionals regarding medical conditions, treatment decisions, prescriptions, or healthcare concerns.
 
 ---
 
-##  Author
+## Author
 
 Prerna Patil
 
-Computer Science Undergraduate | AI & Software Development Enthusiast
+Computer Science Undergraduate • Software Development • Artificial Intelligence
 
-Built with curiosity, caffeine, and Gemini
+**Built with curiosity, caffeine, and countless late-night debugging sessions.**
