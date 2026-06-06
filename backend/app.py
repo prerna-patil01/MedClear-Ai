@@ -17,7 +17,8 @@ limiter.init_app(app)
 from routes.analyze import analyze_bp
 from routes.chat import chat_bp
 from routes.doctors import doctors_bp
-
+from diet import diet_bp
+app.register_blueprint(diet_bp)
 app.register_blueprint(analyze_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(doctors_bp)
