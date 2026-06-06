@@ -29,10 +29,11 @@ GROQ_TEXT_MODELS = [
     "gemma2-9b-it",
 ]
 
-# ─── Groq vision model cascade ──────────────────────────────────────────────
+# ─── Groq vision model cascade (updated — old models decommissioned) ─────────
 GROQ_VISION_MODELS = [
-    "llama-3.2-11b-vision-preview",
-    "llama-3.2-90b-vision-preview",
+    "meta-llama/llama-4-scout-17b-16e-instruct",      # ✅ current best vision model
+    "meta-llama/llama-4-maverick-17b-128e-instruct",   # ✅ fallback vision
+    "llama-3.2-11b-vision-preview",                    # ✅ last resort (may still be active)
 ]
 
 # ─── Accepted image extensions ──────────────────────────────────────────────
@@ -105,7 +106,7 @@ def prepare_image(file_bytes: bytes, ext: str) -> tuple[str, str]:
     mime = IMAGE_MIME.get(ext, "image/jpeg")
     try:
         img = Image.open(io.BytesIO(file_bytes))
-        # Convert RGBA/LA to RGB for JPEG compatibility
+        # Convert RGBA/LA/P to RGB for JPEG compatibility
         if img.mode in ("RGBA", "LA", "P"):
             img = img.convert("RGB")
         # Resize if too large (vision models work best up to ~1920px)
@@ -136,7 +137,7 @@ def validate_response(obj: dict) -> bool:
 
 
 def get_openrouter_free_models() -> list[str]:
-    """Dynamically fetch current free models from OpenRouter — never hardcodes stale IDs."""
+    """Dynamically fetch current free models from OpenRouter."""
     if not OR_KEY:
         return []
     try:
@@ -282,15 +283,15 @@ def call_vision_model(b64_image: str, mime: str) -> dict:
 @limiter.limit("8 per minute")
 def analyze():
     report_text = ""
-    is_image = False
-    image_b64 = None
-    image_mime = None
+    is_image    = False
+    image_b64   = None
+    image_mime  = None
 
     # --- File upload ---
     if "file" in request.files:
-        f = request.files["file"]
+        f        = request.files["file"]
         filename = (f.filename or "").lower()
-        ext = os.path.splitext(filename)[1]
+        ext      = os.path.splitext(filename)[1]
         file_bytes = f.read()
 
         if ext == ".pdf":
@@ -306,7 +307,7 @@ def analyze():
             report_text = extracted
 
         elif ext in IMAGE_EXTENSIONS:
-            is_image = True
+            is_image   = True
             image_b64, image_mime = prepare_image(file_bytes, ext)
 
         elif ext in (".txt", ".csv", ""):
@@ -322,7 +323,7 @@ def analyze():
 
     # --- JSON body ---
     elif request.is_json:
-        data = request.get_json(silent=True) or {}
+        data        = request.get_json(silent=True) or {}
         report_text = data.get("text", "").strip()
 
     # --- Form data ---
@@ -345,7 +346,6 @@ def analyze():
         if is_image:
             result = call_vision_model(image_b64, image_mime)
         else:
-            # Use up to 20,000 chars — enough for the longest lab reports
             prompt = f"Analyze this medical report:\n\n{report_text[:20000]}"
             result = call_text_model(prompt)
 
