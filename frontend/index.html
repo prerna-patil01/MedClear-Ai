@@ -5,43 +5,146 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MedClear — Health Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=Jost:wght@200;300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-<!-- CURSOR -->
 <div id="cursor-dot"></div>
 <div id="cursor-glow"></div>
 
-<!-- UPLOAD SCREEN -->
+<!-- ═══════════════════════════════════════════════════════
+     UPLOAD SCREEN — PREMIUM REDESIGN
+═══════════════════════════════════════════════════════ -->
 <div id="upload-screen" class="screen active">
-  <div class="upload-container">
-    <div class="upload-content">
-      <div class="upload-logo">
-        <div class="logo-icon">
-          <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+
+  <!-- Ambient background -->
+  <div class="upload-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="upload-noise"></div>
+    <div class="upload-lines"></div>
+  </div>
+
+  <!-- Split layout -->
+  <div class="upload-split">
+
+    <!-- ── LEFT: Brand hero ── -->
+    <div class="upload-hero">
+
+      <div class="hero-logo">
+        <div class="hero-logo-icon">
+          <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
             <path d="M20 4C20 4 32 12 32 20C32 28 20 36 20 36C20 36 8 28 8 20C8 12 20 4 20 4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
             <path d="M12 20h16M20 12v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </div>
-        <h1 class="logo-text">MedClear</h1>
+        <span class="hero-logo-text">MedClear</span>
+        <span class="hero-badge">AI</span>
       </div>
 
-      <div class="upload-main">
-        <h2 class="upload-heading">Understand your medical<br><em>report in seconds</em></h2>
-        <p class="upload-subheading">Upload a PDF, photo, or paste text. Get AI-powered clarity instantly.</p>
+      <div class="hero-headline-wrap">
+        <h1 class="hero-headline">
+          Your medical<br/>
+          report,<br/>
+          <em>decoded.</em>
+        </h1>
+        <div class="hero-line"></div>
+      </div>
+
+      <p class="hero-sub">
+        Upload any lab result, scan, or discharge summary. Our AI instantly transforms complex medical data into clear, actionable insights — in plain English.
+      </p>
+
+      <div class="hero-features">
+        <div class="hero-feature">
+          <div class="hero-feature-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div>
+            <strong>Instant Analysis</strong>
+            <span>AI reads your report in under 30 seconds</span>
+          </div>
+        </div>
+        <div class="hero-feature">
+          <div class="hero-feature-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <strong>100% Private</strong>
+            <span>Your data is never stored or shared</span>
+          </div>
+        </div>
+        <div class="hero-feature">
+          <div class="hero-feature-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="10" r="4" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <strong>Ask Meddie AI</strong>
+            <span>Chat with your personal health assistant</span>
+          </div>
+        </div>
+        <div class="hero-feature">
+          <div class="hero-feature-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <strong>Organ Insights</strong>
+            <span>Interactive anatomy highlights affected areas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <strong>30s</strong>
+          <span>Analysis time</span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <strong>10K+</strong>
+          <span>Reports analysed</span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <strong>100%</strong>
+          <span>Private & secure</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── RIGHT: Upload card ── -->
+    <div class="upload-form-wrap">
+      <div class="upload-card">
+
+        <div class="upload-card-top">
+          <h2 class="upload-card-title">Analyse your report</h2>
+          <p class="upload-card-sub">PDF, JPG, PNG or plain text</p>
+        </div>
 
         <div class="upload-tabs">
           <button class="upload-tab active" data-tab="file">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
               <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
               <path d="M8 10h8M8 14h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
             Upload File
           </button>
           <button class="upload-tab" data-tab="text">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
               <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
               <path d="M8 10h8M8 14h8M8 18h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
@@ -49,47 +152,82 @@
           </button>
         </div>
 
+        <!-- FILE UPLOAD AREA -->
         <div class="upload-area" id="upload-file-area">
           <div class="upload-zone" id="drop-zone">
-            <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-              <rect x="8" y="4" width="32" height="40" rx="3" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M16 20h16M16 28h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            <p class="upload-zone-title">Drop your medical report here</p>
-            <p class="upload-zone-sub">or click to browse — PDF, JPG, PNG supported</p>
-            <label class="upload-btn">
+            <div class="drop-icon">
+              <svg width="28" height="28" viewBox="0 0 48 48" fill="none">
+                <path d="M24 8v20M16 20l8-12 8 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 36h32" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <rect x="8" y="36" width="32" height="4" rx="1" fill="currentColor" opacity="0.1"/>
+              </svg>
+            </div>
+            <p class="drop-title">Drop your file here</p>
+            <p class="drop-sub">or click to browse from your device</p>
+            <div class="drop-types">
+              <span>PDF</span>
+              <span>JPG</span>
+              <span>PNG</span>
+              <span>TXT</span>
+            </div>
+            <label class="drop-btn">
               Choose File
               <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png,.txt" hidden/>
             </label>
           </div>
+          <div class="file-selected" id="file-selected" style="display:none;">
+            <div class="file-selected-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="file-selected-info">
+              <strong id="file-selected-name">report.pdf</strong>
+              <span id="file-selected-size">2.4 MB</span>
+            </div>
+            <button class="file-remove" id="file-remove">✕</button>
+          </div>
         </div>
 
+        <!-- TEXT AREA -->
         <div class="upload-area" id="upload-text-area" style="display: none;">
-          <textarea id="report-text" class="upload-textarea" placeholder="Paste your lab results, discharge summary, or any medical text here…"></textarea>
+          <textarea id="report-text" class="upload-textarea" placeholder="Paste your lab results, discharge summary, prescription, or any medical text here…"></textarea>
         </div>
 
+        <!-- SUBMIT BUTTON -->
         <button class="upload-submit" id="analyze-btn">
           <span class="submit-shine"></span>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span>Analyse Report</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="opacity:0.7">
-            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <span class="submit-content">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14l-4-4 1.41-1.41L11 13.17l6.59-6.59L19 8l-8 8z" fill="currentColor"/>
+            </svg>
+            Analyse Report
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="opacity:0.7;">
+              <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
         </button>
 
-        <p class="upload-disclaimer">Educational use only &middot; Not a medical diagnosis</p>
+        <div class="upload-trust">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          Educational use only &middot; Not a medical diagnosis &middot; Data never stored
+        </div>
+
       </div>
     </div>
+
   </div>
 </div>
 
-<!-- RESULTS SCREEN -->
+<!-- ═══════════════════════════════════════════════════════
+     RESULTS SCREEN — UNCHANGED
+═══════════════════════════════════════════════════════ -->
 <div id="results-screen" class="screen">
 
-  <!-- HEADER -->
   <header class="header">
     <div class="header-left">
       <button class="header-back" id="back-btn">
@@ -129,17 +267,15 @@
       </button>
       <button class="header-btn" id="doctor-btn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 3c2.2 0 4 1.8 4 4s-1.8 4-4 4-4-1.8-4-4 1.8-4 4-4zm0 12c-2.7 0-5.1-1.3-6.6-3.3.1-1.8 3.6-2.7 6.6-2.7s6.5.9 6.6 2.7C17.1 15.7 14.7 17 12 17z" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
         Find Doctor
       </button>
     </div>
   </header>
 
-  <!-- MAIN LAYOUT -->
   <div class="layout">
-
-    <!-- LEFT: MEDDIE CHAT -->
     <aside class="panel-left">
       <div class="meddie-container">
         <div class="meddie-header">
@@ -154,16 +290,13 @@
             <p class="meddie-status"><span class="status-dot"></span>Online &amp; Ready</p>
           </div>
         </div>
-
         <div class="chat-messages" id="chat-messages"></div>
-
         <div class="chat-prompts" id="chat-prompts">
           <button class="prompt-chip" data-prompt="What are the most critical findings?">Critical findings</button>
           <button class="prompt-chip" data-prompt="Explain abnormal values simply">Abnormal values</button>
           <button class="prompt-chip" data-prompt="What lifestyle changes should I make?">Lifestyle tips</button>
           <button class="prompt-chip" data-prompt="How urgent is this situation?">How urgent?</button>
         </div>
-
         <div class="chat-input-area">
           <input type="text" id="chat-input" class="chat-input" placeholder="Ask Meddie anything…" autocomplete="off"/>
           <button class="chat-send" id="chat-send">
@@ -175,10 +308,8 @@
       </div>
     </aside>
 
-    <!-- CENTER: FINDINGS & CONTENT -->
     <main class="panel-center">
       <div class="content-scroll">
-        <!-- AI Summary -->
         <div class="card card-summary">
           <div class="card-header">
             <h2 class="card-title">AI Summary</h2>
@@ -186,8 +317,6 @@
           </div>
           <p class="card-text" id="summary-text">Analysing your report…</p>
         </div>
-
-        <!-- Key Findings -->
         <div class="card card-findings">
           <div class="card-header">
             <h2 class="card-title">Key Findings</h2>
@@ -195,26 +324,20 @@
           </div>
           <div class="findings-grid" id="findings-grid"></div>
         </div>
-
-        <!-- Abnormal Values -->
-        <div class="card card-abnormal" id="abnormal-card" style="display: none;">
+        <div class="card card-abnormal" id="abnormal-card" style="display:none;">
           <div class="card-header">
             <h2 class="card-title">Abnormal Values</h2>
             <span class="card-icon warn-icon">⚠</span>
           </div>
           <div class="abnormal-list" id="abnormal-list"></div>
         </div>
-
-        <!-- Recommendations -->
-        <div class="card card-recommendations" id="recommendations-card" style="display: none;">
+        <div class="card card-recommendations" id="recommendations-card" style="display:none;">
           <div class="card-header">
             <h2 class="card-title">Recommendations</h2>
             <span class="card-icon">✦</span>
           </div>
           <div class="recommendations-list" id="recommendations-list"></div>
         </div>
-
-        <!-- Doctor Questions -->
         <div class="card card-questions">
           <div class="card-header">
             <h2 class="card-title">Questions for Your Doctor</h2>
@@ -225,7 +348,6 @@
       </div>
     </main>
 
-    <!-- RIGHT: ANATOMY -->
     <aside class="panel-right">
       <div class="anatomy-container">
         <div class="anatomy-label">Interactive Anatomy</div>
@@ -233,7 +355,6 @@
         <div id="organ-tooltip" class="organ-tooltip"></div>
       </div>
     </aside>
-
   </div>
 </div>
 
