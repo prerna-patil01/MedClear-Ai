@@ -3,603 +3,239 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MedClear — AI Medical Intelligence</title>
+<title>MedClear — Health Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
+<!-- CURSOR -->
 <div id="cursor-dot"></div>
-<div id="cursor-trail"></div>
 <div id="cursor-glow"></div>
 
-<canvas id="bg-canvas"></canvas>
-<div id="organ-tip" class="organ-tip"></div>
-
-<!-- ═══════════ UPLOAD ═══════════ -->
+<!-- UPLOAD SCREEN -->
 <div id="upload-screen" class="screen active">
-  <div class="upload-bg-glow"></div>
-  <div class="upload-wrap">
-    <div class="upload-logo">
-      <div class="u-logo-icon">
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-          <path d="M10 2C10 2 17 6.5 17 10C17 13.5 10 18 10 18C10 18 3 13.5 3 10C3 6.5 10 2 10 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-          <path d="M6.5 10h7M10 6.5v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <span class="u-logo-text">MedClear</span>
-      <span class="u-ai-badge">AI</span>
-    </div>
-
-    <div class="upload-card">
-      <div class="uc-inner">
-        <div class="uc-left">
-          <div class="uc-eyebrow">AI-Powered Medical Analysis</div>
-          <h1 class="uc-heading">Understand your<br/><em>medical reports</em><br/>in seconds.</h1>
-          <p class="uc-sub">Upload a PDF, photo, or paste text. Get instant AI-powered clarity on your health data.</p>
-          <div class="uc-trust-row">
-            <span class="trust-pill"><span class="trust-dot accent"></span>AI Analysis</span>
-            <span class="trust-pill"><span class="trust-dot purple"></span>Body Map</span>
-            <span class="trust-pill"><span class="trust-dot teal"></span>Find Specialists</span>
-          </div>
+  <div class="upload-container">
+    <div class="upload-content">
+      <div class="upload-logo">
+        <div class="logo-icon">
+          <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+            <path d="M20 4C20 4 32 12 32 20C32 28 20 36 20 36C20 36 8 28 8 20C8 12 20 4 20 4Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M12 20h16M20 12v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
         </div>
-        <div class="uc-right">
-          <div class="uc-tabs">
-            <button class="uc-tab active" data-upanel="file">
-              <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="12" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-              File Upload
-            </button>
-            <button class="uc-tab" data-upanel="text">
-              <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 5.5h6M5 8.5h6M5 11.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-              Paste Text
-            </button>
-          </div>
+        <h1 class="logo-text">MedClear</h1>
+      </div>
 
-          <div class="upanel active" id="upanel-file">
-            <div class="drop-zone" id="drop-zone">
-              <div class="dz-ring"></div>
-              <div class="dz-icon">
-                <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect x="6" y="3" width="20" height="26" rx="3" stroke="currentColor" stroke-width="1.4"/><path d="M11 13h10M11 18h7M11 23h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M21 3v8h8" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
-              </div>
-              <p class="dz-title">Drop your medical report here</p>
-              <p class="dz-sub">PDF · JPG · PNG · TXT supported</p>
-              <label class="dz-btn" for="file-input">Choose File</label>
-              <input type="file" id="file-input" accept=".pdf,.txt,.jpg,.jpeg,.png,.webp" hidden/>
-            </div>
-          </div>
+      <div class="upload-main">
+        <h2 class="upload-heading">Understand your medical report in seconds</h2>
+        <p class="upload-subheading">Upload a PDF, photo, or paste text. Get AI-powered clarity instantly.</p>
 
-          <div class="upanel" id="upanel-text">
-            <textarea id="report-text" class="uc-textarea" placeholder="Paste your lab results, discharge summary, or any medical text here…" rows="6"></textarea>
-          </div>
-
-          <button class="analyze-btn" id="analyze-btn">
-            <span class="ab-shine"></span>
-            <svg width="15" height="15" viewBox="0 0 18 18" fill="none" style="position:relative;z-index:1"><circle cx="9" cy="9" r="7.5" stroke="currentColor" stroke-width="1.3"/><path d="M9 5.5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span style="position:relative;z-index:1">Analyze Report</span>
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="position:relative;z-index:1;opacity:.6"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="upload-tabs">
+          <button class="upload-tab active" data-tab="file">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 10h8M8 14h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Upload File
           </button>
-          <p class="uc-note">Educational use only · Not a medical diagnosis</p>
+          <button class="upload-tab" data-tab="text">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 10h8M8 14h8M8 18h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Paste Text
+          </button>
         </div>
+
+        <div class="upload-area" id="upload-file-area">
+          <div class="upload-zone" id="drop-zone">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <rect x="8" y="4" width="32" height="40" rx="3" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M16 20h16M16 28h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <p class="upload-zone-title">Drop your medical report here</p>
+            <p class="upload-zone-sub">or click to browse — PDF, JPG, PNG supported</p>
+            <label class="upload-btn">
+              Choose File
+              <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png,.txt" hidden/>
+            </label>
+          </div>
+        </div>
+
+        <div class="upload-area" id="upload-text-area" style="display: none;">
+          <textarea id="report-text" class="upload-textarea" placeholder="Paste your lab results, discharge summary, or any medical text here…"></textarea>
+        </div>
+
+        <button class="upload-submit" id="analyze-btn">
+          <span class="submit-shine"></span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Analyze Report</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="opacity:0.6">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <p class="upload-disclaimer">Educational use only · Not a medical diagnosis</p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════ LOADING ═══════════ -->
-<div id="loading-screen" class="screen">
-  <div class="loading-wrap">
-    <div class="loading-orb">
-      <div class="lo-r r1"></div><div class="lo-r r2"></div><div class="lo-r r3"></div>
-      <div class="lo-core">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 2C10 2 17 6.5 17 10C17 13.5 10 18 10 18C10 18 3 13.5 3 10C3 6.5 10 2 10 2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-      </div>
-    </div>
-    <h2 class="loading-title">Analyzing your report</h2>
-    <p class="loading-msg" id="loading-msg">Reading values and cross-referencing…</p>
-    <div class="loading-track"><div class="loading-fill" id="loading-bar"></div></div>
-    <div class="loading-steps">
-      <div class="lstep active" id="ls-0"><span class="ls-dot"></span>Extracting data</div>
-      <div class="lstep" id="ls-1"><span class="ls-dot"></span>AI analysis</div>
-      <div class="lstep" id="ls-2"><span class="ls-dot"></span>Generating insights</div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ DASHBOARD ═══════════ -->
+<!-- RESULTS SCREEN -->
 <div id="results-screen" class="screen">
 
-  <!-- Topbar -->
-  <header class="topbar">
-    <div class="tb-left">
-      <button class="tb-back" id="back-btn">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <button class="header-back" id="back-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </button>
-      <div class="tb-logo"><span class="tb-pulse"></span>MedClear<span class="tb-ai">AI</span></div>
-      <div class="tb-divider"></div>
-      <span class="tb-title" id="report-title">Medical Report</span>
+      <div class="header-title">
+        <h1 id="report-name">Medical Analysis</h1>
+        <p class="header-date" id="report-date"></p>
+      </div>
     </div>
-    <div class="tb-right">
-      <button class="tb-ghost" id="history-btn">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        History
+
+    <div class="header-right">
+      <button class="header-btn" id="risk-btn">
+        <span id="risk-badge" class="risk-badge">—</span>
+        <span>Risk Score</span>
       </button>
-      <button class="tb-ghost" id="doctors-open-btn">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM3 14c0-2.2 2.2-4 5-4s5 1.8 5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        Specialists
+      <button class="header-btn" id="meddie-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="10" r="4" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Ask Meddie
       </button>
-      <button class="tb-cta" id="export-btn">
-        <svg width="12" height="12" viewBox="0 0 15 15" fill="none"><path d="M7.5 2v8M4.5 7l3 3 3-3M2.5 12.5h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Export PDF
+      <button class="header-btn" id="pdf-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2v10M7 7l5 5 5-5M7 19h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Download PDF
+      </button>
+      <button class="header-btn" id="diet-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 16c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        Diet Plan
+      </button>
+      <button class="header-btn" id="doctor-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 3c2.2 0 4 1.8 4 4s-1.8 4-4 4-4-1.8-4-4 1.8-4 4-4zm0 12c-2.7 0-5.1-1.3-6.6-3.3.1-1.8 3.6-2.7 6.6-2.7s6.5.9 6.6 2.7C17.1 15.7 14.7 17 12 17z" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        Find Doctor
       </button>
     </div>
   </header>
 
-  <!-- 3-panel -->
-  <div class="dash-grid">
+  <!-- MAIN LAYOUT -->
+  <div class="layout">
 
-    <!-- ── LEFT ── -->
+    <!-- LEFT: MEDDIE CHAT -->
     <aside class="panel-left">
+      <div class="meddie-container">
+        <div class="meddie-header">
+          <div class="meddie-avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="10" r="4" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="meddie-name">Meddie AI</h3>
+            <p class="meddie-status">Online & Ready</p>
+          </div>
+        </div>
 
-      <!-- Risk gauge -->
-      <div class="pcard risk-card">
-        <div class="pcard-label">Risk Assessment</div>
-        <div class="gauge-wrap">
-          <svg viewBox="0 0 200 116" class="gauge-svg">
-            <defs>
-              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#00e5b0"/>
-                <stop offset="50%" stop-color="#f5a623"/>
-                <stop offset="100%" stop-color="#ff4d6d"/>
-              </linearGradient>
-            </defs>
-            <path d="M16 104 A86 86 0 0 1 184 104" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12" stroke-linecap="round"/>
-            <path id="gauge-arc" d="M16 104 A86 86 0 0 1 184 104" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="269" stroke-dashoffset="269" style="transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)"/>
-            <text id="gauge-num" x="100" y="90" text-anchor="middle" class="gauge-num-text">—</text>
-            <text x="100" y="108" text-anchor="middle" class="gauge-sub-text">/10</text>
-          </svg>
-        </div>
-        <div class="risk-meta">
-          <span class="risk-level-txt" id="risk-level">—</span>
-          <span class="risk-badge" id="risk-pill">Analyzing…</span>
-        </div>
-        <p class="risk-reason" id="risk-reason"></p>
-      </div>
+        <div class="chat-messages" id="chat-messages"></div>
 
-      <!-- Summary -->
-      <div class="pcard summary-card">
-        <div class="pcard-label">
-          <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-          AI Summary
+        <div class="chat-prompts" id="chat-prompts">
+          <button class="prompt-chip" data-prompt="What are the most critical findings?">Critical findings</button>
+          <button class="prompt-chip" data-prompt="Explain abnormal values simply">Abnormal values</button>
+          <button class="prompt-chip" data-prompt="What lifestyle changes should I make?">Lifestyle tips</button>
+          <button class="prompt-chip" data-prompt="How urgent is this situation?">How urgent?</button>
         </div>
-        <p class="summary-txt" id="summary-text">Analyzing your report…</p>
-      </div>
 
-      <!-- Specialists -->
-      <div class="pcard" id="spec-card" style="display:none">
-        <div class="pcard-label">Recommended Specialists</div>
-        <div class="spec-list" id="spec-list"></div>
-      </div>
-
-      <!-- Stats -->
-      <div class="pcard stats-row">
-        <div class="stat-item">
-          <div class="stat-icon si-teal"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M8 2v2M8 12v2M2 8h2M12 8h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
-          <span class="stat-lbl">Findings</span>
-          <span class="stat-val" id="stat-findings">—</span>
-        </div>
-        <div class="stat-item">
-          <div class="stat-icon si-purple"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 110 12A6 6 0 018 2z" stroke="currentColor" stroke-width="1.3"/><path d="M6 6.5c0-1.1.9-2 2-2s2 .9 2 2c0 1-.7 1.5-1.5 1.8M8 11v.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
-          <span class="stat-lbl">Questions</span>
-          <span class="stat-val" id="stat-q">—</span>
-        </div>
-        <div class="stat-item">
-          <div class="stat-icon si-amber"><svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 2c-1.5 2-4 3-4 6a4 4 0 008 0c0-3-2.5-4-4-6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg></div>
-          <span class="stat-lbl">Tips</span>
-          <span class="stat-val" id="stat-life">—</span>
+        <div class="chat-input-area">
+          <input type="text" id="chat-input" class="chat-input" placeholder="Ask Meddie anything…" autocomplete="off"/>
+          <button class="chat-send" id="chat-send">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
       </div>
-
-      <!-- Actions -->
-      <div class="pcard action-row">
-        <button class="action-btn" id="lifestyle-open-btn">
-          <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 2c-1.5 2-4 3-4 6a4 4 0 008 0c0-3-2.5-4-4-6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-          Lifestyle Tips
-        </button>
-        <button class="action-btn" id="questions-open-btn">
-          <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 2a6 6 0 110 12A6 6 0 018 2z" stroke="currentColor" stroke-width="1.3"/><path d="M6 6.5c0-1.1.9-2 2-2s2 .9 2 2c0 1-.7 1.5-1.5 1.8M8 11v.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-          Doctor Questions
-        </button>
-      </div>
-
     </aside>
 
-    <!-- ── CENTER ── -->
+    <!-- CENTER: FINDINGS & CONTENT -->
     <main class="panel-center">
-      <div class="body-stage">
-        <!-- Corner brackets -->
-        <span class="bracket tl"></span><span class="bracket tr"></span>
-        <span class="bracket bl"></span><span class="bracket br"></span>
-        <!-- Scan line -->
-        <div class="scan-line"></div>
-        <!-- View toggle -->
-        <div class="view-toggle">
-          <button class="vt-btn active" data-view="front">Front</button>
-          <button class="vt-btn" data-view="back">Back</button>
-          <button class="vt-btn" data-view="xray">X-Ray</button>
-        </div>
-        <!-- Body label -->
-        <div class="body-label-top">
-          <span class="blt-dot"></span>
-          <span id="body-hint">Interactive Anatomy · Hover organs for details</span>
+      <div class="content-scroll">
+        <!-- AI Summary -->
+        <div class="card card-summary">
+          <div class="card-header">
+            <h2 class="card-title">AI Summary</h2>
+            <span class="card-icon">✨</span>
+          </div>
+          <p class="card-text" id="summary-text">Analyzing your report…</p>
         </div>
 
-        <!-- THE BODY SVG -->
-        <div class="body-float-wrap">
-          <svg id="body-svg" viewBox="0 0 260 600" xmlns="http://www.w3.org/2000/svg" class="body-svg">
-            <defs>
-              <!-- Cyan body gradient -->
-              <linearGradient id="bodyFill" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#0d3a5c"/>
-                <stop offset="60%" stop-color="#082840"/>
-                <stop offset="100%" stop-color="#041520"/>
-              </linearGradient>
-              <linearGradient id="bodyStroke" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.9"/>
-                <stop offset="50%" stop-color="#00b8d9" stop-opacity="0.7"/>
-                <stop offset="100%" stop-color="#006080" stop-opacity="0.4"/>
-              </linearGradient>
-              <!-- Muscle gradient -->
-              <linearGradient id="muscleL" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#0a4a6e" stop-opacity="0.6"/>
-                <stop offset="100%" stop-color="#031826" stop-opacity="0.3"/>
-              </linearGradient>
-              <!-- Glow filters -->
-              <filter id="bodyGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="4" result="blur"/>
-                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-              <filter id="organGlow" x="-80%" y="-80%" width="260%" height="260%">
-                <feGaussianBlur stdDeviation="8" result="blur"/>
-                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-              <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
-                <feGaussianBlur stdDeviation="5" result="blur"/>
-                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-              <filter id="cyanGlow">
-                <feGaussianBlur stdDeviation="3" result="blur"/>
-                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
-              <!-- Ambient body gradient radial -->
-              <radialGradient id="bodyAmbient" cx="50%" cy="40%" r="50%">
-                <stop offset="0%" stop-color="rgba(0,229,255,0.08)"/>
-                <stop offset="100%" stop-color="transparent"/>
-              </radialGradient>
-            </defs>
-
-            <!-- Ambient glow behind body -->
-            <ellipse cx="130" cy="300" rx="100" ry="260" fill="url(#bodyAmbient)"/>
-
-            <!-- ═══ BODY SILHOUETTE ═══ -->
-            <!-- Outer cyan glow ring -->
-            <g filter="url(#bodyGlow)">
-
-              <!-- HEAD -->
-              <ellipse cx="130" cy="52" rx="36" ry="44"
-                fill="url(#bodyFill)"
-                stroke="url(#bodyStroke)" stroke-width="1.2"/>
-              <!-- Jaw line -->
-              <path d="M100 72 Q130 84 160 72" fill="none" stroke="rgba(0,229,255,0.3)" stroke-width="0.8"/>
-              <!-- Ear left -->
-              <path d="M94 46 Q88 50 89 58 Q90 64 95 65" fill="none" stroke="rgba(0,229,255,0.25)" stroke-width="1"/>
-              <!-- Ear right -->
-              <path d="M166 46 Q172 50 171 58 Q170 64 165 65" fill="none" stroke="rgba(0,229,255,0.25)" stroke-width="1"/>
-              <!-- Face lines subtle -->
-              <line x1="130" y1="22" x2="130" y2="44" stroke="rgba(0,229,255,0.1)" stroke-width="0.6"/>
-              <path d="M116 40 Q130 44 144 40" fill="none" stroke="rgba(0,229,255,0.08)" stroke-width="0.6"/>
-
-              <!-- NECK -->
-              <path d="M114 90 L114 112 Q130 118 146 112 L146 90 Q130 84 114 90Z"
-                fill="url(#bodyFill)" stroke="rgba(0,229,255,0.35)" stroke-width="1"/>
-
-              <!-- TORSO — shoulders, chest, abs -->
-              <path d="M46 118 Q34 128 30 160 Q28 195 30 235 Q32 265 40 280 Q58 300 80 308 L82 350 Q86 390 88 420 Q90 450 90 490 Q100 496 130 496 Q160 496 170 490 Q170 450 172 420 Q174 390 178 350 L180 308 Q202 300 220 280 Q228 265 230 235 Q232 195 230 160 Q226 128 214 118 Q190 106 162 102 L158 94 Q130 88 102 94 L98 102 Q70 106 46 118Z"
-                fill="url(#bodyFill)" stroke="url(#bodyStroke)" stroke-width="1.2"/>
-
-              <!-- Clavicle left -->
-              <path d="M104 108 Q90 114 74 120" fill="none" stroke="rgba(0,229,255,0.3)" stroke-width="1.2" stroke-linecap="round"/>
-              <!-- Clavicle right -->
-              <path d="M156 108 Q170 114 186 120" fill="none" stroke="rgba(0,229,255,0.3)" stroke-width="1.2" stroke-linecap="round"/>
-              <!-- Sternum -->
-              <line x1="130" y1="110" x2="130" y2="220" stroke="rgba(0,229,255,0.18)" stroke-width="1" stroke-dasharray="3,8"/>
-              <!-- Ribcage lines -->
-              <path d="M88 136 Q130 142 172 136" fill="none" stroke="rgba(0,229,255,0.1)" stroke-width="0.8"/>
-              <path d="M84 152 Q130 158 176 152" fill="none" stroke="rgba(0,229,255,0.09)" stroke-width="0.8"/>
-              <path d="M82 168 Q130 174 178 168" fill="none" stroke="rgba(0,229,255,0.08)" stroke-width="0.8"/>
-              <path d="M80 186 Q130 192 180 186" fill="none" stroke="rgba(0,229,255,0.07)" stroke-width="0.7"/>
-              <!-- Abs lines -->
-              <path d="M114 220 Q130 226 146 220" fill="none" stroke="rgba(0,229,255,0.08)" stroke-width="0.8"/>
-              <path d="M114 238 Q130 244 146 238" fill="none" stroke="rgba(0,229,255,0.07)" stroke-width="0.8"/>
-              <path d="M118 256 Q130 261 142 256" fill="none" stroke="rgba(0,229,255,0.06)" stroke-width="0.7"/>
-              <!-- Hip lines -->
-              <path d="M80 308 Q130 318 180 308" fill="none" stroke="rgba(0,229,255,0.15)" stroke-width="1"/>
-
-              <!-- LEFT ARM -->
-              <path d="M46 118 Q28 130 20 168 Q14 205 16 238 Q18 260 26 270 Q36 278 44 272 Q54 264 56 240 Q58 214 58 185 Q60 155 62 130 L46 118Z"
-                fill="url(#bodyFill)" stroke="url(#bodyStroke)" stroke-width="1.1"/>
-              <!-- Left elbow -->
-              <ellipse cx="26" cy="270" rx="8" ry="7" fill="url(#bodyFill)" stroke="rgba(0,229,255,0.25)" stroke-width="0.8"/>
-              <!-- Left forearm -->
-              <path d="M26 270 Q18 300 16 332 Q14 358 18 375 Q24 386 32 382 Q42 378 44 360 Q46 340 46 315 L44 272 Q36 278 26 270Z"
-                fill="url(#bodyFill)" stroke="rgba(0,229,255,0.35)" stroke-width="1.1"/>
-              <!-- Left hand -->
-              <path d="M18 375 Q14 395 16 408 Q20 420 30 418 Q38 416 40 404 Q42 390 42 378 L32 382 Q24 386 18 375Z"
-                fill="url(#bodyFill)" stroke="rgba(0,229,255,0.28)" stroke-width="1"/>
-
-              <!-- RIGHT ARM -->
-              <path d="M214 118 Q232 130 240 168 Q246 205 244 238 Q242 260 234 270 Q224 278 216 272 Q206 264 204 240 Q202 214 202 185 Q200 155 198 130 L214 118Z"
-                fill="url(#bodyFill)" stroke="url(#bodyStroke)" stroke-width="1.1"/>
-              <!-- Right elbow -->
-              <ellipse cx="234" cy="270" rx="8" ry="7" fill="url(#bodyFill)" stroke="rgba(0,229,255,0.25)" stroke-width="0.8"/>
-              <!-- Right forearm -->
-              <path d="M234 270 Q242 300 244 332 Q246 358 242 375 Q236 386 228 382 Q218 378 216 360 Q214 340 214 315 L216 272 Q224 278 234 270Z"
-                fill="url(#bodyFill)" stroke="rgba(0,229,255,0.35)" stroke-width="1.1"/>
-              <!-- Right hand -->
-              <path d="M242 375 Q246 395 244 408 Q240 420 230 418 Q222 416 220 404 Q218 390 218 378 L228 382 Q236 386 242 375Z"
-                fill="url(#bodyFill)" stroke="rgba(0,229,255,0.28)" stroke-width="1"/>
-
-              <!-- LEFT LEG -->
-              <path d="M82 350 Q76 372 80 410 Q82 440 84 475 Q86 492 90 498 Q96 504 102 500 Q110 496 112 480 Q114 458 112 432 Q110 405 108 375 Q104 352 100 340 L82 350Z"
-                fill="url(#bodyFill)" stroke="url(#bodyStroke)" stroke-width="1.1"/>
-              <!-- Left knee -->
-              <ellipse cx="97" cy="484" rx="14" ry="12" fill="url(#bodyFill)" stroke="rgba(0,229,255,0.22)" stroke-width="0.8"/>
-              <!-- Left shin -->
-              <path d="M90 498 Q86 520 86 548 Q86 568 90 578 Q96 586 104 582 Q112 578 114 566 Q116 550 114 528 Q112 508 112 500 Q104 504 90 498Z"
-                fill="url(#bodyFill)" stroke="rgba(0,229,255,0.32)" stroke-width="1.1"/>
-              <!-- Left foot -->
-              <path d="M90 578 Q84 586 82 594 Q82 600 92 600 Q108 600 116 596 Q120 590 118 582 Q116 576 114 566 Q104 578 90 578Z"
-                fill="url(#bodyFill)" stroke="rgba(0,229,255,0.25)" stroke-width="1"/>
-
-              <!-- RIGHT LEG -->
-              <path d="M178 350 Q184 372 180 410 Q178 440 176 475 Q174 492 170 498 Q164 504 158 500 Q150 496 148 480 Q146 458 148 432 Q150 405 152 375 Q156 352 160 340 L178 350Z"
-                fill="url(#bodyFill)" stroke="url(#bodyStroke)" stroke-width="1.1"/>
-              <!-- Right knee -->
-              <ellipse cx="163" cy="484" rx="14" ry="12" fill="url(#bodyFill)" stroke="rgba(0,229,255,0.22)" stroke-width="0.8"/>
-              <!-- Right shin -->
-              <path d="M170 498 Q174 520 174 548 Q174 568 170 578 Q164 586 156 582 Q148 578 146 566 Q144 550 146 528 Q148 508 148 500 Q156 504 170 498Z"
-                fill="url(#bodyFill)" stroke="rgba(0,229,255,0.32)" stroke-width="1.1"/>
-              <!-- Right foot -->
-              <path d="M170 578 Q176 586 178 594 Q178 600 168 600 Q152 600 144 596 Q140 590 142 582 Q144 576 146 566 Q156 578 170 578Z"
-                fill="url(#bodyFill)" stroke="rgba(0,229,255,0.25)" stroke-width="1"/>
-
-            </g>
-
-            <!-- ═══ MUSCLE DETAIL OVERLAY ═══ -->
-            <g opacity="0.45">
-              <!-- Pectoral muscles -->
-              <path d="M110 122 Q100 132 96 148 Q98 162 110 165 Q124 162 130 150 Q124 136 118 124Z" fill="url(#muscleL)" stroke="rgba(0,229,255,0.12)" stroke-width="0.6"/>
-              <path d="M150 122 Q160 132 164 148 Q162 162 150 165 Q136 162 130 150 Q136 136 142 124Z" fill="url(#muscleL)" stroke="rgba(0,229,255,0.12)" stroke-width="0.6"/>
-              <!-- Deltoids -->
-              <path d="M62 130 Q50 142 52 162 Q60 168 70 160 Q74 148 72 132Z" fill="url(#muscleL)" stroke="rgba(0,229,255,0.1)" stroke-width="0.5"/>
-              <path d="M198 130 Q210 142 208 162 Q200 168 190 160 Q186 148 188 132Z" fill="url(#muscleL)" stroke="rgba(0,229,255,0.1)" stroke-width="0.5"/>
-              <!-- Abs -->
-              <path d="M116 218 Q122 224 128 222 Q128 230 122 232 Q116 230 116 218Z" fill="url(#muscleL)" stroke="rgba(0,229,255,0.1)" stroke-width="0.5"/>
-              <path d="M144 218 Q138 224 132 222 Q132 230 138 232 Q144 230 144 218Z" fill="url(#muscleL)" stroke="rgba(0,229,255,0.1)" stroke-width="0.5"/>
-              <path d="M116 236 Q122 242 128 240 Q128 250 122 252 Q116 250 116 236Z" fill="url(#muscleL)" stroke="rgba(0,229,255,0.1)" stroke-width="0.5"/>
-              <path d="M144 236 Q138 242 132 240 Q132 250 138 252 Q144 250 144 236Z" fill="url(#muscleL)" stroke="rgba(0,229,255,0.1)" stroke-width="0.5"/>
-              <!-- Quads suggestion -->
-              <path d="M88 360 Q84 390 86 420 Q92 430 100 420 Q102 390 100 360Z" fill="url(#muscleL)" stroke="rgba(0,229,255,0.08)" stroke-width="0.5"/>
-              <path d="M172 360 Q176 390 174 420 Q168 430 160 420 Q158 390 160 360Z" fill="url(#muscleL)" stroke="rgba(0,229,255,0.08)" stroke-width="0.5"/>
-            </g>
-
-            <!-- ═══ ORGANS ═══ -->
-
-            <!-- BRAIN -->
-            <g class="organ" id="org-brain" data-organ="brain" data-color="124,92,255"
-               style="filter:drop-shadow(0 0 10px rgba(124,92,255,0.8))">
-              <ellipse cx="130" cy="38" rx="28" ry="24" fill="rgba(124,92,255,0.2)" stroke="rgba(124,92,255,0.7)" stroke-width="1.3"/>
-              <path d="M110 34 Q118 26 130 28 Q142 26 150 34 Q152 42 148 50 Q140 56 130 56 Q120 56 112 50 Q108 42 110 34Z"
-                fill="rgba(124,92,255,0.12)" stroke="rgba(124,92,255,0.5)" stroke-width="0.9"/>
-              <!-- Cerebrum folds -->
-              <path d="M118 30 Q126 24 134 30" fill="none" stroke="rgba(124,92,255,0.4)" stroke-width="0.8"/>
-              <path d="M115 38 Q130 32 145 38" fill="none" stroke="rgba(124,92,255,0.35)" stroke-width="0.8"/>
-              <path d="M117 46 Q130 40 143 46" fill="none" stroke="rgba(124,92,255,0.3)" stroke-width="0.7"/>
-              <!-- Brain stem -->
-              <line x1="130" y1="55" x2="130" y2="70" stroke="rgba(124,92,255,0.5)" stroke-width="2" stroke-linecap="round"/>
-            </g>
-
-            <!-- HEART -->
-            <g class="organ critical" id="org-heart" data-organ="heart" data-color="255,77,109"
-               style="filter:drop-shadow(0 0 12px rgba(255,77,109,0.9))">
-              <path d="M118 148 Q114 140 106 141 Q96 142 96 153 Q96 164 118 177 Q140 164 140 153 Q140 142 130 141 Q122 140 118 148Z"
-                fill="rgba(255,77,109,0.3)" stroke="rgba(255,77,109,0.85)" stroke-width="1.4"/>
-              <!-- Heartbeat ECG line across heart -->
-              <polyline points="100,153 106,145 112,163 118,136 124,163 130,145 136,153"
-                fill="none" stroke="rgba(255,77,109,1)" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
-              <!-- Aorta -->
-              <path d="M130 141 Q130 130 130 120 Q132 115 130 110" fill="none" stroke="rgba(255,77,109,0.6)" stroke-width="1.8" stroke-linecap="round"/>
-              <!-- Pulse circles -->
-              <circle cx="118" cy="160" r="18" fill="none" stroke="rgba(255,77,109,0.18)" stroke-width="1">
-                <animate attributeName="r" values="18;35" dur="1.2s" repeatCount="indefinite"/>
-                <animate attributeName="opacity" values="0.4;0" dur="1.2s" repeatCount="indefinite"/>
-              </circle>
-              <circle cx="118" cy="160" r="18" fill="none" stroke="rgba(255,77,109,0.1)" stroke-width="1">
-                <animate attributeName="r" values="18;35" dur="1.2s" begin="0.6s" repeatCount="indefinite"/>
-                <animate attributeName="opacity" values="0.3;0" dur="1.2s" begin="0.6s" repeatCount="indefinite"/>
-              </circle>
-            </g>
-
-            <!-- LUNGS -->
-            <g class="organ" id="org-lung-l" data-organ="lungs" data-color="0,229,255"
-               style="filter:drop-shadow(0 0 10px rgba(0,229,255,0.7))">
-              <path d="M100 128 Q88 136 82 158 Q78 178 80 198 Q82 212 88 218 Q96 222 104 214 Q110 200 112 178 Q114 155 112 130 L100 128Z"
-                fill="rgba(0,229,255,0.18)" stroke="rgba(0,229,255,0.65)" stroke-width="1.2"/>
-              <!-- Lung lobes -->
-              <path d="M86 160 Q96 158 108 162" fill="none" stroke="rgba(0,229,255,0.3)" stroke-width="0.8"/>
-              <path d="M84 178 Q96 176 110 180" fill="none" stroke="rgba(0,229,255,0.25)" stroke-width="0.7"/>
-            </g>
-            <g class="organ" id="org-lung-r" data-organ="lungs" data-color="0,229,255"
-               style="filter:drop-shadow(0 0 10px rgba(0,229,255,0.7))">
-              <path d="M160 128 Q172 136 178 158 Q182 178 180 198 Q178 212 172 218 Q164 222 156 214 Q150 200 148 178 Q146 155 148 130 L160 128Z"
-                fill="rgba(0,229,255,0.18)" stroke="rgba(0,229,255,0.65)" stroke-width="1.2"/>
-              <!-- Lung lobes -->
-              <path d="M174 160 Q164 158 152 162" fill="none" stroke="rgba(0,229,255,0.3)" stroke-width="0.8"/>
-              <path d="M176 178 Q164 176 150 180" fill="none" stroke="rgba(0,229,255,0.25)" stroke-width="0.7"/>
-            </g>
-            <!-- Trachea -->
-            <path d="M130 96 L130 128 M130 128 L112 130 M130 128 L148 130"
-              fill="none" stroke="rgba(0,229,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-
-            <!-- LIVER -->
-            <g class="organ" id="org-liver" data-organ="liver" data-color="245,166,35"
-               style="filter:drop-shadow(0 0 9px rgba(245,166,35,0.7))">
-              <path d="M100 224 Q96 236 98 252 Q100 264 110 268 Q122 270 130 262 Q138 252 136 238 Q134 226 128 222 Q114 218 100 224Z"
-                fill="rgba(245,166,35,0.2)" stroke="rgba(245,166,35,0.65)" stroke-width="1.2"/>
-              <!-- Liver lobes -->
-              <path d="M102 236 Q116 240 128 236" fill="none" stroke="rgba(245,166,35,0.3)" stroke-width="0.8"/>
-            </g>
-
-            <!-- STOMACH -->
-            <g class="organ" id="org-stomach" data-organ="stomach" data-color="0,229,176"
-               style="filter:drop-shadow(0 0 8px rgba(0,229,176,0.6))">
-              <path d="M138 228 Q146 232 150 248 Q152 262 146 270 Q140 276 132 272 Q126 265 128 250 Q130 235 138 228Z"
-                fill="rgba(0,229,176,0.18)" stroke="rgba(0,229,176,0.6)" stroke-width="1.1"/>
-            </g>
-
-            <!-- KIDNEYS -->
-            <g class="organ" id="org-kidney-l" data-organ="kidneys" data-color="34,211,238"
-               style="filter:drop-shadow(0 0 8px rgba(34,211,238,0.65))">
-              <ellipse cx="104" cy="282" rx="13" ry="19" fill="rgba(34,211,238,0.15)" stroke="rgba(34,211,238,0.6)" stroke-width="1.1" transform="rotate(-12,104,282)"/>
-            </g>
-            <g class="organ" id="org-kidney-r" data-organ="kidneys" data-color="34,211,238"
-               style="filter:drop-shadow(0 0 8px rgba(34,211,238,0.65))">
-              <ellipse cx="156" cy="282" rx="13" ry="19" fill="rgba(34,211,238,0.15)" stroke="rgba(34,211,238,0.6)" stroke-width="1.1" transform="rotate(12,156,282)"/>
-            </g>
-
-            <!-- Thyroid -->
-            <g class="organ" id="org-thyroid" data-organ="thyroid" data-color="255,181,71"
-               style="filter:drop-shadow(0 0 7px rgba(255,181,71,0.6))">
-              <path d="M118 102 Q130 108 142 102 Q138 116 130 118 Q122 116 118 102Z"
-                fill="rgba(255,181,71,0.2)" stroke="rgba(255,181,71,0.6)" stroke-width="1"/>
-            </g>
-
-            <!-- SPINE (center detail) -->
-            <g opacity="0.15">
-              <line x1="130" y1="110" x2="130" y2="340" stroke="rgba(0,229,255,1)" stroke-width="1.5" stroke-dasharray="4,9"/>
-            </g>
-
-            <!-- Ground glow -->
-            <ellipse cx="130" cy="598" rx="60" ry="8" fill="rgba(0,229,255,0.15)"/>
-          </svg>
+        <!-- Key Findings -->
+        <div class="card card-findings">
+          <div class="card-header">
+            <h2 class="card-title">Key Findings</h2>
+            <span class="findings-count" id="findings-count">0</span>
+          </div>
+          <div class="findings-grid" id="findings-grid"></div>
         </div>
 
-        <!-- Floating organ labels -->
-        <div class="olabel" id="lbl-heart" style="left:20%;top:30%">
-          <span class="olbl-dot" style="background:#ff4d6d;box-shadow:0 0 8px #ff4d6d"></span>
-          <span class="olbl-name">Heart</span>
+        <!-- Abnormal Values -->
+        <div class="card card-abnormal" id="abnormal-card" style="display: none;">
+          <div class="card-header">
+            <h2 class="card-title">Abnormal Values</h2>
+            <span class="card-icon">⚠️</span>
+          </div>
+          <div class="abnormal-list" id="abnormal-list"></div>
         </div>
-        <div class="olabel" id="lbl-lungs" style="right:18%;top:28%">
-          <span class="olbl-dot" style="background:#00e5ff;box-shadow:0 0 8px #00e5ff"></span>
-          <span class="olbl-name">Lungs</span>
-        </div>
-        <div class="olabel" id="lbl-liver" style="left:18%;top:45%">
-          <span class="olbl-dot" style="background:#f5a623;box-shadow:0 0 8px #f5a623"></span>
-          <span class="olbl-name">Liver</span>
-        </div>
-        <div class="olabel" id="lbl-kidneys" style="right:16%;top:48%">
-          <span class="olbl-dot" style="background:#22d3ee;box-shadow:0 0 8px #22d3ee"></span>
-          <span class="olbl-name">Kidneys</span>
-        </div>
-        <div class="olabel" id="lbl-brain" style="left:22%;top:8%">
-          <span class="olbl-dot" style="background:#a78bfa;box-shadow:0 0 8px #a78bfa"></span>
-          <span class="olbl-name">Brain</span>
-        </div>
-      </div>
 
-      <!-- Findings chips below body -->
-      <div class="findings-strip">
-        <div class="fs-header">
-          <span class="fs-label">Key Findings</span>
-          <span class="fs-count" id="chips-count"></span>
+        <!-- Recommendations -->
+        <div class="card card-recommendations" id="recommendations-card" style="display: none;">
+          <div class="card-header">
+            <h2 class="card-title">Recommendations</h2>
+            <span class="card-icon">💡</span>
+          </div>
+          <div class="recommendations-list" id="recommendations-list"></div>
         </div>
-        <div class="chips-grid" id="chips-grid"></div>
+
+        <!-- Doctor Questions -->
+        <div class="card card-questions">
+          <div class="card-header">
+            <h2 class="card-title">Questions for Your Doctor</h2>
+            <span class="questions-count" id="questions-count">0</span>
+          </div>
+          <ol class="questions-list" id="questions-list"></ol>
+        </div>
       </div>
     </main>
 
-    <!-- ── RIGHT — MEDDIE ── -->
+    <!-- RIGHT: ANATOMY -->
     <aside class="panel-right">
-      <div class="meddie-hdr">
-        <div class="meddie-av">
-          <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.4"/><path d="M6.5 10c0-2 1.6-3.5 3.5-3.5s3.5 1.5 3.5 3.5v.5h-7V10z" stroke="currentColor" stroke-width="1.3"/><circle cx="10" cy="8" r="1.3" fill="currentColor"/></svg>
-        </div>
-        <div class="meddie-info">
-          <div class="meddie-name">Meddie <span class="meddie-badge">AI</span></div>
-          <div class="meddie-status"><span class="online-dot"></span>Online · Ready</div>
-        </div>
-        <button class="tb-ghost small" id="history-btn-r">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-
-      <div class="chat-msgs" id="chat-msgs" aria-live="polite"></div>
-
-      <div class="chat-starters" id="chat-starters">
-        <button class="cs-chip" data-msg="What are the most critical findings I should be concerned about?">Most critical findings?</button>
-        <button class="cs-chip" data-msg="Explain my abnormal values in simple English.">Explain abnormal values</button>
-        <button class="cs-chip" data-msg="How urgent is this? Do I need to see a doctor immediately?">How urgent is this?</button>
-        <button class="cs-chip" data-msg="What lifestyle changes should I make based on my report?">Lifestyle changes?</button>
-      </div>
-
-      <div class="chat-input-row">
-        <input class="chat-input" id="chat-input" type="text" placeholder="Ask Meddie about your report…" autocomplete="off"/>
-        <button class="chat-send" id="chat-send">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
+      <div class="anatomy-container">
+        <div class="anatomy-label">Interactive Anatomy</div>
+        <svg id="anatomy-svg" class="anatomy-svg" viewBox="0 0 300 600" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div id="organ-tooltip" class="organ-tooltip"></div>
       </div>
     </aside>
 
   </div>
 </div>
-
-<!-- ═══ MODALS ═══ -->
-
-<!-- Doctors -->
-<div class="modal-veil" id="doctors-veil" hidden></div>
-<div class="modal-box" id="doctors-modal" hidden>
-  <div class="modal-hdr"><h3>Find Specialists Near You</h3><button class="modal-x" data-modal="doctors">✕</button></div>
-  <div class="modal-search">
-    <div class="modal-input-wrap">
-      <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1C4 1 2 3 2 5.5c0 3.5 5 7.5 5 7.5s5-4 5-7.5C12 3 10 1 7 1z" stroke="currentColor" stroke-width="1.2"/></svg>
-      <input type="text" id="doctor-location" class="modal-input" placeholder="Enter your city…"/>
-    </div>
-    <button class="accent-btn" id="find-doctors-btn">Search</button>
-  </div>
-  <div id="doctor-list" class="doctor-list">
-    <div class="modal-empty"><svg width="30" height="30" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="18" r="8" stroke="currentColor" stroke-width="1.2" opacity=".3"/><path d="M8 34c0-5 5-9 12-9s12 4 12 9" stroke="currentColor" stroke-width="1.2" opacity=".3" stroke-linecap="round"/></svg><p>Enter your city above</p></div>
-  </div>
-</div>
-
-<!-- Lifestyle -->
-<div class="modal-veil" id="lifestyle-veil" hidden></div>
-<div class="modal-box" id="lifestyle-modal" hidden>
-  <div class="modal-hdr"><h3>Lifestyle Recommendations</h3><button class="modal-x" data-modal="lifestyle">✕</button></div>
-  <div id="lifestyle-list" class="lifestyle-list"></div>
-</div>
-
-<!-- Questions -->
-<div class="modal-veil" id="questions-veil" hidden></div>
-<div class="modal-box" id="questions-modal" hidden>
-  <div class="modal-hdr"><h3>Questions for Your Doctor</h3><button class="modal-x" data-modal="questions">✕</button></div>
-  <ol id="questions-list" class="questions-list"></ol>
-</div>
-
-<!-- History -->
-<div id="history-veil" class="modal-veil" hidden></div>
-<aside id="history-panel" class="history-panel" hidden>
-  <div class="modal-hdr"><h3>Past Analyses</h3><button class="modal-x" id="history-close">✕</button></div>
-  <div id="history-list" class="history-list"></div>
-</aside>
 
 <script src="script.js"></script>
 </body>
