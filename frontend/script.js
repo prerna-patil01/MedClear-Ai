@@ -4,9 +4,6 @@ const API_BASE = "https://medclearai.onrender.com";
 let currentAnalysis = null;
 let chatHistory = [];
 
-/* ════════════════════════════════════
-   BOOT
-════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
   initCursor();
   initScreens();
@@ -16,11 +13,39 @@ document.addEventListener('DOMContentLoaded', () => {
   createWireframeBody();
   initChat();
   setupEventListeners();
+  initMobileResponsive();
 });
 
-/* ════════════════════════════════════
-   CURSOR
-════════════════════════════════════ */
+function initMobileResponsive() {
+  const meddieBtn = document.getElementById('meddie-btn');
+  const panelLeft = document.querySelector('.panel-left');
+  
+  if (!meddieBtn) return;
+
+  meddieBtn.addEventListener('click', () => {
+    if (window.innerWidth < 768) {
+      panelLeft.classList.toggle('active');
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth < 768) {
+      const isClickInsidePanel = panelLeft?.contains(e.target);
+      const isClickOnButton = meddieBtn.contains(e.target);
+      
+      if (!isClickInsidePanel && !isClickOnButton && panelLeft?.classList.contains('active')) {
+        panelLeft.classList.remove('active');
+      }
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      panelLeft?.classList.remove('active');
+    }
+  });
+}
+
 function initCursor() {
   const dot  = document.getElementById('cursor-dot');
   const glow = document.getElementById('cursor-glow');
@@ -33,9 +58,6 @@ function initCursor() {
   });
 }
 
-/* ════════════════════════════════════
-   SCREENS
-════════════════════════════════════ */
 function initScreens() {
   const uploadScreen  = document.getElementById('upload-screen');
   const resultsScreen = document.getElementById('results-screen');
@@ -48,9 +70,6 @@ function initScreens() {
   };
 }
 
-/* ════════════════════════════════════
-   UPLOAD SCREEN
-════════════════════════════════════ */
 function initUploadScreen() {
   const uploadTabs = document.querySelectorAll('.upload-tab');
   const fileArea   = document.getElementById('upload-file-area');
@@ -172,9 +191,6 @@ function showToast(msg) {
   setTimeout(() => toast?.remove(), 3500);
 }
 
-/* ════════════════════════════════════
-   RESULTS SCREEN
-════════════════════════════════════ */
 function initResultsScreen() {
   const backBtn = document.getElementById('back-btn');
   backBtn?.addEventListener('click', () => {
@@ -310,13 +326,10 @@ function renderRiskBadge(data) {
   }
 }
 
-/* ════════════════════════════════════
-   ANATOMY / WIREFRAME BODY
-════════════════════════════════════ */
 function initAnatomy() {
   document.addEventListener('mousemove', (e) => {
     const svg = document.getElementById('anatomy-svg');
-    if (!svg) return;
+    if (!svg || window.innerWidth < 768) return;
     const x =  (e.clientX / window.innerWidth  - 0.5) * 8;
     const y = -(e.clientY / window.innerHeight - 0.5) * 4;
     svg.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
@@ -327,24 +340,25 @@ function createWireframeBody() {
   const svg = document.getElementById('anatomy-svg');
   if (!svg) return;
 
-  /* ── palette aligned to old-money theme ── */
+  svg.setAttribute('viewBox', '0 0 300 600');
+  svg.style.transform = 'scale(1.15)';
+  svg.style.transformOrigin = 'center';
+
   const C = {
-    body:    '#8a7a5a',   /* aged brass — skeleton / outline */
-    heart:   '#b05c5c',   /* dusty rouge */
-    lung:    '#7a9e8e',   /* muted sage */
-    liver:   '#c8a96e',   /* gold */
-    kidney:  '#8a9eb0',   /* muted slate */
-    stomach: '#a08e6a',   /* warm bronze */
-    thyroid: '#b8a070',   /* lighter brass */
-    brain:   '#c8a96e',   /* gold-tinted */
+    body:    '#8a7a5a',
+    heart:   '#b05c5c',
+    lung:    '#7a9e8e',
+    liver:   '#c8a96e',
+    kidney:  '#8a9eb0',
+    stomach: '#a08e6a',
+    thyroid: '#b8a070',
+    brain:   '#c8a96e',
     spine:   'rgba(138,122,90,0.25)',
     glow:    'rgba(200,169,110,0.12)',
   };
 
-  /* ── defs ── */
   const defs = ns('defs');
 
-  /* gradient for body outline */
   const grad = ns('linearGradient');
   grad.id = 'bodyGrad';
   setA(grad, { x1:'0%', y1:'0%', x2:'0%', y2:'100%' });
@@ -355,7 +369,6 @@ function createWireframeBody() {
   grad.append(s1, s2);
   defs.append(grad);
 
-  /* glow filter */
   const filter = ns('filter');
   filter.id = 'organGlow';
   const blur = ns('feGaussianBlur');
@@ -369,7 +382,6 @@ function createWireframeBody() {
 
   svg.append(defs);
 
-  /* ── helpers ── */
   function ns(tag) {
     return document.createElementNS('http://www.w3.org/2000/svg', tag);
   }
@@ -404,21 +416,14 @@ function createWireframeBody() {
     return l;
   }
 
-  /* ── structure ── */
-
-  // Neck
   svg.append(path('M140 75 L140 95 Q150 93, 160 95 L160 75', C.body));
-
-  // Clavicles
   svg.append(path('M115 98 Q132 94, 150 95 Q168 94, 185 98', C.body, null, null, 'none', '1'));
 
-  // Thorax cage lines
   [105,115,125,135].forEach((y, i) => {
     const w = [14, 18, 20, 18][i];
     svg.append(path(`M${150-w} ${y} Q150 ${y+4}, ${150+w} ${y}`, `rgba(138,122,90,0.22)`, null, null, 'none', '0.8'));
   });
 
-  // Spine
   const spineEl = ns('path');
   setA(spineEl, {
     d: 'M150 95 Q149.5 150, 150 240',
@@ -426,7 +431,6 @@ function createWireframeBody() {
   });
   svg.append(spineEl);
 
-  // Body outline
   const bodyOutline = ns('path');
   setA(bodyOutline, {
     d: 'M120 95 L113 185 Q113 215, 130 242 L170 242 Q187 215, 187 185 L180 95',
@@ -434,41 +438,31 @@ function createWireframeBody() {
   });
   svg.append(bodyOutline);
 
-  // Arms
   svg.append(line(120, 98, 100, 190, C.body, '1.2'));
   svg.append(line(180, 98, 200, 190, C.body, '1.2'));
-  // Forearms
   svg.append(line(100, 190, 96,  260, C.body, '1'));
   svg.append(line(200, 190, 204, 260, C.body, '1'));
 
-  // Hips
   svg.append(path('M130 242 Q130 255, 125 265 Q150 270, 175 265 Q170 255, 170 242', C.body, null, null, 'none', '1'));
 
-  // Legs
   svg.append(line(135, 265, 130, 360, C.body, '1.4'));
   svg.append(line(165, 265, 170, 360, C.body, '1.4'));
-  // Shins
   svg.append(line(130, 360, 128, 440, C.body, '1.2'));
   svg.append(line(170, 360, 172, 440, C.body, '1.2'));
-  // Feet
   svg.append(path('M122 440 Q128 445, 138 444', C.body, null, null, 'none', '1'));
   svg.append(path('M178 440 Q172 445, 162 444', C.body, null, null, 'none', '1'));
 
-  // Head
   const head = circle('150', '50', '28', C.brain, 'org-brain', 'Brain');
   setA(head, { opacity: '0.9', 'stroke-linecap': 'round' });
   svg.append(head);
 
-  // Brain detail (lobes)
   svg.append(path('M130 47 Q133 38, 150 36 Q167 38, 170 47', `rgba(200,169,110,0.35)`, null, null, 'none', '0.9'));
   svg.append(path('M150 36 L150 55', `rgba(200,169,110,0.2)`, null, null, 'none', '0.7'));
 
-  // Thyroid
   const thyroid = ellipse('150', '86', '9', '5', C.thyroid, 'org-thyroid', 'Thyroid');
   setA(thyroid, { opacity: '0.7' });
   svg.append(thyroid);
 
-  // Left lung
   const lungL = ns('path');
   setA(lungL, {
     d: 'M122 100 Q118 110, 117 125 Q117 145, 122 155 Q130 160, 138 155 Q143 145, 143 125 Q143 108, 138 100 Z',
@@ -477,7 +471,6 @@ function createWireframeBody() {
   organ(lungL, 'org-lung-l', 'Left Lung');
   svg.append(lungL);
 
-  // Right lung
   const lungR = ns('path');
   setA(lungR, {
     d: 'M178 100 Q182 110, 183 125 Q183 145, 178 155 Q170 160, 162 155 Q157 145, 157 125 Q157 108, 162 100 Z',
@@ -486,7 +479,6 @@ function createWireframeBody() {
   organ(lungR, 'org-lung-r', 'Right Lung');
   svg.append(lungR);
 
-  // Heart
   const heart = ns('path');
   setA(heart, {
     d: 'M150 118 L144 112 Q138 109, 135 114 Q132 118, 136 124 L150 134 L164 124 Q168 118, 165 114 Q162 109, 156 112 Z',
@@ -495,7 +487,6 @@ function createWireframeBody() {
   organ(heart, 'org-heart', 'Heart');
   svg.append(heart);
 
-  // Liver
   const liver = ns('path');
   setA(liver, {
     d: 'M155 148 Q170 145, 182 150 Q186 162, 180 174 Q170 180, 158 176 Q150 172, 148 162 Q148 152, 155 148 Z',
@@ -504,7 +495,6 @@ function createWireframeBody() {
   organ(liver, 'org-liver', 'Liver');
   svg.append(liver);
 
-  // Stomach
   const stomach = ns('path');
   setA(stomach, {
     d: 'M136 152 Q130 158, 131 170 Q133 180, 143 182 Q153 183, 157 174 Q160 164, 155 154 Q148 148, 140 150 Z',
@@ -513,7 +503,6 @@ function createWireframeBody() {
   organ(stomach, 'org-stomach', 'Stomach');
   svg.append(stomach);
 
-  // Left kidney
   const kidneyL = ns('path');
   setA(kidneyL, {
     d: 'M123 178 Q118 183, 118 193 Q118 203, 123 207 Q130 210, 136 206 Q140 200, 140 191 Q140 182, 136 178 Q130 174, 123 178 Z',
@@ -522,7 +511,6 @@ function createWireframeBody() {
   organ(kidneyL, 'org-kidney-l', 'Left Kidney');
   svg.append(kidneyL);
 
-  // Right kidney
   const kidneyR = ns('path');
   setA(kidneyR, {
     d: 'M177 178 Q182 183, 182 193 Q182 203, 177 207 Q170 210, 164 206 Q160 200, 160 191 Q160 182, 164 178 Q170 174, 177 178 Z',
@@ -531,7 +519,6 @@ function createWireframeBody() {
   organ(kidneyR, 'org-kidney-r', 'Right Kidney');
   svg.append(kidneyR);
 
-  /* ── organ tooltip ── */
   const tooltip = document.querySelector('.organ-tooltip') || document.getElementById('organ-tooltip');
 
   document.querySelectorAll('.organ').forEach(o => {
@@ -550,16 +537,43 @@ function createWireframeBody() {
 }
 
 function highlightOrgans(data) {
-  const ORGAN_KEYWORDS = {
-    'org-brain':   ['brain', 'neuro', 'headache'],
-    'org-thyroid': ['thyroid', 'tsh', 't3', 't4'],
-    'org-heart':   ['heart', 'cardiac', 'cholesterol', 'blood pressure'],
-    'org-lung-l':  ['lung', 'respiratory', 'oxygen', 'spo2'],
-    'org-lung-r':  ['lung', 'respiratory'],
-    'org-liver':   ['liver', 'bilirubin', 'alt', 'ast'],
-    'org-stomach': ['glucose', 'diabetes', 'stomach'],
-    'org-kidney-l':['kidney', 'creatinine', 'urea', 'renal'],
-    'org-kidney-r':['kidney', 'creatinine'],
+  const ORGAN_MAP = {
+    'org-brain': {
+      keywords: ['brain', 'neuro', 'cognitive', 'memory', 'seizure', 'headache', 'cns'],
+      testKeywords: ['eeg', 'mri brain', 'neurological']
+    },
+    'org-thyroid': {
+      keywords: ['thyroid', 'tsh', 't3', 't4', 'goiter', 'hypothyroid', 'hyperthyroid'],
+      testKeywords: ['thyroid function', 'tsh level', 'thyroid panel']
+    },
+    'org-heart': {
+      keywords: ['heart', 'cardiac', 'cardio', 'cholesterol', 'ecg', 'ekg', 'coronary', 'hypertension', 'ldl', 'hdl', 'triglyceride', 'artery', 'myocardial', 'ventricular'],
+      testKeywords: ['troponin', 'bnp', 'echocardiogram', 'cardiac enzymes']
+    },
+    'org-lung-l': {
+      keywords: ['lung', 'pulmonary', 'respiratory', 'oxygen', 'saturation', 'breathing', 'bronch', 'spo2', 'pneumonia', 'asthma'],
+      testKeywords: ['spirometry', 'oxygen saturation', 'chest x-ray', 'pft']
+    },
+    'org-lung-r': {
+      keywords: ['lung', 'pulmonary', 'respiratory', 'oxygen'],
+      testKeywords: ['chest imaging', 'respiratory function']
+    },
+    'org-liver': {
+      keywords: ['liver', 'bilirubin', 'alt', 'ast', 'sgpt', 'sgot', 'hepatic', 'albumin', 'jaundice', 'cirrhosis', 'hepatitis'],
+      testKeywords: ['liver function', 'liver enzymes', 'ast/alt']
+    },
+    'org-stomach': {
+      keywords: ['glucose', 'diabetes', 'hba1c', 'insulin', 'pancreas', 'gastric', 'stomach', 'blood sugar', 'glycemia'],
+      testKeywords: ['blood glucose', 'glucose tolerance', 'fasting blood sugar']
+    },
+    'org-kidney-l': {
+      keywords: ['kidney', 'creatinine', 'urea', 'bun', 'renal', 'uric', 'gfr', 'proteinuria', 'nephro', 'urinary'],
+      testKeywords: ['kidney function', 'renal panel', 'creatinine clearance']
+    },
+    'org-kidney-r': {
+      keywords: ['kidney', 'creatinine', 'urea', 'renal'],
+      testKeywords: ['kidney', 'renal']
+    }
   };
 
   const text = [
@@ -568,23 +582,68 @@ function highlightOrgans(data) {
     (data.specialists || []).join(' '),
   ].join(' ').toLowerCase();
 
-  Object.entries(ORGAN_KEYWORDS).forEach(([id, kws]) => {
-    const organ = document.getElementById(id);
-    if (!organ) return;
-    const match = kws.some(k => text.includes(k));
-    if (match) {
+  const organSeverity = {};
+  (data.findings || []).forEach(finding => {
+    const findingText = (finding.name + ' ' + finding.test + ' ' + finding.status + ' ' + finding.value).toLowerCase();
+    
+    Object.entries(ORGAN_MAP).forEach(([organId, info]) => {
+      const keywordMatch = info.keywords.some(k => findingText.includes(k)) ||
+                          info.testKeywords.some(k => findingText.includes(k));
+      
+      if (keywordMatch) {
+        const severity = getStatus(finding.status);
+        if (!organSeverity[organId]) {
+          organSeverity[organId] = severity;
+        } else {
+          if (severityRank(severity) < severityRank(organSeverity[organId])) {
+            organSeverity[organId] = severity;
+          }
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('.organ').forEach(organ => {
+    const organId = organ.id;
+    const severity = organSeverity[organId];
+
+    if (severity) {
       organ.classList.add('highlight');
-      organ.style.opacity = '1';
+      organ.classList.remove('highlight-low', 'highlight-moderate', 'highlight-high');
+      
+      if (severity === 'high') {
+        organ.classList.add('highlight-high');
+        organ.style.opacity = '1';
+        organ.style.filter = 'drop-shadow(0 0 6px rgba(176,92,92,0.6))';
+      } else if (severity === 'moderate') {
+        organ.classList.add('highlight-moderate');
+        organ.style.opacity = '0.9';
+        organ.style.filter = 'drop-shadow(0 0 4px rgba(200,169,110,0.5))';
+      } else {
+        organ.classList.add('highlight-low');
+        organ.style.opacity = '0.85';
+        organ.style.filter = 'drop-shadow(0 0 3px rgba(122,158,142,0.4))';
+      }
     } else {
-      organ.classList.remove('highlight');
+      organ.classList.remove('highlight', 'highlight-low', 'highlight-moderate', 'highlight-high');
       organ.style.opacity = '0.35';
+      organ.style.filter = 'none';
     }
   });
 }
 
-/* ════════════════════════════════════
-   MEDDIE CHAT
-════════════════════════════════════ */
+function getStatus(statusStr) {
+  const s = (statusStr || '').toLowerCase();
+  if (/high|abnormal|critical|elevated|above|increase/.test(s)) return 'high';
+  if (/moderate|borderline|low|reduced|decrease|below/.test(s)) return 'moderate';
+  if (/normal|negative|within/.test(s)) return 'low';
+  return 'low';
+}
+
+function severityRank(severity) {
+  return { 'high': 0, 'moderate': 1, 'low': 2 }[severity] || 3;
+}
+
 function initChat() {
   const input   = document.getElementById('chat-input');
   const send    = document.getElementById('chat-send');
@@ -669,16 +728,15 @@ function addMessage(role, text) {
   messages.scrollTop = messages.scrollHeight;
 }
 
-/* ════════════════════════════════════
-   EVENT LISTENERS
-════════════════════════════════════ */
 function setupEventListeners() {
   document.getElementById('risk-btn')?.addEventListener('click', () => {
     showToast(`Risk Level: ${currentAnalysis?.risk?.level || 'Unknown'}`);
   });
 
-  document.getElementById('meddie-btn')?.addEventListener('click', () => {
-    document.getElementById('chat-input')?.focus();
+  document.getElementById('meddie-btn')?.addEventListener('click', (e) => {
+    if (window.innerWidth >= 768) {
+      document.getElementById('chat-input')?.focus();
+    }
   });
 
   document.getElementById('pdf-btn')?.addEventListener('click', () => {
@@ -694,9 +752,6 @@ function setupEventListeners() {
   });
 }
 
-/* ════════════════════════════════════
-   UTILITIES
-════════════════════════════════════ */
 function escHtml(str) {
   const map = { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' };
   return String(str || '').replace(/[&<>"']/g, c => map[c]);
