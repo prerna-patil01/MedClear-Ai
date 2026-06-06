@@ -3,9 +3,9 @@
 ══════════════════════════════════════ */
 :root {
   /* Backgrounds */
-  --bg:        #0d0f0e;        /* near-black with warm undertone */
-  --bg2:       #111410;        /* card surface base */
-  --bg3:       #161810;        /* slightly lighter */
+  --bg:        #0d0f0e;
+  --bg2:       #111410;
+  --bg3:       #161810;
 
   /* Surfaces — glass */
   --surface:   rgba(255,252,240,0.035);
@@ -18,21 +18,21 @@
   --border3:   rgba(255,252,240,0.22);
 
   /* Text */
-  --text:      #f5f0e8;        /* warm ivory */
+  --text:      #f5f0e8;
   --text2:     rgba(245,240,232,0.58);
   --text3:     rgba(245,240,232,0.32);
   --text4:     rgba(245,240,232,0.18);
 
   /* Old Money accents */
-  --gold:      #c8a96e;        /* aged brass */
-  --gold-lt:   #e2c99a;        /* champagne */
-  --gold-dk:   #8a6e3d;        /* dark bronze */
-  --sage:      #7a9e8e;        /* muted jade */
-  --sage-lt:   #a3c4b5;        /* pale sage */
-  --cream:     #ede8de;        /* aged parchment */
-  --rouge:     #b05c5c;        /* dusty crimson */
+  --gold:      #c8a96e;
+  --gold-lt:   #e2c99a;
+  --gold-dk:   #8a6e3d;
+  --sage:      #7a9e8e;
+  --sage-lt:   #a3c4b5;
+  --cream:     #ede8de;
+  --rouge:     #b05c5c;
   --rouge-lt:  #d98080;
-  --slate:     #6e8a9e;        /* muted steel blue */
+  --slate:     #6e8a9e;
 
   /* Semantic */
   --accent:    var(--gold);
@@ -41,9 +41,9 @@
   --success:   var(--sage);
 
   /* Typography */
-  --font-d: 'Cormorant Garamond', Georgia, serif;   /* display / titles */
-  --font-b: 'Jost', sans-serif;                      /* body */
-  --font-m: 'DM Mono', monospace;                   /* values / data */
+  --font-d: 'Cormorant Garamond', Georgia, serif;
+  --font-b: 'Jost', sans-serif;
+  --font-m: 'DM Mono', monospace;
 
   /* Spacing */
   --r-sm: 10px;
@@ -65,7 +65,6 @@ body {
   height: 100vh;
   overflow: hidden;
   cursor: none;
-  /* Subtle noise texture overlay */
   background-image:
     radial-gradient(ellipse 80% 50% at 50% -10%, rgba(200,169,110,0.06), transparent 70%),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
@@ -145,7 +144,6 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Logo */
 .upload-logo {
   display: flex;
   align-items: center;
@@ -173,7 +171,6 @@ body {
   color: var(--text);
 }
 
-/* Main card */
 .upload-main {
   background: rgba(255,252,240,0.03);
   border: 1px solid var(--border2);
@@ -231,7 +228,6 @@ body {
   letter-spacing: 0.01em;
 }
 
-/* Tabs */
 .upload-tabs {
   display: flex;
   gap: 0;
@@ -266,7 +262,6 @@ body {
 
 .upload-tab:hover:not(.active) { color: var(--text2); }
 
-/* Drop zone */
 .upload-area { margin-bottom: 20px; }
 
 .upload-zone {
@@ -326,7 +321,6 @@ body {
   border-color: rgba(200,169,110,0.5);
 }
 
-/* Textarea */
 .upload-textarea {
   width: 100%;
   min-height: 180px;
@@ -351,7 +345,6 @@ body {
 
 .upload-textarea::placeholder { color: var(--text4); }
 
-/* Submit button */
 .upload-submit {
   position: relative;
   width: 100%;
@@ -412,10 +405,9 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden; /* the screen itself must not scroll — only content-scroll does */
+  overflow: hidden;
 }
 
-/* HEADER */
 .header {
   height: 58px;
   border-bottom: 1px solid var(--border);
@@ -532,16 +524,15 @@ body {
   grid-template-columns: 1fr 2fr 1fr;
   gap: 12px;
   padding: 12px;
-  /* Take all remaining height after the 58px header */
   flex: 1;
-  min-height: 0;   /* critical: stops the grid from blowing past its flex container */
+  min-height: 0;
   overflow: hidden;
 }
 
 .panel-left {
   min-height: 0;
   border-radius: var(--r-lg);
-  overflow: hidden;          /* intentional: clips the rounded corners of the panel bg */
+  overflow: hidden;
   background: rgba(255,252,240,0.025);
   border: 1px solid var(--border);
   display: flex;
@@ -555,18 +546,17 @@ body {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  /* no gap here — content-scroll is the only child that matters */
-  overflow: hidden; /* keeps the flex container from leaking */
+  overflow: hidden;
 }
 
 .content-scroll {
   flex: 1;
-  min-height: 0;           /* required: lets flex child scroll instead of grow */
+  min-height: 0;
   overflow-y: auto;
-  padding: 2px 6px 16px 2px; /* bottom pad so last card isn't flush */
+  padding: 2px 6px 16px 2px;
   display: flex;
   flex-direction: column;
-  gap: 16px;               /* consistent 16px between every card */
+  gap: 16px;
 }
 
 .content-scroll::-webkit-scrollbar { width: 5px; }
@@ -603,11 +593,9 @@ body {
   padding: 22px 24px;
   transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.25s ease;
   position: relative;
-  /* overflow: visible — never clip card content */
   overflow: visible;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  /* Cards must never compress — height is purely content-driven */
   flex-shrink: 0;
   width: 100%;
 }
@@ -702,7 +690,6 @@ body {
   z-index: 2;
 }
 
-/* Findings grid */
 .findings-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -720,8 +707,8 @@ body {
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, transform 0.2s;
   position: relative;
-  overflow: hidden;          /* clip the ::before accent bar only — item is safe, content fits */
-  min-height: 72px;          /* prevents zero-height collapse before JS populates */
+  overflow: hidden;
+  min-height: 72px;
 }
 
 .finding-item::before {
@@ -769,7 +756,6 @@ body {
   text-transform: uppercase;
 }
 
-/* Abnormal / recommendation items */
 .abnormal-list,
 .recommendations-list {
   display: flex;
@@ -791,7 +777,6 @@ body {
   color: var(--text2);
   line-height: 1.6;
   transition: background 0.2s;
-  /* Never clip — content must show */
   overflow: visible;
 }
 
@@ -804,7 +789,6 @@ body {
   color: var(--text);
 }
 
-/* Doctor questions */
 .questions-list {
   display: flex;
   flex-direction: column;
@@ -830,7 +814,6 @@ body {
   transition: background 0.2s, border-color 0.2s, color 0.2s;
   line-height: 1.6;
   letter-spacing: 0.01em;
-  /* Content-height only — no fixed height, no overflow hidden */
   overflow: visible;
 }
 
@@ -972,7 +955,6 @@ body {
   border-radius: 12px 4px 12px 12px;
 }
 
-/* Prompt chips */
 .chat-prompts {
   display: flex;
   flex-direction: column;
@@ -1001,7 +983,6 @@ body {
   color: var(--gold-lt);
 }
 
-/* Chat input */
 .chat-input-area {
   display: flex;
   gap: 8px;
@@ -1129,3 +1110,486 @@ body {
 }
 
 .organ-tooltip.visible { opacity: 1; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN — Media Queries
+══════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1439px) {
+  .upload-heading {
+    font-size: 32px;
+  }
+
+  .card-title {
+    font-size: 15px;
+  }
+
+  .card-text {
+    font-size: 13px;
+  }
+
+  .findings-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+
+  .layout {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .card {
+    padding: 20px 22px;
+  }
+
+  .meddie-container {
+    padding: 14px;
+  }
+
+  .header-btn {
+    font-size: 11px;
+    padding: 6px 11px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .layout {
+    grid-template-columns: 1fr 1.2fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .panel-left {
+    grid-column: 1 / -1;
+    max-height: 140px;
+    border-radius: var(--r-lg);
+  }
+
+  .meddie-container {
+    padding: 10px;
+    max-height: 100%;
+  }
+
+  .meddie-header {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+  }
+
+  .chat-messages {
+    max-height: 40px;
+    margin-bottom: 6px;
+    display: none;
+  }
+
+  .chat-prompts {
+    display: none;
+  }
+
+  .chat-input-area {
+    padding: 5px;
+  }
+
+  .chat-input {
+    font-size: 11px;
+  }
+
+  .chat-send {
+    width: 28px;
+    height: 28px;
+  }
+
+  .panel-right {
+    min-height: auto;
+  }
+
+  .panel-center {
+    grid-column: 1 / -1;
+    order: 2;
+  }
+
+  .header-right {
+    gap: 4px;
+    overflow-x: auto;
+    padding-right: 10px;
+  }
+
+  .header-right::-webkit-scrollbar {
+    height: 2px;
+  }
+
+  .header-right::-webkit-scrollbar-thumb {
+    background: rgba(200,169,110,0.15);
+  }
+
+  .header-btn {
+    font-size: 10px;
+    padding: 5px 10px;
+    flex-shrink: 0;
+  }
+
+  .header-btn span:last-child {
+    display: none;
+  }
+
+  .header-btn svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .card {
+    padding: 16px 18px;
+  }
+
+  .card-title {
+    font-size: 14px;
+  }
+
+  .findings-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .upload-heading {
+    font-size: 28px;
+  }
+
+  .upload-main {
+    padding: 32px 30px;
+  }
+
+  .anatomy-label {
+    font-size: 8px;
+  }
+
+  .meddie-name {
+    font-size: 13px;
+  }
+
+  .meddie-status {
+    font-size: 9px;
+  }
+
+  .meddie-header {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 767px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .panel-left {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 0;
+    opacity: 0;
+    border-radius: 20px 20px 0 0;
+    z-index: 100;
+    transition: height 0.3s, opacity 0.3s;
+    max-height: 70vh;
+    overflow: hidden;
+  }
+
+  .panel-left.active {
+    height: 50vh;
+    opacity: 1;
+  }
+
+  .meddie-container {
+    height: 100%;
+  }
+
+  .panel-center {
+    order: 1;
+  }
+
+  .panel-right {
+    order: 2;
+    max-height: 300px;
+    margin-top: 8px;
+  }
+
+  #meddie-btn {
+    display: flex;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8a6e3d, #c8a96e);
+    border: 1px solid rgba(200,169,110,0.3);
+    z-index: 99;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(200,169,110,0.3);
+    padding: 0 !important;
+  }
+
+  #meddie-btn span {
+    display: none;
+  }
+
+  #meddie-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .header {
+    height: auto;
+    padding: 12px 14px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .header-left {
+    width: 100%;
+    order: 1;
+  }
+
+  .header-title h1 {
+    font-size: 15px;
+  }
+
+  .header-date {
+    font-size: 10px;
+  }
+
+  .header-right {
+    width: 100%;
+    order: 2;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .header-right::-webkit-scrollbar {
+    height: 2px;
+  }
+
+  .header-right::-webkit-scrollbar-thumb {
+    background: rgba(200,169,110,0.2);
+  }
+
+  .header-btn {
+    font-size: 9px;
+    padding: 5px 8px;
+    flex-shrink: 0;
+  }
+
+  .header-btn span {
+    display: none;
+  }
+
+  .header-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .risk-badge {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+
+  .card {
+    padding: 14px 16px;
+  }
+
+  .card-title {
+    font-size: 13px;
+  }
+
+  .card-header {
+    margin-bottom: 12px;
+  }
+
+  .card-text {
+    font-size: 12px;
+  }
+
+  .findings-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .finding-item {
+    min-height: auto;
+  }
+
+  .abnormal-list,
+  .recommendations-list {
+    gap: 8px;
+  }
+
+  .abnormal-item,
+  .recommendation-item {
+    padding: 10px 12px;
+    font-size: 11.5px;
+  }
+
+  .questions-list {
+    gap: 8px;
+  }
+
+  .questions-list li {
+    padding: 10px 10px 10px 38px;
+    font-size: 11.5px;
+  }
+
+  .questions-list li::before {
+    width: 18px;
+    height: 18px;
+    font-size: 8px;
+    left: 8px;
+  }
+
+  .upload-container {
+    padding: 0 16px;
+  }
+
+  .upload-heading {
+    font-size: 24px;
+  }
+
+  .upload-main {
+    padding: 24px 20px;
+  }
+
+  .upload-zone {
+    padding: 30px 16px;
+  }
+
+  .upload-zone svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .upload-zone-title {
+    font-size: 15px;
+  }
+
+  .upload-btn {
+    padding: 6px 14px;
+    font-size: 11px;
+  }
+
+  .upload-submit {
+    padding: 12px;
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  .anatomy-label {
+    font-size: 8px;
+    top: 10px;
+  }
+
+  .content-scroll {
+    padding: 2px 4px 12px 2px;
+    gap: 12px;
+  }
+
+  .panel-center {
+    min-height: 0;
+    flex: 1;
+  }
+
+  @media (hover: none) {
+    #cursor-dot,
+    #cursor-glow {
+      display: none;
+    }
+  }
+
+  #results-screen {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    height: auto;
+    padding: 10px 10px;
+  }
+
+  .header-left {
+    gap: 8px;
+  }
+
+  .header-title h1 {
+    font-size: 13px;
+  }
+
+  .header-btn {
+    font-size: 8px;
+    padding: 4px 6px;
+  }
+
+  .upload-heading {
+    font-size: 22px;
+  }
+
+  .card {
+    padding: 12px 14px;
+  }
+
+  .card-title {
+    font-size: 12px;
+  }
+
+  .findings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .finding-item {
+    padding: 10px 12px;
+  }
+
+  .finding-name {
+    font-size: 10px;
+  }
+
+  .finding-value {
+    font-size: 12px;
+  }
+
+  .panel-right {
+    max-height: 280px;
+  }
+
+  #meddie-btn {
+    width: 44px;
+    height: 44px;
+    bottom: 16px;
+    right: 16px;
+  }
+
+  #meddie-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-height: 600px) {
+  .header {
+    height: auto;
+  }
+
+  .card {
+    padding: 12px 14px;
+  }
+
+  .panel-left.active {
+    max-height: 50vh;
+  }
+
+  .panel-right {
+    max-height: 200px;
+  }
+}
