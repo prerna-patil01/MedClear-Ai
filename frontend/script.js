@@ -1,8 +1,7 @@
 'use strict';
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   MEDCLEAR AI — script.js
-   Complete frontend logic: upload, results, anatomy, chat, diet, doctors
+   MEDCLEAR AI — script.js  (Final — includes theme, diet, doctor, chat)
 ═══════════════════════════════════════════════════════════════════════════ */
 
 const API_BASE      = 'https://medclearai.onrender.com';
@@ -13,6 +12,7 @@ let chatHistory     = [];
    BOOT
 ───────────────────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   initCursor();
   initScreens();
   initUploadScreen();
@@ -24,6 +24,70 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileResponsive();
   injectModalStyles();
 });
+
+/* ─────────────────────────────────────────────────────────────────────────
+   THEME — Dark & Cream
+───────────────────────────────────────────────────────────────────────── */
+function initTheme() {
+  const saved = localStorage.getItem('mc-theme') || 'dark';
+  applyTheme(saved);
+
+  // Re-insert header toggle when results screen opens
+  const results = document.getElementById('results-screen');
+  if (results) {
+    new MutationObserver(() => insertHeaderToggle())
+      .observe(results, { attributes: true, attributeFilter: ['class'] });
+  }
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('mc-theme', theme);
+  const icon = theme === 'cream' ? '☀️' : '🌙';
+  const tip  = theme === 'cream' ? 'Switch to Dark mode' : 'Switch to Cream mode';
+  document.querySelectorAll('.theme-toggle, .theme-toggle-upload').forEach(btn => {
+    btn.textContent = icon;
+    btn.title       = tip;
+  });
+  const svg = document.getElementById('anatomy-svg');
+  if (svg) {
+    svg.style.filter = theme === 'cream'
+      ? 'drop-shadow(0 0 18px rgba(138,94,40,0.15)) saturate(0.85)'
+      : 'drop-shadow(0 0 18px rgba(200,169,110,0.08))';
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'dark' ? 'cream' : 'dark');
+}
+
+function makeThemeBtn(className) {
+  const btn = document.createElement('button');
+  btn.className = className;
+  btn.addEventListener('click', toggleTheme);
+  return btn;
+}
+
+function insertHeaderToggle() {
+  const headerRight = document.querySelector('.header-right');
+  if (!headerRight || headerRight.querySelector('.theme-toggle')) return;
+  const btn = makeThemeBtn('theme-toggle');
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+  btn.textContent = currentTheme === 'cream' ? '☀️' : '🌙';
+  btn.title = currentTheme === 'cream' ? 'Switch to Dark mode' : 'Switch to Cream mode';
+  headerRight.insertBefore(btn, headerRight.firstChild);
+}
+
+function insertUploadToggle() {
+  const uploadScreen = document.getElementById('upload-screen');
+  if (!uploadScreen || uploadScreen.querySelector('.theme-toggle-upload')) return;
+  const btn = makeThemeBtn('theme-toggle-upload');
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+  btn.textContent = currentTheme === 'cream' ? '☀️' : '🌙';
+  btn.title = currentTheme === 'cream' ? 'Switch to Dark mode' : 'Switch to Cream mode';
+  uploadScreen.appendChild(btn);
+}
 
 /* ─────────────────────────────────────────────────────────────────────────
    CURSOR
@@ -49,13 +113,15 @@ function initScreens() {
   window.showScreen = (name) => {
     uploadScreen.classList.remove('active');
     resultsScreen.classList.remove('active');
-    if (name === 'upload')  uploadScreen.classList.add('active');
-    if (name === 'results') resultsScreen.classList.add('active');
+    if (name === 'upload')  { uploadScreen.classList.add('active');  insertUploadToggle(); }
+    if (name === 'results') { resultsScreen.classList.add('active'); insertHeaderToggle(); }
   };
+  // Insert upload toggle on first load
+  insertUploadToggle();
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   MOBILE RESPONSIVE — Meddie floating button toggle
+   MOBILE RESPONSIVE
 ───────────────────────────────────────────────────────────────────────── */
 function initMobileResponsive() {
   const meddieBtn = document.getElementById('meddie-btn');
@@ -94,7 +160,6 @@ function initUploadScreen() {
   const fileRemove       = document.getElementById('file-remove');
   const analyzeBtn       = document.getElementById('analyze-btn');
 
-  /* Tabs */
   uploadTabs.forEach(tab => {
     tab.addEventListener('click', () => {
       uploadTabs.forEach(t => t.classList.remove('active'));
@@ -104,43 +169,33 @@ function initUploadScreen() {
     });
   });
 
-  /* Drag & drop */
-  dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('drag-over');
-  });
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
   dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
     const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      fileInput.files = files;
-      showFileSelected(files[0]);
-    }
+    if (files.length > 0) { fileInput.files = files; showFileSelected(files[0]); }
   });
 
-  /* File input change */
   fileInput.addEventListener('change', () => {
     if (fileInput.files.length > 0) showFileSelected(fileInput.files[0]);
   });
 
-  /* Remove selected file */
   fileRemove?.addEventListener('click', () => {
     fileInput.value = '';
     if (fileSelected) fileSelected.style.display = 'none';
     if (dropZone)     dropZone.style.display      = 'block';
   });
 
-  /* Show file selected state */
   function showFileSelected(file) {
     if (!fileSelected || !fileSelectedName || !fileSelectedSize) return;
     fileSelectedName.textContent = file.name;
     fileSelectedSize.textContent = file.size < 1024 * 1024
       ? (file.size / 1024).toFixed(1) + ' KB'
       : (file.size / (1024 * 1024)).toFixed(1) + ' MB';
-    dropZone.style.display      = 'none';
-    fileSelected.style.display  = 'flex';
+    dropZone.style.display     = 'none';
+    fileSelected.style.display = 'flex';
   }
 
   analyzeBtn.addEventListener('click', handleAnalyze);
@@ -211,9 +266,7 @@ function showToast(msg, type = 'error') {
   const toast = document.createElement('div');
   toast.className = '_mc_toast';
   toast.textContent = msg;
-  const bg = type === 'success'
-    ? 'rgba(122,158,142,0.92)'
-    : 'rgba(176,92,92,0.92)';
+  const bg = type === 'success' ? 'rgba(122,158,142,0.92)' : 'rgba(176,92,92,0.92)';
   Object.assign(toast.style, {
     position: 'fixed', bottom: '24px', left: '50%',
     transform: 'translateX(-50%) translateY(8px)',
@@ -239,7 +292,7 @@ function showToast(msg, type = 'error') {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   RESULTS SCREEN — Back button
+   RESULTS SCREEN
 ───────────────────────────────────────────────────────────────────────── */
 function initResultsScreen() {
   document.getElementById('back-btn')?.addEventListener('click', () => {
@@ -373,7 +426,7 @@ function renderRiskBadge(data) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   ANATOMY — Init + wireframe body + organ highlighting
+   ANATOMY
 ───────────────────────────────────────────────────────────────────────── */
 function initAnatomy() {
   document.addEventListener('mousemove', (e) => {
@@ -381,7 +434,7 @@ function initAnatomy() {
     if (!svg || window.innerWidth < 768) return;
     const x =  (e.clientX / window.innerWidth  - 0.5) * 8;
     const y = -(e.clientY / window.innerHeight - 0.5) * 4;
-    svg.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+    svg.style.transform = `rotateY(${x}deg) rotateX(${y}deg) scale(1.15)`;
   });
 }
 
@@ -405,26 +458,23 @@ function createWireframeBody() {
     spine:   'rgba(138,122,90,0.25)',
   };
 
-  /* Helpers */
   const SVG_NS = 'http://www.w3.org/2000/svg';
-  const ns  = tag => document.createElementNS(SVG_NS, tag);
-  const setA = (el, attrs) => { Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v)); return el; };
-  const organ = (el, id, name) => { el.id = id; el.classList.add('organ'); el.dataset.organ = name; return el; };
-  const circle = (cx, cy, r, stroke, id, name) => organ(setA(ns('circle'), { cx, cy, r, stroke, 'stroke-width': '1.2', fill: 'none' }), id, name);
+  const ns     = tag => document.createElementNS(SVG_NS, tag);
+  const setA   = (el, attrs) => { Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v)); return el; };
+  const organ  = (el, id, name) => { el.id = id; el.classList.add('organ'); el.dataset.organ = name; return el; };
+  const circle  = (cx, cy, r, stroke, id, name) => organ(setA(ns('circle'),  { cx, cy, r, stroke, 'stroke-width': '1.2', fill: 'none' }), id, name);
   const ellipse = (cx, cy, rx, ry, stroke, id, name) => organ(setA(ns('ellipse'), { cx, cy, rx, ry, stroke, 'stroke-width': '1.1', fill: 'none' }), id, name);
-  const path = (d, stroke, id, name, fill = 'none', sw = '1.2') => {
+  const path    = (d, stroke, id, name, fill = 'none', sw = '1.2') => {
     const p = setA(ns('path'), { d, stroke, fill, 'stroke-width': sw, 'stroke-linejoin': 'round' });
     return id ? organ(p, id, name) : p;
   };
   const line = (x1, y1, x2, y2, stroke, sw = '1.2') => setA(ns('line'), { x1, y1, x2, y2, stroke, 'stroke-width': sw });
 
-  /* Defs */
   const defs = ns('defs');
   const grad = setA(ns('linearGradient'), { id: 'bodyGrad', x1: '0%', y1: '0%', x2: '0%', y2: '100%' });
   grad.append(setA(ns('stop'), { offset: '0%',   'stop-color': '#c8a96e', 'stop-opacity': '0.9' }));
   grad.append(setA(ns('stop'), { offset: '100%', 'stop-color': '#5a4a2a', 'stop-opacity': '0.4' }));
   defs.append(grad);
-
   const filter = setA(ns('filter'), { id: 'organGlow' });
   const blur   = setA(ns('feGaussianBlur'), { stdDeviation: '2.5', result: 'blur' });
   const merge  = ns('feMerge');
@@ -434,23 +484,18 @@ function createWireframeBody() {
   defs.append(filter);
   svg.append(defs);
 
-  /* Skeleton */
   svg.append(path('M140 75 L140 95 Q150 93, 160 95 L160 75', C.body));
   svg.append(path('M115 98 Q132 94, 150 95 Q168 94, 185 98', C.body, null, null, 'none', '1'));
   [105, 115, 125, 135].forEach((y, i) => {
     const w = [14, 18, 20, 18][i];
-    svg.append(path(`M${150 - w} ${y} Q150 ${y + 4}, ${150 + w} ${y}`, 'rgba(138,122,90,0.22)', null, null, 'none', '0.8'));
+    svg.append(path(`M${150-w} ${y} Q150 ${y+4}, ${150+w} ${y}`, 'rgba(138,122,90,0.22)', null, null, 'none', '0.8'));
   });
   svg.append(setA(ns('path'), { d: 'M150 95 Q149.5 150, 150 240', stroke: C.spine, 'stroke-width': '0.9', fill: 'none', 'stroke-dasharray': '3,4' }));
   svg.append(setA(ns('path'), { d: 'M120 95 L113 185 Q113 215, 130 242 L170 242 Q187 215, 187 185 L180 95', stroke: 'url(#bodyGrad)', 'stroke-width': '1.5', fill: 'none', opacity: '0.65' }));
-
-  /* Arms */
   svg.append(line(120, 98, 100, 190, C.body, '1.2'));
   svg.append(line(180, 98, 200, 190, C.body, '1.2'));
   svg.append(line(100, 190, 96, 260, C.body, '1'));
   svg.append(line(200, 190, 204, 260, C.body, '1'));
-
-  /* Hips & legs */
   svg.append(path('M130 242 Q130 255, 125 265 Q150 270, 175 265 Q170 255, 170 242', C.body, null, null, 'none', '1'));
   svg.append(line(135, 265, 130, 360, C.body, '1.4'));
   svg.append(line(165, 265, 170, 360, C.body, '1.4'));
@@ -459,37 +504,25 @@ function createWireframeBody() {
   svg.append(path('M122 440 Q128 445, 138 444', C.body, null, null, 'none', '1'));
   svg.append(path('M178 440 Q172 445, 162 444', C.body, null, null, 'none', '1'));
 
-  /* Head + brain */
   const head = circle('150', '50', '28', C.brain, 'org-brain', 'Brain');
   setA(head, { opacity: '0.9' });
   svg.append(head);
   svg.append(path('M130 47 Q133 38, 150 36 Q167 38, 170 47', 'rgba(200,169,110,0.35)', null, null, 'none', '0.9'));
   svg.append(path('M150 36 L150 55', 'rgba(200,169,110,0.2)', null, null, 'none', '0.7'));
 
-  /* Thyroid */
   const thyroid = ellipse('150', '86', '9', '5', C.thyroid, 'org-thyroid', 'Thyroid');
   setA(thyroid, { opacity: '0.7' });
   svg.append(thyroid);
 
-  /* Lungs */
   const lungL = organ(setA(ns('path'), { d: 'M122 100 Q118 110, 117 125 Q117 145, 122 155 Q130 160, 138 155 Q143 145, 143 125 Q143 108, 138 100 Z', stroke: C.lung, 'stroke-width': '1.1', fill: 'rgba(122,158,142,0.07)' }), 'org-lung-l', 'Left Lung');
   const lungR = organ(setA(ns('path'), { d: 'M178 100 Q182 110, 183 125 Q183 145, 178 155 Q170 160, 162 155 Q157 145, 157 125 Q157 108, 162 100 Z', stroke: C.lung, 'stroke-width': '1.1', fill: 'rgba(122,158,142,0.07)' }), 'org-lung-r', 'Right Lung');
   svg.append(lungL, lungR);
-
-  /* Heart */
   svg.append(organ(setA(ns('path'), { d: 'M150 118 L144 112 Q138 109, 135 114 Q132 118, 136 124 L150 134 L164 124 Q168 118, 165 114 Q162 109, 156 112 Z', stroke: C.heart, 'stroke-width': '1.2', fill: 'rgba(176,92,92,0.15)' }), 'org-heart', 'Heart'));
-
-  /* Liver */
   svg.append(organ(setA(ns('path'), { d: 'M155 148 Q170 145, 182 150 Q186 162, 180 174 Q170 180, 158 176 Q150 172, 148 162 Q148 152, 155 148 Z', stroke: C.liver, 'stroke-width': '1.1', fill: 'rgba(200,169,110,0.06)' }), 'org-liver', 'Liver'));
-
-  /* Stomach */
   svg.append(organ(setA(ns('path'), { d: 'M136 152 Q130 158, 131 170 Q133 180, 143 182 Q153 183, 157 174 Q160 164, 155 154 Q148 148, 140 150 Z', stroke: C.stomach, 'stroke-width': '1', fill: 'rgba(160,142,106,0.06)' }), 'org-stomach', 'Stomach'));
-
-  /* Kidneys */
   svg.append(organ(setA(ns('path'), { d: 'M123 178 Q118 183, 118 193 Q118 203, 123 207 Q130 210, 136 206 Q140 200, 140 191 Q140 182, 136 178 Q130 174, 123 178 Z', stroke: C.kidney, 'stroke-width': '1', fill: 'rgba(110,138,158,0.07)' }), 'org-kidney-l', 'Left Kidney'));
   svg.append(organ(setA(ns('path'), { d: 'M177 178 Q182 183, 182 193 Q182 203, 177 207 Q170 210, 164 206 Q160 200, 160 191 Q160 182, 164 178 Q170 174, 177 178 Z', stroke: C.kidney, 'stroke-width': '1', fill: 'rgba(110,138,158,0.07)' }), 'org-kidney-r', 'Right Kidney'));
 
-  /* Tooltips */
   const tooltip = document.getElementById('organ-tooltip');
   document.querySelectorAll('.organ').forEach(o => {
     o.addEventListener('mouseenter', () => {
@@ -498,23 +531,21 @@ function createWireframeBody() {
     o.addEventListener('mousemove', (e) => {
       if (tooltip) { tooltip.style.left = (e.clientX + 14) + 'px'; tooltip.style.top = (e.clientY - 12) + 'px'; }
     });
-    o.addEventListener('mouseleave', () => {
-      if (tooltip) tooltip.classList.remove('visible');
-    });
+    o.addEventListener('mouseleave', () => { if (tooltip) tooltip.classList.remove('visible'); });
   });
 }
 
 function highlightOrgans(data) {
   const ORGAN_MAP = {
-    'org-brain':    { kw: ['brain','neuro','cognitive','headache','cns','memory'],          tk: ['eeg','mri brain','neurological'] },
-    'org-thyroid':  { kw: ['thyroid','tsh','t3','t4','goiter','hypothyroid','hyperthyroid'],tk: ['thyroid function','thyroid panel'] },
+    'org-brain':    { kw: ['brain','neuro','cognitive','headache','cns','memory'],           tk: ['eeg','mri brain','neurological'] },
+    'org-thyroid':  { kw: ['thyroid','tsh','t3','t4','goiter','hypothyroid','hyperthyroid'], tk: ['thyroid function','thyroid panel'] },
     'org-heart':    { kw: ['heart','cardiac','cholesterol','ecg','ekg','coronary','hypertension','ldl','hdl','triglyceride','artery','myocardial'], tk: ['troponin','bnp','echocardiogram','cardiac enzymes'] },
-    'org-lung-l':   { kw: ['lung','pulmonary','respiratory','oxygen','spo2','breathing','bronch','pneumonia','asthma'],                            tk: ['spirometry','chest x-ray','pft','oxygen saturation'] },
-    'org-lung-r':   { kw: ['lung','pulmonary','respiratory','oxygen'],                      tk: ['chest imaging','respiratory function'] },
-    'org-liver':    { kw: ['liver','bilirubin','alt','ast','sgpt','sgot','hepatic','albumin','jaundice','cirrhosis','hepatitis'],                   tk: ['liver function','liver enzymes','ast/alt'] },
-    'org-stomach':  { kw: ['glucose','diabetes','hba1c','insulin','pancreas','stomach','blood sugar','glycemia'],                                  tk: ['blood glucose','glucose tolerance','fasting blood sugar'] },
-    'org-kidney-l': { kw: ['kidney','creatinine','urea','bun','renal','uric','gfr','proteinuria','nephro'],                                        tk: ['kidney function','renal panel','creatinine clearance'] },
-    'org-kidney-r': { kw: ['kidney','creatinine','urea','renal'],                          tk: ['kidney','renal'] },
+    'org-lung-l':   { kw: ['lung','pulmonary','respiratory','oxygen','spo2','breathing','bronch','pneumonia','asthma'], tk: ['spirometry','chest x-ray','pft','oxygen saturation'] },
+    'org-lung-r':   { kw: ['lung','pulmonary','respiratory','oxygen'],                       tk: ['chest imaging','respiratory function'] },
+    'org-liver':    { kw: ['liver','bilirubin','alt','ast','sgpt','sgot','hepatic','albumin','jaundice','cirrhosis','hepatitis'], tk: ['liver function','liver enzymes','ast/alt'] },
+    'org-stomach':  { kw: ['glucose','diabetes','hba1c','insulin','pancreas','stomach','blood sugar','glycemia'], tk: ['blood glucose','glucose tolerance','fasting blood sugar'] },
+    'org-kidney-l': { kw: ['kidney','creatinine','urea','bun','renal','uric','gfr','proteinuria','nephro'], tk: ['kidney function','renal panel','creatinine clearance'] },
+    'org-kidney-r': { kw: ['kidney','creatinine','urea','renal'],                            tk: ['kidney','renal'] },
   };
 
   const organSeverity = {};
@@ -523,9 +554,8 @@ function highlightOrgans(data) {
     Object.entries(ORGAN_MAP).forEach(([id, { kw, tk }]) => {
       if (kw.some(k => ft.includes(k)) || tk.some(k => ft.includes(k))) {
         const sev = getStatus(finding.status);
-        if (!organSeverity[id] || severityRank(sev) < severityRank(organSeverity[id])) {
+        if (!organSeverity[id] || severityRank(sev) < severityRank(organSeverity[id]))
           organSeverity[id] = sev;
-        }
       }
     });
   });
@@ -537,8 +567,8 @@ function highlightOrgans(data) {
       o.classList.add('highlight', `highlight-${sev}`);
       o.style.opacity = '1';
       o.style.filter  =
-        sev === 'high'     ? 'drop-shadow(0 0 6px rgba(176,92,92,0.7))'     :
-        sev === 'moderate' ? 'drop-shadow(0 0 5px rgba(200,169,110,0.6))'   :
+        sev === 'high'     ? 'drop-shadow(0 0 6px rgba(176,92,92,0.7))'   :
+        sev === 'moderate' ? 'drop-shadow(0 0 5px rgba(200,169,110,0.6))' :
                              'drop-shadow(0 0 4px rgba(122,158,142,0.5))';
     } else {
       o.style.opacity = '0.32';
@@ -550,7 +580,7 @@ function highlightOrgans(data) {
 function getStatus(s) {
   s = (s || '').toLowerCase();
   if (/high|abnormal|critical|elevated|above|increase/.test(s)) return 'high';
-  if (/moderate|borderline|low|reduced|decrease|below/.test(s)) return 'moderate';
+  if (/moderate|borderline|low|reduced|decrease|below/.test(s))  return 'moderate';
   return 'low';
 }
 function severityRank(s) { return ({ high: 0, moderate: 1, low: 2 })[s] ?? 3; }
@@ -562,7 +592,6 @@ function initChat() {
   const input   = document.getElementById('chat-input');
   const send    = document.getElementById('chat-send');
   const prompts = document.querySelectorAll('.prompt-chip');
-
   send?.addEventListener('click', sendMessage);
   input?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
@@ -588,14 +617,12 @@ async function sendMessage() {
   const send  = document.getElementById('chat-send');
   const msg   = input?.value?.trim();
   if (!msg) return;
-
-  input.value   = '';
+  input.value = '';
   send.disabled = true;
   addMessage('user', escHtml(msg));
   chatHistory.push({ role: 'user', content: msg });
-
   try {
-    const res = await fetch(`${API_BASE}/api/chat`, {
+    const res   = await fetch(`${API_BASE}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: msg, context: currentAnalysis, history: chatHistory.slice(-6) }),
@@ -631,17 +658,13 @@ function addMessage(role, html) {
 function setupEventListeners() {
   document.getElementById('risk-btn')?.addEventListener('click', () => {
     if (!currentAnalysis) return;
-    showToast(`Risk: ${currentAnalysis.risk?.level || 'Unknown'} — ${currentAnalysis.risk?.reason || ''}`, 'error');
+    showToast(`Risk: ${currentAnalysis.risk?.level || 'Unknown'} — ${currentAnalysis.risk?.reason || ''}`);
   });
-
   document.getElementById('meddie-btn')?.addEventListener('click', () => {
     if (window.innerWidth >= 768) document.getElementById('chat-input')?.focus();
   });
-
   document.getElementById('pdf-btn')?.addEventListener('click', () => window.print());
-
   document.getElementById('diet-btn')?.addEventListener('click', () => openDietModal());
-
   document.getElementById('doctor-btn')?.addEventListener('click', () => openDoctorModal());
 }
 
@@ -651,7 +674,6 @@ function setupEventListeners() {
 function openDietModal() {
   if (!currentAnalysis) { showToast('Please analyse a report first'); return; }
   document.getElementById('diet-modal')?.remove();
-
   const modal = document.createElement('div');
   modal.id        = 'diet-modal';
   modal.className = 'mc-modal-overlay';
@@ -672,16 +694,14 @@ function openDietModal() {
         </div>
       </div>
     </div>`;
-
   document.body.appendChild(modal);
   modal.querySelector('#diet-close').addEventListener('click', () => modal.remove());
   modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
   requestAnimationFrame(() => modal.classList.add('mc-modal-visible'));
-
-  fetchDietPlan(modal);
+  fetchDietPlan();
 }
 
-async function fetchDietPlan(modal) {
+async function fetchDietPlan() {
   const body = document.getElementById('diet-body');
   if (!body) return;
   try {
@@ -705,28 +725,22 @@ async function fetchDietPlan(modal) {
 
 function renderDietPlan(plan, body) {
   if (!plan || !body) return;
-
   const mealBlock = (obj) => {
     if (!obj) return '';
     const items  = (obj.suggestions || []).map(s => `<li>${escHtml(s)}</li>`).join('');
-    const avoids = (obj.avoid       || []).map(a => `<span class="dp-avoid-tag">${escHtml(a)}</span>`).join('');
+    const avoids = (obj.avoid || []).map(a => `<span class="dp-avoid-tag">${escHtml(a)}</span>`).join('');
     return `<ul class="dp-meal-list">${items}</ul>${avoids ? `<div class="dp-avoid-row">${avoids}</div>` : ''}`;
   };
-
   const nutrientsPrio  = (plan.nutrients_to_prioritize || []).map(n => `
     <div class="dp-nutrient dp-nutrient--good">
-      <strong>${escHtml(n.nutrient)}</strong>
-      <span>${escHtml(n.reason)}</span>
+      <strong>${escHtml(n.nutrient)}</strong><span>${escHtml(n.reason)}</span>
       <div class="dp-sources">${(n.sources || []).map(s => `<span>${escHtml(s)}</span>`).join('')}</div>
     </div>`).join('');
-
   const nutrientsLimit = (plan.nutrients_to_limit || []).map(n => `
     <div class="dp-nutrient dp-nutrient--limit">
-      <strong>${escHtml(n.nutrient)}</strong>
-      <span>${escHtml(n.reason)}</span>
+      <strong>${escHtml(n.nutrient)}</strong><span>${escHtml(n.reason)}</span>
       <div class="dp-limit-badge">${escHtml(n.limit || '')}</div>
     </div>`).join('');
-
   const sampleHtml = Object.entries(plan.sample_day || {}).map(([t, m]) => `
     <div class="dp-sample-row">
       <span class="dp-sample-time">${escHtml(t.replace(/_/g, ' '))}</span>
@@ -735,7 +749,6 @@ function renderDietPlan(plan, body) {
 
   body.innerHTML = `
     <div class="dp-wrap">
-
       <div class="dp-summary-card">
         <div class="dp-summary-meta">
           <span>📅 ${escHtml(plan.duration || '4-week plan')}</span>
@@ -744,43 +757,30 @@ function renderDietPlan(plan, body) {
         </div>
         <p class="dp-summary-text">${escHtml(plan.summary || '')}</p>
       </div>
-
       <div class="dp-section-title">Daily Meals</div>
       <div class="dp-meals-grid">
-        ${['breakfast', 'lunch', 'dinner', 'snacks'].map(m => `
+        ${['breakfast','lunch','dinner','snacks'].map(m => `
           <div class="dp-meal-card">
-            <div class="dp-meal-label">${m.charAt(0).toUpperCase() + m.slice(1)}</div>
+            <div class="dp-meal-label">${m.charAt(0).toUpperCase()+m.slice(1)}</div>
             ${mealBlock(plan.meals?.[m])}
           </div>`).join('')}
       </div>
-
       ${sampleHtml ? `<div class="dp-section-title">Sample Day</div><div class="dp-sample-card">${sampleHtml}</div>` : ''}
-
-      ${nutrientsPrio  ? `<div class="dp-section-title">Nutrients to Prioritise</div><div class="dp-nutrients-grid">${nutrientsPrio}</div>`  : ''}
-      ${nutrientsLimit ? `<div class="dp-section-title">Nutrients to Limit</div><div class="dp-nutrients-grid">${nutrientsLimit}</div>`      : ''}
-
+      ${nutrientsPrio  ? `<div class="dp-section-title">Nutrients to Prioritise</div><div class="dp-nutrients-grid">${nutrientsPrio}</div>` : ''}
+      ${nutrientsLimit ? `<div class="dp-section-title">Nutrients to Limit</div><div class="dp-nutrients-grid">${nutrientsLimit}</div>` : ''}
       ${(plan.foods_to_avoid || []).length ? `
         <div class="dp-section-title">Foods to Avoid</div>
-        <div class="dp-avoid-list">
-          ${(plan.foods_to_avoid).map(f => `<div class="dp-avoid-item">⚠ ${escHtml(f)}</div>`).join('')}
-        </div>` : ''}
-
+        <div class="dp-avoid-list">${plan.foods_to_avoid.map(f => `<div class="dp-avoid-item">⚠ ${escHtml(f)}</div>`).join('')}</div>` : ''}
       ${plan.hydration ? `
         <div class="dp-section-title">Hydration</div>
         <div class="dp-hydration-card">
           <strong>💧 ${escHtml(plan.hydration.target || '')}</strong>
           <ul>${(plan.hydration.tips || []).map(t => `<li>${escHtml(t)}</li>`).join('')}</ul>
         </div>` : ''}
-
       ${(plan.lifestyle_tips || []).length ? `
         <div class="dp-section-title">Lifestyle Tips</div>
-        <div class="dp-tips-list">
-          ${(plan.lifestyle_tips).map(t => `<div class="dp-tip">✦ ${escHtml(t)}</div>`).join('')}
-        </div>` : ''}
-
-      <div class="dp-disclaimer">
-        ${escHtml(plan.disclaimer || 'Consult a registered dietitian before making significant dietary changes.')}
-      </div>
+        <div class="dp-tips-list">${plan.lifestyle_tips.map(t => `<div class="dp-tip">✦ ${escHtml(t)}</div>`).join('')}</div>` : ''}
+      <div class="dp-disclaimer">${escHtml(plan.disclaimer || 'Consult a registered dietitian before making significant dietary changes.')}</div>
     </div>`;
 }
 
@@ -790,10 +790,8 @@ function renderDietPlan(plan, body) {
 function openDoctorModal() {
   if (!currentAnalysis) { showToast('Please analyse a report first'); return; }
   document.getElementById('doctor-modal')?.remove();
-
   const specialists   = currentAnalysis?.specialists || [];
   const suggestedSpec = specialists.length ? specialists[0].toLowerCase() : 'general physician';
-
   const modal = document.createElement('div');
   modal.id        = 'doctor-modal';
   modal.className = 'mc-modal-overlay';
@@ -816,8 +814,7 @@ function openDoctorModal() {
           <div class="fd-field">
             <label>Specialty</label>
             <input type="text" id="fd-specialty" class="fd-input"
-                   value="${escHtml(suggestedSpec)}"
-                   placeholder="e.g. cardiologist" autocomplete="off"/>
+                   value="${escHtml(suggestedSpec)}" placeholder="e.g. cardiologist" autocomplete="off"/>
           </div>
           <button class="fd-search-btn" id="fd-search">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -827,48 +824,37 @@ function openDoctorModal() {
             Search
           </button>
         </div>
-
         ${specialists.length ? `
           <div class="fd-suggested">
             Suggested from your report:
             ${specialists.map(s => `<span class="fd-spec-tag" data-spec="${escHtml(s.toLowerCase())}">${escHtml(s)}</span>`).join('')}
           </div>` : ''}
-
         <div id="fd-results" class="fd-results"></div>
       </div>
     </div>`;
-
   document.body.appendChild(modal);
-
   modal.querySelector('#doctor-close').addEventListener('click', () => modal.remove());
   modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
   requestAnimationFrame(() => modal.classList.add('mc-modal-visible'));
 
-  /* Specialty tag clicks */
   modal.querySelectorAll('.fd-spec-tag').forEach(tag => {
     tag.addEventListener('click', () => {
       document.getElementById('fd-specialty').value = tag.dataset.spec;
-      modal.querySelectorAll('.fd-spec-tag').forEach(t => {
-        t.style.background   = '';
-        t.style.borderColor  = '';
-        t.style.color        = '';
-      });
+      modal.querySelectorAll('.fd-spec-tag').forEach(t => { t.style.background = ''; t.style.borderColor = ''; t.style.color = ''; });
       tag.style.background  = 'rgba(200,169,110,0.18)';
       tag.style.borderColor = 'rgba(200,169,110,0.4)';
       tag.style.color       = '#e2c99a';
     });
   });
 
-  /* Search trigger */
   const doSearch = () => {
     const location  = document.getElementById('fd-location')?.value?.trim();
     const specialty = document.getElementById('fd-specialty')?.value?.trim() || 'general physician';
     if (!location) { showToast('Please enter your location'); return; }
     fetchDoctors(location, specialty);
   };
-
   document.getElementById('fd-search').addEventListener('click', doSearch);
-  document.getElementById('fd-location').addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
+  document.getElementById('fd-location').addEventListener('keydown',  (e) => { if (e.key === 'Enter') doSearch(); });
   document.getElementById('fd-specialty').addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
 }
 
@@ -880,7 +866,6 @@ async function fetchDoctors(location, specialty) {
       <div class="mc-spinner"></div>
       <p>Searching near ${escHtml(location)}…</p>
     </div>`;
-
   try {
     const res  = await fetch(`${API_BASE}/api/doctors`, {
       method: 'POST',
@@ -905,25 +890,19 @@ function renderDoctors(data, container) {
     container.innerHTML = `
       <div class="mc-error">
         <span>🔍</span>
-        <p>${escHtml(data.note || 'No doctors found nearby. Try a different location or area.')}</p>
+        <p>${escHtml(data.note || 'No doctors found nearby. Try a different location.')}</p>
       </div>`;
     return;
   }
-
   container.innerHTML = `
-    <div class="fd-meta">
-      Found <strong>${doctors.length}</strong> result${doctors.length !== 1 ? 's' : ''}
-      near <strong>${escHtml(data.location || location)}</strong>
-    </div>
+    <div class="fd-meta">Found <strong>${doctors.length}</strong> result${doctors.length !== 1 ? 's' : ''} near <strong>${escHtml(data.location || '')}</strong></div>
     <div class="fd-list">
       ${doctors.map(d => `
         <div class="fd-card">
           <div class="fd-card-left">
             <div class="fd-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z
-                         m0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                      fill="currentColor" opacity="0.85"/>
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor" opacity="0.85"/>
               </svg>
             </div>
             <div class="fd-info">
@@ -935,7 +914,7 @@ function renderDoctors(data, container) {
           <div class="fd-card-right">
             <span class="fd-dist">${d.distance_km} km</span>
             <div class="fd-actions">
-              ${d.phone   ? `<a href="tel:${escHtml(d.phone)}"   class="fd-btn fd-btn--call">📞 Call</a>` : ''}
+              ${d.phone   ? `<a href="tel:${escHtml(d.phone)}" class="fd-btn fd-btn--call">📞 Call</a>` : ''}
               <a href="${escHtml(d.maps_url)}" target="_blank" rel="noopener" class="fd-btn fd-btn--map">🗺 Map</a>
               ${d.website ? `<a href="${escHtml(d.website)}" target="_blank" rel="noopener" class="fd-btn fd-btn--web">🌐 Site</a>` : ''}
             </div>
@@ -960,40 +939,28 @@ function injectModalStyles() {
   const style = document.createElement('style');
   style.id    = 'mc-modal-styles';
   style.textContent = `
-
-/* ─── Spin keyframe ─── */
 @keyframes mcSpin { to { transform: rotate(360deg); } }
 
-/* ─── Overlay ─── */
 .mc-modal-overlay {
   position: fixed; inset: 0; z-index: 1000;
-  background: rgba(0,0,0,0.72);
-  backdrop-filter: blur(10px) saturate(120%);
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px;
+  background: rgba(0,0,0,0.72); backdrop-filter: blur(10px) saturate(120%);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
   opacity: 0; transition: opacity 0.3s ease;
 }
 .mc-modal-overlay.mc-modal-visible { opacity: 1; }
-
-/* ─── Modal card ─── */
 .mc-modal {
   width: 100%; max-height: 88vh;
-  background: #111410;
-  border: 1px solid rgba(255,252,240,0.12);
-  border-radius: 22px;
+  background: #111410; border: 1px solid rgba(255,252,240,0.12); border-radius: 22px;
   display: flex; flex-direction: column;
   box-shadow: 0 40px 100px rgba(0,0,0,0.65), 0 0 0 1px rgba(200,169,110,0.07) inset;
   transform: translateY(18px); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
   overflow: hidden;
 }
 .mc-modal-overlay.mc-modal-visible .mc-modal { transform: translateY(0); }
-
-/* ─── Header ─── */
 .mc-modal-header {
   display: flex; align-items: flex-start; justify-content: space-between;
-  padding: 24px 28px 18px;
-  border-bottom: 1px solid rgba(255,252,240,0.07);
-  flex-shrink: 0; position: relative;
+  padding: 24px 28px 18px; border-bottom: 1px solid rgba(255,252,240,0.07); flex-shrink: 0;
+  position: relative;
 }
 .mc-modal-header::after {
   content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
@@ -1012,182 +979,95 @@ function injectModalStyles() {
   transition: background 0.2s, color 0.2s;
 }
 .mc-modal-close:hover { background: rgba(176,92,92,0.12); color: #d98080; border-color: rgba(176,92,92,0.2); }
-
-/* ─── Body ─── */
 .mc-modal-body { flex: 1; overflow-y: auto; padding: 24px 28px; }
 .mc-modal-body::-webkit-scrollbar { width: 4px; }
 .mc-modal-body::-webkit-scrollbar-thumb { background: rgba(200,169,110,0.15); border-radius: 2px; }
 
-/* ─── Loading ─── */
-.mc-loading {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 14px; padding: 64px 20px; text-align: center;
-}
+.mc-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 64px 20px; text-align: center; }
 .mc-loading p     { font-size: 13px; font-weight: 300; color: rgba(245,240,232,0.5); }
 .mc-loading small { font-size: 11px; color: rgba(245,240,232,0.25); letter-spacing: 0.03em; }
-.mc-spinner {
-  width: 38px; height: 38px; border-radius: 50%;
-  border: 2px solid rgba(200,169,110,0.12); border-top-color: #c8a96e;
-  animation: mcSpin 0.8s linear infinite;
-}
-
-/* ─── Error ─── */
-.mc-error {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 12px; padding: 52px 20px; text-align: center;
-}
+.mc-spinner { width: 38px; height: 38px; border-radius: 50%; border: 2px solid rgba(200,169,110,0.12); border-top-color: #c8a96e; animation: mcSpin 0.8s linear infinite; }
+.mc-error { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 52px 20px; text-align: center; }
 .mc-error span { font-size: 30px; }
 .mc-error p { font-size: 13px; color: rgba(245,240,232,0.45); font-weight: 300; max-width: 320px; line-height: 1.6; }
-.mc-retry {
-  padding: 8px 20px; background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.25);
-  border-radius: 8px; color: #e2c99a; font-size: 12px; cursor: pointer;
-  font-family: 'Jost', sans-serif; letter-spacing: 0.04em;
-  transition: background 0.2s, transform 0.15s;
-}
-.mc-retry:hover { background: rgba(200,169,110,0.18); transform: translateY(-1px); }
+.mc-retry { padding: 8px 20px; background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.25); border-radius: 8px; color: #e2c99a; font-size: 12px; cursor: pointer; font-family: 'Jost', sans-serif; letter-spacing: 0.04em; transition: background 0.2s; }
+.mc-retry:hover { background: rgba(200,169,110,0.18); }
 
-/* ══════════════════════════════════════════════════════════
-   DIET PLAN STYLES
-══════════════════════════════════════════════════════════ */
 .dp-wrap { display: flex; flex-direction: column; gap: 24px; }
-
-.dp-summary-card {
-  background: rgba(200,169,110,0.05); border: 1px solid rgba(200,169,110,0.14);
-  border-radius: 14px; padding: 18px 20px;
-}
+.dp-summary-card { background: rgba(200,169,110,0.05); border: 1px solid rgba(200,169,110,0.14); border-radius: 14px; padding: 18px 20px; }
 .dp-summary-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.dp-summary-meta span {
-  font-size: 11.5px; font-weight: 300; color: rgba(245,240,232,0.6);
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,252,240,0.08);
-  padding: 4px 10px; border-radius: 6px;
-}
+.dp-summary-meta span { font-size: 11.5px; font-weight: 300; color: rgba(245,240,232,0.6); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,252,240,0.08); padding: 4px 10px; border-radius: 6px; }
 .dp-condition-tag { background: rgba(200,169,110,0.12) !important; border-color: rgba(200,169,110,0.22) !important; color: #e2c99a !important; }
 .dp-summary-text { font-size: 13px; font-weight: 300; color: rgba(245,240,232,0.65); line-height: 1.75; }
-
-.dp-section-title {
-  font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 600;
-  color: #f5f0e8; letter-spacing: 0.01em;
-  padding-bottom: 8px; border-bottom: 1px solid rgba(255,252,240,0.07);
-}
-
+.dp-section-title { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 600; color: #f5f0e8; letter-spacing: 0.01em; padding-bottom: 8px; border-bottom: 1px solid rgba(255,252,240,0.07); }
 .dp-meals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.dp-meal-card {
-  background: rgba(0,0,0,0.2); border: 1px solid rgba(255,252,240,0.07);
-  border-radius: 12px; padding: 14px 16px;
-}
+.dp-meal-card { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,252,240,0.07); border-radius: 12px; padding: 14px 16px; }
 .dp-meal-label { font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #c8a96e; margin-bottom: 10px; }
 .dp-meal-list { list-style: none; display: flex; flex-direction: column; gap: 6px; padding: 0; }
 .dp-meal-list li { font-size: 12px; font-weight: 300; color: rgba(245,240,232,0.7); line-height: 1.5; padding-left: 12px; position: relative; }
 .dp-meal-list li::before { content: '·'; position: absolute; left: 0; color: #c8a96e; }
 .dp-avoid-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
-.dp-avoid-tag {
-  font-size: 10px; color: #d98080; background: rgba(176,92,92,0.08);
-  border: 1px solid rgba(176,92,92,0.18); padding: 2px 8px; border-radius: 4px;
-  font-family: 'DM Mono', monospace;
-}
-
+.dp-avoid-tag { font-size: 10px; color: #d98080; background: rgba(176,92,92,0.08); border: 1px solid rgba(176,92,92,0.18); padding: 2px 8px; border-radius: 4px; font-family: 'DM Mono', monospace; }
 .dp-sample-card { background: rgba(0,0,0,0.18); border: 1px solid rgba(255,252,240,0.07); border-radius: 12px; overflow: hidden; }
 .dp-sample-row { display: flex; align-items: baseline; gap: 16px; padding: 11px 16px; border-bottom: 1px solid rgba(255,252,240,0.05); }
 .dp-sample-row:last-child { border-bottom: none; }
 .dp-sample-time { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; text-transform: capitalize; color: #c8a96e; letter-spacing: 0.04em; min-width: 90px; flex-shrink: 0; }
 .dp-sample-meal { font-size: 12.5px; font-weight: 300; color: rgba(245,240,232,0.7); line-height: 1.5; }
-
 .dp-nutrients-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .dp-nutrient { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 12px 14px; }
 .dp-nutrient--good  { border: 1px solid rgba(122,158,142,0.22); }
 .dp-nutrient--limit { border: 1px solid rgba(176,92,92,0.22); }
 .dp-nutrient strong { display: block; font-size: 12.5px; font-weight: 500; color: #f5f0e8; margin-bottom: 4px; }
 .dp-nutrient span   { font-size: 11px; font-weight: 300; color: rgba(245,240,232,0.5); line-height: 1.5; display: block; margin-bottom: 8px; }
-.dp-sources         { display: flex; flex-wrap: wrap; gap: 4px; }
-.dp-sources span    { font-size: 10px; color: #a3c4b5; background: rgba(122,158,142,0.1); border: 1px solid rgba(122,158,142,0.2); padding: 2px 7px; border-radius: 4px; }
-.dp-limit-badge     { font-family: 'DM Mono', monospace; font-size: 10px; color: #d98080; background: rgba(176,92,92,0.1); border: 1px solid rgba(176,92,92,0.2); padding: 3px 8px; border-radius: 4px; display: inline-block; }
-
+.dp-sources { display: flex; flex-wrap: wrap; gap: 4px; }
+.dp-sources span { font-size: 10px; color: #a3c4b5; background: rgba(122,158,142,0.1); border: 1px solid rgba(122,158,142,0.2); padding: 2px 7px; border-radius: 4px; }
+.dp-limit-badge { font-family: 'DM Mono', monospace; font-size: 10px; color: #d98080; background: rgba(176,92,92,0.1); border: 1px solid rgba(176,92,92,0.2); padding: 3px 8px; border-radius: 4px; display: inline-block; }
 .dp-avoid-list { display: flex; flex-direction: column; gap: 6px; }
 .dp-avoid-item { font-size: 12.5px; font-weight: 300; color: rgba(245,240,232,0.6); background: rgba(176,92,92,0.06); border: 1px solid rgba(176,92,92,0.12); border-radius: 8px; padding: 10px 14px; }
-
 .dp-hydration-card { background: rgba(110,138,158,0.06); border: 1px solid rgba(110,138,158,0.2); border-radius: 12px; padding: 16px 18px; }
 .dp-hydration-card strong { display: block; font-size: 13.5px; color: #a3c4b5; margin-bottom: 10px; }
 .dp-hydration-card ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 5px; }
 .dp-hydration-card li { font-size: 12px; font-weight: 300; color: rgba(245,240,232,0.6); padding-left: 14px; position: relative; }
 .dp-hydration-card li::before { content: '·'; position: absolute; left: 0; color: #6e8a9e; }
-
 .dp-tips-list { display: flex; flex-direction: column; gap: 8px; }
 .dp-tip { font-size: 12.5px; font-weight: 300; color: rgba(245,240,232,0.65); padding: 10px 14px; background: rgba(200,169,110,0.04); border: 1px solid rgba(200,169,110,0.1); border-radius: 8px; }
-
 .dp-disclaimer { font-size: 10.5px; font-weight: 300; color: rgba(245,240,232,0.25); text-align: center; letter-spacing: 0.02em; line-height: 1.65; padding-top: 6px; }
 
-/* ══════════════════════════════════════════════════════════
-   FIND DOCTOR STYLES
-══════════════════════════════════════════════════════════ */
 .fd-search-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 14px; }
 .fd-field { flex: 1; display: flex; flex-direction: column; gap: 6px; }
 .fd-field label { font-size: 10.5px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(245,240,232,0.32); }
-.fd-input {
-  background: rgba(0,0,0,0.25); border: 1px solid rgba(255,252,240,0.1); border-radius: 10px;
-  padding: 10px 14px; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 300;
-  color: #f5f0e8; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
-}
+.fd-input { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,252,240,0.1); border-radius: 10px; padding: 10px 14px; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 300; color: #f5f0e8; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
 .fd-input::placeholder { color: rgba(245,240,232,0.2); }
 .fd-input:focus { border-color: rgba(200,169,110,0.4); box-shadow: 0 0 0 3px rgba(200,169,110,0.07); }
-.fd-search-btn {
-  display: flex; align-items: center; gap: 7px; padding: 10px 20px;
-  background: linear-gradient(135deg, #8a6e3d, #c8a96e); border: none; border-radius: 10px;
-  font-family: 'Jost', sans-serif; font-size: 12.5px; font-weight: 500;
-  letter-spacing: 0.05em; color: #0d0f0e; cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s; white-space: nowrap; flex-shrink: 0;
-  box-shadow: 0 4px 14px rgba(200,169,110,0.25);
-}
+.fd-search-btn { display: flex; align-items: center; gap: 7px; padding: 10px 20px; background: linear-gradient(135deg, #8a6e3d, #c8a96e); border: none; border-radius: 10px; font-family: 'Jost', sans-serif; font-size: 12.5px; font-weight: 500; letter-spacing: 0.05em; color: #0d0f0e; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; white-space: nowrap; flex-shrink: 0; box-shadow: 0 4px 14px rgba(200,169,110,0.25); }
 .fd-search-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,169,110,0.35); }
-
 .fd-suggested { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 18px; font-size: 11px; color: rgba(245,240,232,0.3); }
-.fd-spec-tag {
-  font-size: 11px; color: rgba(245,240,232,0.5); background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,252,240,0.1); padding: 3px 10px; border-radius: 6px;
-  cursor: pointer; transition: background 0.2s, color 0.2s;
-}
+.fd-spec-tag { font-size: 11px; color: rgba(245,240,232,0.5); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,252,240,0.1); padding: 3px 10px; border-radius: 6px; cursor: pointer; transition: background 0.2s, color 0.2s; }
 .fd-spec-tag:hover { background: rgba(200,169,110,0.1); color: #e2c99a; }
-
 .fd-results { min-height: 40px; }
 .fd-meta { font-size: 11.5px; font-weight: 300; color: rgba(245,240,232,0.35); margin-bottom: 12px; }
 .fd-meta strong { color: rgba(245,240,232,0.55); }
-
 .fd-list { display: flex; flex-direction: column; gap: 9px; }
-.fd-card {
-  display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
-  background: rgba(0,0,0,0.2); border: 1px solid rgba(255,252,240,0.07); border-radius: 12px;
-  padding: 14px 16px; transition: border-color 0.2s, background 0.2s;
-}
+.fd-card { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,252,240,0.07); border-radius: 12px; padding: 14px 16px; transition: border-color 0.2s, background 0.2s; }
 .fd-card:hover { border-color: rgba(200,169,110,0.2); background: rgba(200,169,110,0.03); }
-.fd-card-left  { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-width: 0; }
-.fd-icon {
-  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-  background: rgba(200,169,110,0.08); border: 1px solid rgba(200,169,110,0.15);
-  display: flex; align-items: center; justify-content: center; color: #c8a96e;
-}
-.fd-info    { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.fd-name    { font-size: 13.5px; font-weight: 500; color: #f5f0e8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-.fd-type    { font-size: 11px; color: rgba(245,240,232,0.35); font-weight: 300; letter-spacing: 0.02em; }
+.fd-card-left { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-width: 0; }
+.fd-icon { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; background: rgba(200,169,110,0.08); border: 1px solid rgba(200,169,110,0.15); display: flex; align-items: center; justify-content: center; color: #c8a96e; }
+.fd-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.fd-name { font-size: 13.5px; font-weight: 500; color: #f5f0e8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.fd-type { font-size: 11px; color: rgba(245,240,232,0.35); font-weight: 300; letter-spacing: 0.02em; }
 .fd-address { font-size: 11.5px; color: rgba(245,240,232,0.42); font-weight: 300; display: block; margin-top: 2px; line-height: 1.4; }
 .fd-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
 .fd-dist { font-family: 'DM Mono', monospace; font-size: 11px; color: #c8a96e; font-weight: 500; white-space: nowrap; }
 .fd-actions { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
-.fd-btn {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 5px 10px; border-radius: 7px; font-size: 11px;
-  font-family: 'Jost', sans-serif; font-weight: 400; letter-spacing: 0.02em;
-  text-decoration: none; cursor: pointer; white-space: nowrap;
-  border: 1px solid rgba(255,252,240,0.1); color: rgba(245,240,232,0.55);
-  background: rgba(255,255,255,0.04); transition: background 0.2s, color 0.2s;
-}
+.fd-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 7px; font-size: 11px; font-family: 'Jost', sans-serif; font-weight: 400; letter-spacing: 0.02em; text-decoration: none; cursor: pointer; white-space: nowrap; border: 1px solid rgba(255,252,240,0.1); color: rgba(245,240,232,0.55); background: rgba(255,255,255,0.04); transition: background 0.2s, color 0.2s; }
 .fd-btn:hover    { background: rgba(255,255,255,0.09); color: #f5f0e8; }
-.fd-btn--map  { border-color: rgba(200,169,110,0.2); color: #c8a96e; background: rgba(200,169,110,0.06); }
+.fd-btn--map  { border-color: rgba(200,169,110,0.2);   color: #c8a96e; background: rgba(200,169,110,0.06); }
 .fd-btn--map:hover  { background: rgba(200,169,110,0.14); }
-.fd-btn--call { border-color: rgba(122,158,142,0.25); color: #a3c4b5; background: rgba(122,158,142,0.06); }
+.fd-btn--call { border-color: rgba(122,158,142,0.25);  color: #a3c4b5; background: rgba(122,158,142,0.06); }
 .fd-btn--call:hover { background: rgba(122,158,142,0.14); }
-.fd-btn--web  { border-color: rgba(110,138,158,0.2); color: #8aaecc; background: rgba(110,138,158,0.06); }
+.fd-btn--web  { border-color: rgba(110,138,158,0.2);   color: #8aaecc; background: rgba(110,138,158,0.06); }
 .fd-btn--web:hover  { background: rgba(110,138,158,0.14); }
 
-/* ─── Mobile responsive for modals ─── */
 @media (max-width: 600px) {
   .mc-modal-header { padding: 18px 20px 14px; }
   .mc-modal-body   { padding: 16px 18px; }
@@ -1198,6 +1078,55 @@ function injectModalStyles() {
   .fd-card-right   { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
   .fd-dist         { order: -1; }
 }
+
+/* ── Cream mode modal overrides ── */
+[data-theme="cream"] .mc-modal {
+  background: #ede4ce; border-color: rgba(42,28,8,0.15);
+  box-shadow: 0 40px 100px rgba(42,28,8,0.18), 0 0 0 1px rgba(138,94,40,0.08) inset;
+}
+[data-theme="cream"] .mc-modal-header { border-bottom-color: rgba(42,28,8,0.1); }
+[data-theme="cream"] .mc-modal-title  { color: #1c1206; }
+[data-theme="cream"] .mc-modal-sub    { color: rgba(28,18,6,0.38); }
+[data-theme="cream"] .mc-modal-close  { background: rgba(42,28,8,0.05); border-color: rgba(42,28,8,0.1); color: rgba(28,18,6,0.4); }
+[data-theme="cream"] .mc-modal-close:hover { background: rgba(138,48,48,0.1); color: #8a3030; }
+[data-theme="cream"] .mc-loading p    { color: rgba(28,18,6,0.55); }
+[data-theme="cream"] .mc-loading small{ color: rgba(28,18,6,0.3); }
+[data-theme="cream"] .mc-spinner      { border-color: rgba(138,94,40,0.15); border-top-color: #8a5e28; }
+[data-theme="cream"] .mc-error p      { color: rgba(28,18,6,0.5); }
+[data-theme="cream"] .dp-section-title{ color: #1c1206; border-bottom-color: rgba(42,28,8,0.1); }
+[data-theme="cream"] .dp-summary-card { background: rgba(138,94,40,0.06); border-color: rgba(138,94,40,0.18); }
+[data-theme="cream"] .dp-summary-meta span { color: rgba(28,18,6,0.6); background: rgba(42,28,8,0.04); border-color: rgba(42,28,8,0.1); }
+[data-theme="cream"] .dp-summary-text { color: rgba(28,18,6,0.65); }
+[data-theme="cream"] .dp-meal-card    { background: rgba(42,28,8,0.04); border-color: rgba(42,28,8,0.1); }
+[data-theme="cream"] .dp-meal-label   { color: #8a5e28; }
+[data-theme="cream"] .dp-meal-list li { color: rgba(28,18,6,0.7); }
+[data-theme="cream"] .dp-meal-list li::before { color: #8a5e28; }
+[data-theme="cream"] .dp-sample-card  { background: rgba(42,28,8,0.03); border-color: rgba(42,28,8,0.08); }
+[data-theme="cream"] .dp-sample-row   { border-bottom-color: rgba(42,28,8,0.06); }
+[data-theme="cream"] .dp-sample-time  { color: #8a5e28; }
+[data-theme="cream"] .dp-sample-meal  { color: rgba(28,18,6,0.7); }
+[data-theme="cream"] .dp-nutrient     { background: rgba(42,28,8,0.04); }
+[data-theme="cream"] .dp-nutrient strong { color: #1c1206; }
+[data-theme="cream"] .dp-nutrient span   { color: rgba(28,18,6,0.5); }
+[data-theme="cream"] .dp-avoid-item   { background: rgba(138,48,48,0.05); border-color: rgba(138,48,48,0.14); color: rgba(28,18,6,0.65); }
+[data-theme="cream"] .dp-hydration-card { background: rgba(58,112,96,0.06); border-color: rgba(58,112,96,0.22); }
+[data-theme="cream"] .dp-hydration-card li { color: rgba(28,18,6,0.6); }
+[data-theme="cream"] .dp-tip          { background: rgba(138,94,40,0.05); border-color: rgba(138,94,40,0.12); color: rgba(28,18,6,0.65); }
+[data-theme="cream"] .dp-disclaimer   { color: rgba(28,18,6,0.3); }
+[data-theme="cream"] .fd-field label  { color: rgba(28,18,6,0.4); }
+[data-theme="cream"] .fd-input        { background: rgba(42,28,8,0.05); border-color: rgba(42,28,8,0.14); color: #1c1206; }
+[data-theme="cream"] .fd-input::placeholder { color: rgba(28,18,6,0.25); }
+[data-theme="cream"] .fd-suggested    { color: rgba(28,18,6,0.35); }
+[data-theme="cream"] .fd-spec-tag     { color: rgba(28,18,6,0.5); background: rgba(42,28,8,0.04); border-color: rgba(42,28,8,0.12); }
+[data-theme="cream"] .fd-meta         { color: rgba(28,18,6,0.4); }
+[data-theme="cream"] .fd-meta strong  { color: rgba(28,18,6,0.6); }
+[data-theme="cream"] .fd-card         { background: rgba(42,28,8,0.04); border-color: rgba(42,28,8,0.09); }
+[data-theme="cream"] .fd-card:hover   { border-color: rgba(138,94,40,0.22); background: rgba(138,94,40,0.04); }
+[data-theme="cream"] .fd-icon         { background: rgba(138,94,40,0.09); border-color: rgba(138,94,40,0.18); color: #8a5e28; }
+[data-theme="cream"] .fd-name         { color: #1c1206; }
+[data-theme="cream"] .fd-type         { color: rgba(28,18,6,0.38); }
+[data-theme="cream"] .fd-address      { color: rgba(28,18,6,0.45); }
+[data-theme="cream"] .fd-dist         { color: #8a5e28; }
   `;
   document.head.appendChild(style);
 }
