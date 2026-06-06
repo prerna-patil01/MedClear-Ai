@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MedClear — Health Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
@@ -29,19 +29,19 @@
       </div>
 
       <div class="upload-main">
-        <h2 class="upload-heading">Understand your medical report in seconds</h2>
+        <h2 class="upload-heading">Understand your medical<br><em>report in seconds</em></h2>
         <p class="upload-subheading">Upload a PDF, photo, or paste text. Get AI-powered clarity instantly.</p>
 
         <div class="upload-tabs">
           <button class="upload-tab active" data-tab="file">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
               <rect x="4" y="2" width="16" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
               <path d="M8 10h8M8 14h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
             Upload File
           </button>
           <button class="upload-tab" data-tab="text">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
               <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
               <path d="M8 10h8M8 14h8M8 18h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
@@ -51,7 +51,7 @@
 
         <div class="upload-area" id="upload-file-area">
           <div class="upload-zone" id="drop-zone">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
               <rect x="8" y="4" width="32" height="40" rx="3" stroke="currentColor" stroke-width="1.5"/>
               <path d="M16 20h16M16 28h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
@@ -70,17 +70,17 @@
 
         <button class="upload-submit" id="analyze-btn">
           <span class="submit-shine"></span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
             <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span>Analyze Report</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="opacity:0.6">
+          <span>Analyse Report</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="opacity:0.7">
             <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
 
-        <p class="upload-disclaimer">Educational use only · Not a medical diagnosis</p>
+        <p class="upload-disclaimer">Educational use only &middot; Not a medical diagnosis</p>
       </div>
     </div>
   </div>
@@ -93,7 +93,7 @@
   <header class="header">
     <div class="header-left">
       <button class="header-back" id="back-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
           <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
@@ -109,26 +109,26 @@
         <span>Risk Score</span>
       </button>
       <button class="header-btn" id="meddie-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="10" r="4" stroke="currentColor" stroke-width="1.5"/>
           <path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
         Ask Meddie
       </button>
       <button class="header-btn" id="pdf-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <path d="M12 2v10M7 7l5 5 5-5M7 19h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         Download PDF
       </button>
       <button class="header-btn" id="diet-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 16c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z" stroke="currentColor" stroke-width="1.5"/>
         </svg>
         Diet Plan
       </button>
       <button class="header-btn" id="doctor-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
           <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 3c2.2 0 4 1.8 4 4s-1.8 4-4 4-4-1.8-4-4 1.8-4 4-4zm0 12c-2.7 0-5.1-1.3-6.6-3.3.1-1.8 3.6-2.7 6.6-2.7s6.5.9 6.6 2.7C17.1 15.7 14.7 17 12 17z" stroke="currentColor" stroke-width="1.5"/>
         </svg>
         Find Doctor
@@ -144,14 +144,14 @@
       <div class="meddie-container">
         <div class="meddie-header">
           <div class="meddie-avatar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="10" r="4" stroke="currentColor" stroke-width="1.5"/>
               <path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </div>
           <div>
             <h3 class="meddie-name">Meddie AI</h3>
-            <p class="meddie-status">Online & Ready</p>
+            <p class="meddie-status"><span class="status-dot"></span>Online &amp; Ready</p>
           </div>
         </div>
 
@@ -167,7 +167,7 @@
         <div class="chat-input-area">
           <input type="text" id="chat-input" class="chat-input" placeholder="Ask Meddie anything…" autocomplete="off"/>
           <button class="chat-send" id="chat-send">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
               <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
@@ -182,9 +182,9 @@
         <div class="card card-summary">
           <div class="card-header">
             <h2 class="card-title">AI Summary</h2>
-            <span class="card-icon">✨</span>
+            <span class="card-icon">✦</span>
           </div>
-          <p class="card-text" id="summary-text">Analyzing your report…</p>
+          <p class="card-text" id="summary-text">Analysing your report…</p>
         </div>
 
         <!-- Key Findings -->
@@ -200,7 +200,7 @@
         <div class="card card-abnormal" id="abnormal-card" style="display: none;">
           <div class="card-header">
             <h2 class="card-title">Abnormal Values</h2>
-            <span class="card-icon">⚠️</span>
+            <span class="card-icon warn-icon">⚠</span>
           </div>
           <div class="abnormal-list" id="abnormal-list"></div>
         </div>
@@ -209,7 +209,7 @@
         <div class="card card-recommendations" id="recommendations-card" style="display: none;">
           <div class="card-header">
             <h2 class="card-title">Recommendations</h2>
-            <span class="card-icon">💡</span>
+            <span class="card-icon">✦</span>
           </div>
           <div class="recommendations-list" id="recommendations-list"></div>
         </div>
